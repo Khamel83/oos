@@ -1,10 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ENV_FILE="${1:-.env}"; ACTIVE_FILE="${2:-.env.active}"
-mapfile -t KEYS < <(grep -E '^OPENROUTER_KEYS=' "$ENV_FILE" | sed 's/^OPENROUTER_KEYS=//' | tr -d '"' | tr ',' '\n' | sed '/^\s*$/d')
-[[ ${#KEYS[@]} -gt 0 ]] || { echo "No OPENROUTER_KEYS"; exit 1; }
-for k in "${KEYS[@]}"; do
-  code=$(curl -sS -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $k" https://openrouter.ai/api/v1/models || echo "000")
-  if [[ "$code" == "200" ]]; then printf "OPENAI_API_KEY=%s\n" "$k" > "$ACTIVE_FILE"; exit 0; fi
-done
-echo "No working OpenRouter key"; exit 2
+# Reads OPENROUTER_KEYS (comma-separated). Writes .env.active with OPENAI_API_KEY.
+IN="${1:-.env}"
+OUT="${2:-.env.active}"
+
+# Normalize and source IN
+sed -e 's/\r$//' "$IN" | awk 'NF && $1 !~ /^#/' > .env.export
+set -a; . ./.env.export; set +a
+
+: "${OPENAI_API_BASE_URL:=https://openrouter.ai/api/v1}"
+if [[ -n "${OPENROUTER_KEYS:-}" ]]; then
+  IFS=',' read -ra KEYS <<< "$OPENROUTER_KEYS"
+  SEL="${KEYS[0]}"
+elif [[ -n "${OPENROUTER_API_KEY:-}" ]]; then
+  SEL="${OPENROUTER_API_KEY}"
+else
+  SEL="${OPENAI_API_KEY:-}"
+fi
+
+{
+  echo "OPENAI_API_BASE_URL=${OPENAI_API_BASE_URL}"
+  [[ -n "${SEL}" ]] && echo "OPENAI_API_KEY=${SEL}"
+} > "${OUT}"
