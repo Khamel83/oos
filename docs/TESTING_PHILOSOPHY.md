@@ -276,6 +276,59 @@ This transforms development from reactive debugging to proactive quality assuran
 
 ---
 
+## 🚀 Recent Learnings & Evolution
+
+### **OOS Development Session Insights (September 2025)**
+
+#### **Project Structure Complexity Management**
+- **Problem**: Users confused by overlapping systems (OOS + Archon + Atlas artifacts)
+- **Solution**: Clear separation through documentation and archiving non-essential files
+- **Learning**: Even good tools can be overwhelming - documentation must explain "what do I actually need?"
+
+#### **CI/CD Test Fragility**
+- **Problem**: Bash test library syntax errors causing CI failures
+- **Root Cause**: Non-printable characters in dynamically generated test files
+- **Solution**: Simplified test approach with reliable basics
+- **Learning**: Complex test frameworks can be more fragile than simple assertion libraries
+
+#### **Documentation as User Experience**
+- **Problem**: Comprehensive system was unclear to users despite extensive functionality
+- **Solution**: README-centric documentation with hyperlinked navigation
+- **Learning**: Users need a "start here" approach, not exhaustive feature lists
+
+#### **Modular vs. Monolithic Tooling**
+- **Insight**: Users want the option to use just `bootstrap_enhanced.sh` without all the management tools
+- **Implementation**: Clear decision tree in documentation about what tools are actually needed
+- **Learning**: Power tools should be optional, core functionality should be simple
+
+#### **Testing Philosophy Evolution**
+```bash
+# STARTED WITH: Complex colored assertion library
+assert_equals() {
+  # 50+ lines of formatting, error tracking, color management
+  # Result: Syntax errors, CI failures, maintenance burden
+}
+
+# EVOLVED TO: Simple, reliable validation
+assert_equals() {
+  if [[ "$1" == "$2" ]]; then
+    echo "  ✓ Values match"
+    ((PASS_COUNT++))
+  else
+    echo "  ✗ Expected: $1, Got: $2"
+    ((FAIL_COUNT++))
+  fi
+}
+```
+
+#### **User Confusion Resolution Patterns**
+1. **Surface the confusion** - "I'm too dumb to understand" → Actually system was unclear
+2. **Simplify the explanation** - Created SYSTEM_OVERVIEW.md with clear component separation
+3. **Archive the noise** - Moved non-essential files to reduce cognitive load
+4. **Provide decision trees** - "Do I need all these tools?" with clear yes/no guidance
+
+---
+
 ## 🎯 Summary: Tests as Living Documentation
 
 Good tests answer these questions:

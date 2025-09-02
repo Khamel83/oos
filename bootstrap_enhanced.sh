@@ -1087,6 +1087,10 @@ main() {
   echo -e "${CYAN}Useful Commands:${NC}"
   echo "  bin/select_or_key.sh            # Select working API key"
   echo "  bin/rotate_or_key.sh            # Rotate to next API key"
+  echo
+  echo -e "${PURPLE}🧠 Development Learning System:${NC}"
+  echo "  bin/development_guide.sh reminder  # Review lessons before coding"
+  echo "  bin/archon_learning.sh setup       # Set up learning repository"
   echo "  ./bin/diagnose.sh --auto        # Run system diagnostics"
   echo "  ./bin/health_monitor.sh --daemon # Start health monitoring"
   

@@ -102,6 +102,8 @@ cd /path/to/my-project
 | **[performance_monitor.sh](docs/API_REFERENCE.md#performance-monitoring)** | Performance profiling | `./bin/performance_monitor.sh profile script.sh` |
 | **[run_tests.sh](docs/API_REFERENCE.md#testing-framework)** | Comprehensive testing | `./bin/run_tests.sh all` |
 | **[key_rotator.sh](docs/API_REFERENCE.md#key-rotation)** | API key management | `./bin/key_rotator.sh validate` |
+| 🧠 **[development_guide.sh](bin/development_guide.sh)** | **Learning enforcement (READ BEFORE CODING)** | `./bin/development_guide.sh reminder` |
+| 📚 **[archon_learning.sh](bin/archon_learning.sh)** | **Track lessons to prevent repetition** | `./bin/archon_learning.sh setup` |
 
 ---
 
