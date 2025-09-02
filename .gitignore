@@ -1,0 +1,12 @@
+# secrets
+.env
+.env.*
+!.env.template
+
+# local
+.env.export
+.DS_Store
+*.log
+
+# tool state
+/.mcp/

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-set -a; source .env; set +a
+bin/safe_source_env.sh .env
 [[ -f .env.active ]] || bin/select_or_key.sh .env .env.active
-set -a; source .env.active; set +a
+bin/safe_source_env.sh .env.active
 exec claude --mcp-debug
