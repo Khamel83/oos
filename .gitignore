@@ -10,3 +10,4 @@
 
 # tool state
 /.mcp/
+.venv/

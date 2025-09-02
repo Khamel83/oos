@@ -1,23 +1,38 @@
-# OOS — Omar Operation System
+# OOS (Organized Operational Setup) - Complete Project Management System
 
-Turn-key project bootstrap for local agent coding with **Claude Code**, **Gemini CLI**, and **Qwen**, wired to **Archon (MCP)** and secrets from **1Password**.  
-Goal: `mkdir project && bootstrap.sh` → code immediately with the right MCPs, keys, and runners.
+**Advanced project bootstrap and management system** for local agent coding with **Claude Code**, **Gemini CLI**, and **Qwen**, integrated with **Archon (MCP)** and secure secrets from **1Password**.
 
-## Why
-- One command per project; idempotent.
-- Secrets never live in git; 1Password is the source of truth.
-- Archon MCP autowired (local or remote).
-- Works with Claude/Gemini/Qwen CLIs interchangeably.
+🎯 **Goal:** `mkdir project && bootstrap_enhanced.sh` → comprehensive project setup with monitoring, security, testing, and management tools.
 
-## What it does
-- Pulls `.env` from 1Password item `bootstrap-env` (vault `Private`, field `env`).
-- Normalizes env (drops CRLF/BOM, comments) and derives a runtime `.env.active`.
-- Registers MCPs (Archon, Context7) for this project.
-- Creates runners:
-  - `.agents/runners/run_claude.sh`
-  - `.agents/runners/run_gemini.sh`
-  - `.agents/runners/run_qwen.sh`
-- Optionally creates a GitHub repo and pushes (with push-protection safe defaults).
+## 🚀 Core Benefits
+- **One-command setup** per project; completely idempotent
+- **Security-first approach** with comprehensive audit capabilities  
+- **Zero-secret git commits** - 1Password is the single source of truth
+- **Archon MCP integration** with proper project separation
+- **Multi-agent support** - Works with Claude/Gemini/Qwen CLIs interchangeably
+- **Production-ready tooling** with monitoring, testing, and optimization
+- **Enterprise-grade security** with encryption, audit logging, and compliance
+
+## 🛠️ What It Provides
+
+### Core Bootstrap Features
+- Pulls `.env` from 1Password item `bootstrap-env` (vault `Private`, field `env`)
+- Normalizes environment (drops CRLF/BOM, comments) and derives runtime `.env.active`
+- Auto-registers MCPs (Archon, Context7) with health monitoring
+- Creates optimized runners for each AI CLI with proper environment isolation
+- Optional GitHub repo creation with push-protection safe defaults
+- **NEW:** Enhanced bootstrap with pre-flight checks and rollback capabilities
+
+### Advanced Management Tools
+- **Diagnostics System** - Interactive troubleshooting with self-healing
+- **Health Monitoring** - Continuous system monitoring with alerting  
+- **Security Auditing** - Comprehensive security scanning and compliance reporting
+- **Performance Monitoring** - Profiling, benchmarking, and optimization
+- **Testing Framework** - Unit, integration, security, and performance testing
+- **Project Templates** - Rapid project creation with customizable templates
+- **MCP Management** - Dynamic MCP server configuration and health monitoring
+- **Key Rotation** - Automated API key management with smart failover
+- **Web Dashboard** - Real-time monitoring and management interface
 
 ## Prereqs
 - **Archon MCP** running (default local: `http://localhost:8051/mcp`).  
