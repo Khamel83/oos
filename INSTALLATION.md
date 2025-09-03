@@ -155,7 +155,7 @@ brew install python3
 
 ```bash
 # Complete installation in one command
-curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
 ```
 
 This would:

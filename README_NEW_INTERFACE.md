@@ -73,7 +73,7 @@ Choice [1-4]:
 
 ### One-Line Install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
 ```
 
 ### Manual Install
