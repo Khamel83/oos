@@ -1,239 +1,269 @@
-# OOS (Organized Operational Setup)
+# 🚀 OOS - Organized Operational Setup
 
-**One-command project bootstrap and management system** for AI-powered development with Claude, Gemini, and Qwen.
+**One command to transform any directory into an AI-powered development environment with secure credential management.**
 
-🎯 **Quick Start:** `./bootstrap_enhanced.sh my-project /path/to/project` → Ready to code immediately.
+## ⚡ 30-Second Quick Start
 
----
-
-## 🚀 What This Does
-
-**Core Function**: Bootstrap new projects with proper AI CLI setup, secrets from 1Password, and comprehensive development tools.
-
-**Key Features**:
-- ✅ **One-command setup** - Project ready in seconds
-- 🔐 **Secure secret management** - 1Password integration, zero secrets in git
-- 🤖 **Multi-AI support** - Claude, Gemini, Qwen CLI runners
-- 📊 **Professional tooling** - Monitoring, testing, security, performance
-- 🔌 **Optional integrations** - Archon task management, web dashboard
-
----
-
-## 📖 Complete Documentation
-
-### **🎯 Start Here**
-- **[System Overview](docs/SYSTEM_OVERVIEW.md)** - What everything actually does (READ FIRST!)
-- **[Quick Start Guide](docs/USAGE_GUIDE.md)** - Step-by-step workflows for all scenarios
-
-### **📚 Detailed Guides**
-- **[Archon Integration](docs/ARCHON_INTEGRATION.md)** - Task management and project separation
-- **[API Reference](docs/API_REFERENCE.md)** - Complete tool documentation
-- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Fix common problems
-- **[Testing Philosophy](docs/TESTING_PHILOSOPHY.md)** - Automated validation approach
-
----
-
-## 🏗️ Project Structure
-
-```
-oos/
-├── 📄 bootstrap_enhanced.sh      # Main setup script (START HERE)
-├── 📁 bin/                       # Management tools
-│   ├── 🔍 diagnose.sh           # Fix problems automatically  
-│   ├── 📊 health_monitor.sh     # Continuous monitoring
-│   ├── 🧪 run_tests.sh          # Test everything
-│   ├── 🛡️ security_audit.sh     # Security scanning
-│   ├── ⚡ performance_monitor.sh # Performance profiling
-│   ├── 📁 template_manager.sh   # Project templates
-│   ├── 🔑 key_rotator.sh        # API key management
-│   └── 🔌 mcp_manager.sh        # MCP server management
-├── 📁 .agents/                   # AI CLI runners
-│   └── runners/
-│       ├── 🤖 run_claude.sh     # Claude Code integration
-│       ├── 🤖 run_gemini.sh     # Gemini CLI integration  
-│       └── 🤖 run_qwen.sh       # Qwen integration
-├── 📁 dashboard/                 # Web monitoring interface
-├── 📁 templates/                 # Project templates
-├── 📁 tests/                     # Test suite
-└── 📁 docs/                      # Complete documentation
-```
-
----
-
-## 🚀 Usage Examples
-
-### **Simple Project Setup**
 ```bash
-# Create new project with AI tools configured
-./bootstrap_enhanced.sh my-project /path/to/my-project
+# 1. Install OOS (downloads everything needed)
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
 
-# That's it! Ready to code with Claude, Gemini, or Qwen
-cd /path/to/my-project
-.agents/runners/run_claude.sh
+# 2. Use anywhere
+mkdir my-project && cd my-project
+oos
+# → Asks you to sign into 1Password
+# → Choose what you need (secure env, AI tools, etc.)
+# → Done!
 ```
 
-### **Professional Development**
-```bash
-# Setup with monitoring and validation
-./bootstrap_enhanced.sh --security-hardened my-project /path/to/project
-./bin/health_monitor.sh daemon     # Start continuous monitoring  
-./bin/run_tests.sh all             # Validate everything works
-./bin/security_audit.sh scan --fix # Security compliance
+**That's it!** No complex commands, no manual configuration.
+
+---
+
+## 🎯 What is OOS?
+
+OOS is a development environment bootstrapper that:
+- 🔐 **Manages secrets securely** via 1Password (no API keys in your code!)
+- 🤖 **Sets up AI development tools** (Claude, Gemini, Qwen) 
+- ⚡ **Works context-aware** (different options based on where you run it)
+- 🛠️ **Adds development utilities** (diagnostics, health checks, etc.)
+- 📋 **Provides project templates** and best practices
+
+---
+
+## 🎪 How It Works
+
+OOS detects your situation and shows relevant options:
+
+### Empty Directory → New Project Setup
+```
+$ mkdir my-app && cd my-app && oos
+
+🚀 OOS - Organized Operational Setup
+📂 Empty directory - perfect for a new project!
+
+What do you need?
+1. 🔐 Just secure environment (.env from 1Password) ← RECOMMENDED
+2. 🆕 Full project setup with AI tools
+3. ❓ Show help
+
+Choice [1-3]: 1
+🔐 1Password authentication required
+Run: eval $(op signin)
+Continue after signing in? [y/N]: y
+✅ Created .env with 50 secure variables
+🎉 Done! Your secure environment is ready.
 ```
 
-### **Template-Based Projects**
-```bash
-# Use built-in templates
-./bin/template_manager.sh list                    # See available templates
-./bin/template_manager.sh create web-app my-app   # Create from template
-./bin/template_manager.sh create cli-tool my-cli  # CLI application
-./bin/template_manager.sh create api-service api  # REST API service
+### Existing Project → Enhancement Options  
+```
+$ cd my-existing-app && oos
+
+🛠️ Enhancing existing project...
+Project: my-existing-app
+
+What would you like to add?
+1. 🔐 Add secure environment (.env from 1Password)
+2. 🤖 Add AI CLI runners (Claude, Gemini, etc.)
+3. 🔧 Add development tools (diagnostics, health checks)
+4. 📋 All of the above
 ```
 
 ---
 
-## 🔧 Management Tools
+## 🔧 Requirements
 
-| Tool | Purpose | Usage |
-|------|---------|-------|
-| **[diagnose.sh](docs/API_REFERENCE.md#diagnostics-system)** | Fix problems automatically | `./bin/diagnose.sh --self-heal` |
-| **[health_monitor.sh](docs/API_REFERENCE.md#health-monitoring)** | Continuous system monitoring | `./bin/health_monitor.sh daemon` |
-| **[security_audit.sh](docs/API_REFERENCE.md#security-auditing)** | Security scanning & compliance | `./bin/security_audit.sh scan --fix` |
-| **[performance_monitor.sh](docs/API_REFERENCE.md#performance-monitoring)** | Performance profiling | `./bin/performance_monitor.sh profile script.sh` |
-| **[run_tests.sh](docs/API_REFERENCE.md#testing-framework)** | Comprehensive testing | `./bin/run_tests.sh all` |
-| **[key_rotator.sh](docs/API_REFERENCE.md#key-rotation)** | API key management | `./bin/key_rotator.sh validate` |
-| 🧠 **[development_guide.sh](bin/development_guide.sh)** | **Auto-learning from development** | `echo 'insight' \| ./bin/development_guide.sh update` |
+### Automatically Checked During Install
+- **Python 3.7+** (usually pre-installed)
+- **Git** (for repository management)
+- **curl, rsync** (common system tools)
+
+### Optional (For Full Functionality)
+- **1Password CLI** (`op`) - for secure environment management
+- **GitHub CLI** (`gh`) - for GitHub integration  
+- **Node.js/npm** - for JavaScript projects
+
+**The installer checks everything and tells you exactly what to install if anything is missing.**
 
 ---
 
-## 🤖 AI Integration
+## 🚀 Real-World Usage
 
-### **Supported AI CLIs**
-- **[Claude Code](https://claude.ai/code)** - Anthropic's official CLI
-- **Gemini CLI** - Google's AI assistant  
-- **Qwen CLI** - Alibaba's AI model
+### Solo Developer - Quick Project Setup
+```bash
+# Install once
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
 
-### **Runner Scripts**
-- **`.agents/runners/run_claude.sh`** - Claude with proper environment
-- **`.agents/runners/run_gemini.sh`** - Gemini with secret management  
-- **`.agents/runners/run_qwen.sh`** - Qwen integration
+# Use anywhere
+mkdir side-project && cd side-project
+oos  # Choose "secure environment" → instant API keys from 1Password
+```
 
-Each runner loads secrets from 1Password, sets up the environment, and launches the AI CLI with proper configuration.
+### Team Standardization
+```bash
+# Everyone runs the same install
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
+
+# Every project gets standardized setup
+cd company-project && oos  # Same tools, same security, same workflow
+```
+
+### AI Development
+```bash
+oos  # Choose "full project setup"
+# → Get Claude, Gemini, Qwen runners pre-configured
+# → Start coding with AI immediately
+```
 
 ---
 
 ## 🔐 Security Features
 
-### **Secret Management**
-- 🔐 **1Password integration** - Secrets never stored in git
-- 🔄 **Automatic key rotation** - Smart failover for API keys  
-- 🛡️ **Secret detection** - Prevent accidental commits
-- 🔒 **Environment encryption** - Encrypt sensitive files
-
-### **Security Scanning**
-- 🔍 **Exposed secret detection** - Scan for leaked credentials
-- 📋 **File permission validation** - Ensure secure access controls
-- 📊 **Compliance reporting** - Generate security audit reports
-- 🔧 **Auto-remediation** - Fix security issues automatically
+- **No secrets in code** - All API keys stored in 1Password
+- **Environment isolation** - Each project gets its own `.env` 
+- **Secure by default** - Automatically adds `.env` to `.gitignore`
+- **Your credentials** - Uses your own 1Password vault
 
 ---
 
-## 🔌 Optional Integrations
+## 📖 Complete Documentation
 
-### **Archon MCP Task Management**
-Connect to [Archon MCP server](docs/ARCHON_INTEGRATION.md) for advanced project and task management:
-- 📋 **Project isolation** - Separate tasks per project
-- 📝 **Task tracking** - From todo → doing → review → done
-- 📚 **Document management** - Specifications, designs, notes
-- 📊 **Version control** - Track project evolution
-
-### **Web Dashboard**
-Real-time monitoring interface at `http://localhost:5000`:
-- 📊 **System status** - Live health monitoring
-- 🔍 **Performance metrics** - Resource usage and timing
-- 🛡️ **Security alerts** - Real-time issue notifications  
-- 📋 **Project management** - CRUD operations via web UI
+- **[Installation Guide](INSTALLATION.md)** - Detailed installation options
+- **[Usage Examples](USAGE_EXAMPLES.md)** - Real-world scenarios  
+- **[New Interface Guide](README_NEW_INTERFACE.md)** - Interactive system details
+- **[System Overview](docs/SYSTEM_OVERVIEW.md)** - Technical architecture
+- **[API Reference](docs/API_REFERENCE.md)** - Advanced features
 
 ---
 
-## ❓ FAQ
+## 🚨 Troubleshooting
 
-<details>
-<summary><strong>Do I need all these tools?</strong></summary>
-
-**No!** Start with just:
-- `bootstrap_enhanced.sh` (project setup)
-- `bin/diagnose.sh` (when things break)
-
-Add other tools as needed. See [System Overview](docs/SYSTEM_OVERVIEW.md) for guidance.
-</details>
-
-<details>
-<summary><strong>Can I use this without Archon?</strong></summary>
-
-**Yes!** OOS works completely independently. Archon is optional task management - see [Archon Integration](docs/ARCHON_INTEGRATION.md).
-</details>
-
-<details>
-<summary><strong>What's the difference between bootstrap.sh and bootstrap_enhanced.sh?</strong></summary>
-
-**Enhanced version** has error checking, rollback, validation, and comprehensive diagnostics. Use `bootstrap_enhanced.sh`.
-</details>
-
-<details>
-<summary><strong>Is this overkill for personal projects?</strong></summary>
-
-**Maybe!** For simple use, just run `bootstrap_enhanced.sh` and ignore everything else. The system is modular.
-</details>
-
-<details>
-<summary><strong>How do I ensure project separation in Archon?</strong></summary>
-
-Each project gets a unique `ARCHON_PROJECT_ID` in its `.env` file. See [Archon Integration Guide](docs/ARCHON_INTEGRATION.md).
-</details>
-
----
-
-## 🆘 Getting Help
-
-### **Quick Fixes**
+### "oos: command not found"
 ```bash
-# System broken? Try auto-healing
-./bin/diagnose.sh --self-heal
+# The installer creates a global command. If it doesn't work:
+which oos  # Check if installed
 
-# Can't access 1Password?
-eval "$(op signin)"
+# If not found, try full path:
+~/oos/run.py
 
-# Archon not connecting?
-curl -I http://localhost:8051/mcp
+# Or reinstall:
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
 ```
 
-### **Documentation**
-- 🎯 **[System Overview](docs/SYSTEM_OVERVIEW.md)** - Understand what you have
-- 📖 **[Usage Guide](docs/USAGE_GUIDE.md)** - Complete workflows  
-- 🔧 **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Fix common problems
-- 📚 **[API Reference](docs/API_REFERENCE.md)** - Complete tool docs
+### "1Password authentication required"  
+```bash
+# Sign in first:
+eval $(op signin)
+# Enter your 1Password password
 
-### **Support**
-- 📋 **Issues**: [GitHub Issues](https://github.com/Khamel83/oos/issues)
-- 🔍 **Diagnostics**: `./bin/diagnose.sh --collect-logs`
-- 📊 **System Status**: `./bin/health_monitor.sh check`
+# Then use OOS:
+oos
+```
 
----
+### Missing System Requirements
+```bash
+# The installer tells you exactly what to install:
 
-## 🎯 What Makes OOS Different
+# Ubuntu/Debian:
+sudo apt update && sudo apt install python3 git curl
 
-**Traditional Setup**: Install tools → Configure environment → Setup secrets → Debug issues → Start coding
-
-**OOS Setup**: `./bootstrap_enhanced.sh project-name /path` → Start coding
-
-**Key Benefits**:
-- ✅ **Zero manual configuration** - Everything automated
-- 🔐 **Security by default** - Proper secret management
-- 🤖 **AI-ready** - Pre-configured AI CLI integration  
-- 📊 **Production tools** - Monitoring, testing, security built-in
-- 🔧 **Self-healing** - Automatic problem detection and fixes
+# macOS:
+brew install python3 git
+# or install from https://www.python.org/downloads/
+```
 
 ---
 
-**Ready to get started?** → **[Quick Start Guide](docs/USAGE_GUIDE.md)**
+## 🎉 Why OOS?
+
+### Before OOS
+```bash
+# Manual setup every project
+export OPENAI_API_KEY="..."
+export ANTHROPIC_API_KEY="..."
+pip install -r requirements.txt
+mkdir -p .agents/runners
+curl -o .agents/runners/run_claude.sh ...
+chmod +x .agents/runners/run_claude.sh
+echo ".env" >> .gitignore
+# ... 30+ more lines of setup
+```
+
+### After OOS
+```bash
+oos
+# Answer a few questions → Done!
+```
+
+---
+
+## 🏗️ What Gets Created
+
+When you use OOS, you get:
+
+```
+your-project/
+├── .env                     # Secure API keys from 1Password
+├── .gitignore              # Properly configured  
+├── .agents/runners/        # AI CLI scripts
+│   ├── run_claude.sh       # Claude with secure environment
+│   ├── run_gemini.sh       # Gemini integration
+│   └── run_qwen.sh         # Qwen integration
+├── bin/                    # Development utilities
+│   ├── diagnose.sh         # Fix problems automatically
+│   ├── health_monitor.sh   # System monitoring
+│   └── select_or_key.sh    # API key management
+└── docs/                   # Project documentation
+```
+
+**Everything pre-configured, secure, and ready to use.**
+
+---
+
+## 🤝 Advanced Features
+
+OOS also includes professional development tools:
+
+| Tool | Purpose | Usage |
+|------|---------|-------|
+| **diagnose.sh** | Auto-fix problems | `./bin/diagnose.sh --self-heal` |
+| **health_monitor.sh** | System monitoring | `./bin/health_monitor.sh daemon` |
+| **security_audit.sh** | Security scanning | `./bin/security_audit.sh scan --fix` |
+| **performance_monitor.sh** | Performance profiling | `./bin/performance_monitor.sh profile` |
+
+**But you can ignore all this and just use `oos` for simple setup!**
+
+---
+
+## 🤝 Contributing
+
+OOS is open source! Feel free to:
+- Report issues on [GitHub Issues](https://github.com/Khamel83/oos/issues)
+- Suggest features  
+- Submit pull requests
+- Share your project templates
+
+---
+
+## 💡 The OOS Philosophy
+
+**Complex tools should have simple interfaces.**
+
+OOS handles the complexity of:
+- Secure credential management
+- AI CLI configuration  
+- Development tool setup
+- Project scaffolding
+- Security best practices
+
+**So you can focus on building.**
+
+---
+
+**Ready to transform your development workflow?**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
+```
+
+**Then just run `oos` from any project directory! 🚀**

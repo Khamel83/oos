@@ -14,20 +14,57 @@ esac
 
 echo "📍 Detected: $MACHINE"
 
-# Check requirements
+# Check core requirements
+echo "🔍 Checking core requirements..."
+
 if ! command -v python3 &> /dev/null; then
     echo "❌ Python 3 is required but not found"
-    echo "Install with: sudo apt install python3 (Ubuntu) or brew install python3 (Mac)"
+    if [ "$MACHINE" = "Linux" ]; then
+        echo "   Install with: sudo apt update && sudo apt install python3"
+    elif [ "$MACHINE" = "Mac" ]; then
+        echo "   Install with: brew install python3"
+        echo "   Or download from: https://www.python.org/downloads/"
+    fi
     exit 1
 fi
 
 if ! command -v git &> /dev/null; then
     echo "❌ Git is required but not found"
-    echo "Install with: sudo apt install git (Ubuntu) or brew install git (Mac)"
+    if [ "$MACHINE" = "Linux" ]; then
+        echo "   Install with: sudo apt update && sudo apt install git"
+    elif [ "$MACHINE" = "Mac" ]; then
+        echo "   Install with: brew install git"
+        echo "   Or install Xcode Command Line Tools: xcode-select --install"
+    fi
     exit 1
 fi
 
-echo "✅ Python 3 and Git found"
+# Check Python version (need 3.7+)
+PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+if python3 -c 'import sys; exit(0 if sys.version_info >= (3, 7) else 1)' 2>/dev/null; then
+    echo "✅ Python $PYTHON_VERSION found"
+else
+    echo "❌ Python 3.7+ required, found $PYTHON_VERSION"
+    echo "   Upgrade Python or use a newer system"
+    exit 1
+fi
+
+echo "✅ Git found"
+
+# Check for commonly needed system tools
+echo "🔍 Checking additional tools..."
+for tool in curl rsync; do
+    if command -v $tool &> /dev/null; then
+        echo "✅ $tool found"
+    else
+        echo "⚠️  $tool not found (may be needed for some OOS features)"
+        if [ "$MACHINE" = "Linux" ]; then
+            echo "   Install with: sudo apt install $tool"
+        elif [ "$MACHINE" = "Mac" ]; then
+            echo "   Usually pre-installed, or: brew install $tool"
+        fi
+    fi
+done
 
 # Install directory
 INSTALL_DIR="$HOME/oos"
