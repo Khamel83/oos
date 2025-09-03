@@ -158,11 +158,32 @@ brew install python3
 curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
 ```
 
-This would:
+This will:
 1. Clone the repo to `~/oos`
 2. Create the global `oos` command
-3. Check requirements
+3. Check all requirements
 4. Show usage examples
+
+## After Installation
+
+### 1. Set up 1Password (Required for secure environment)
+See **[1Password Setup Guide](1PASSWORD_SETUP.md)** for complete instructions.
+
+Quick setup:
+```bash
+# Install 1Password CLI
+brew install --cask 1password-cli  # macOS
+# or follow OS-specific instructions in the guide
+
+# Create bootstrap-env item in 1Password with your API keys
+# See 1PASSWORD_SETUP.md for exact format
+```
+
+### 2. Use OOS anywhere
+```bash
+mkdir my-project && cd my-project
+oos  # Context-aware setup with simple questions!
+```
 
 ---
 

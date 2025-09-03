@@ -128,6 +128,7 @@ oos  # Choose "full project setup"
 
 ## 📖 Complete Documentation
 
+- **[1Password Setup](1PASSWORD_SETUP.md)** - How to configure your secure environment
 - **[Installation Guide](INSTALLATION.md)** - Detailed installation options
 - **[Usage Examples](USAGE_EXAMPLES.md)** - Real-world scenarios  
 - **[New Interface Guide](README_NEW_INTERFACE.md)** - Interactive system details
@@ -159,6 +160,11 @@ eval $(op signin)
 # Then use OOS:
 oos
 ```
+
+### "1Password item not found" or "No API keys"
+You need to set up your 1Password vault with API keys:
+- **[Complete 1Password Setup Guide](1PASSWORD_SETUP.md)** - Step-by-step instructions
+- **Quick fix**: Create `bootstrap-env` item in `Private` vault with `env` field containing your API keys
 
 ### Missing System Requirements
 ```bash
