@@ -104,26 +104,64 @@ enforce_learning_review() {
   fi
 }
 
-update_learnings() {
+auto_extract_learnings() {
+  local log_file="$1"
   local philosophy_file="$PROJECT_ROOT/docs/TESTING_PHILOSOPHY.md"
   
-  echo -e "${BLUE}📝 Adding new learning to testing philosophy...${NC}"
-  echo
-  echo "What new insight did you discover? (Enter to skip)"
-  read -r new_insight
+  if [[ ! -f "$log_file" ]]; then
+    return 0
+  fi
   
-  if [[ -n "$new_insight" ]]; then
-    echo "#### **$(date '+%B %Y') Development Session**" >> "$philosophy_file"
-    echo "- **Learning**: $new_insight" >> "$philosophy_file"
+  echo -e "${BLUE}📝 Auto-extracting learnings from development logs...${NC}"
+  
+  # Look for common learning patterns in logs
+  local learnings=""
+  
+  # Extract CI failures and fixes
+  if grep -i "ci.*fail\|test.*fail\|error.*fix" "$log_file" >/dev/null 2>&1; then
+    learnings="$learnings\n- CI/Test failure patterns detected - review for systematic issues"
+  fi
+  
+  # Extract user confusion indicators
+  if grep -i "confus\|unclear\|don.*understand\|overwhelm" "$log_file" >/dev/null 2>&1; then
+    learnings="$learnings\n- User confusion indicators found - simplification may be needed"
+  fi
+  
+  # Extract complexity warnings
+  if grep -i "complex\|complicate\|too many\|overkill" "$log_file" >/dev/null 2>&1; then
+    learnings="$learnings\n- Complexity concerns noted - consider modular approach"
+  fi
+  
+  if [[ -n "$learnings" ]]; then
+    echo "" >> "$philosophy_file"
+    echo "#### **$(date '+%B %Y') Auto-Extracted Insights**" >> "$philosophy_file"
+    echo -e "$learnings" >> "$philosophy_file"
     echo "" >> "$philosophy_file"
     
-    echo -e "${GREEN}✅ Learning added to $philosophy_file${NC}"
-    echo "This will help prevent repeating the same lessons."
+    echo -e "${GREEN}✅ Auto-extracted learnings added to $philosophy_file${NC}"
+  fi
+}
+
+update_learnings() {
+  echo -e "${YELLOW}💡 Quick learning capture:${NC}"
+  echo "Usage: echo 'your insight' | $0 update"
+  echo "   or: $0 update 'your insight directly'"
+  
+  local insight="$1"
+  if [[ -z "$insight" ]] && [[ ! -t 0 ]]; then
+    # Read from pipe
+    read -r insight
+  fi
+  
+  if [[ -n "$insight" ]]; then
+    local philosophy_file="$PROJECT_ROOT/docs/TESTING_PHILOSOPHY.md"
+    echo "- **$(date '+%b %d')**: $insight" >> "$philosophy_file"
+    echo -e "${GREEN}✅ Learning added${NC}"
   fi
 }
 
 main() {
-  local command="${1:-reminder}"
+  local command="${1:-quick}"
   
   case "$command" in
     "check")
@@ -135,18 +173,27 @@ main() {
       enforce_learning_review
       ;;
     "update")
-      update_learnings
+      shift
+      update_learnings "$*"
+      ;;
+    "extract")
+      auto_extract_learnings "${2:-/var/log/development.log}"
       ;;
     "quick")
       show_critical_reminders
       ;;
     *)
-      echo "Usage: $0 [check|reminder|update|quick]"
+      echo "Usage: $0 [check|update|extract|quick]"
       echo
       echo "  check     - Check if learnings are up to date"
-      echo "  reminder  - Show critical reminders and enforce review"
-      echo "  update    - Add new learning to prevent repetition"
-      echo "  quick     - Show reminders without enforcement"
+      echo "  update    - Add learning: $0 update 'insight text'"
+      echo "  extract   - Auto-extract from logs: $0 extract logfile"
+      echo "  quick     - Show current wisdom (default)"
+      echo
+      echo "Examples:"
+      echo "  echo 'Complex frameworks cause more problems' | $0 update"
+      echo "  $0 update 'Users need clearer documentation'"
+      echo "  $0 extract ~/.bash_history"
       exit 1
       ;;
   esac

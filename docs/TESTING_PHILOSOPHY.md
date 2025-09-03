@@ -337,4 +337,5 @@ Good tests answer these questions:
 - **"What happens when things go wrong?"** → Error condition tests
 - **"Is this system healthy?"** → End-to-end tests
 
-The testing philosophy should evolve with the system, but the core principle remains: **if tests pass, the system works as intended by users.**
+The testing philosophy should evolve with the system, but the core principle remains: **if tests pass, the system works as intended by users.**- **Sep 02**: Manual learning systems never get used - make everything automatic
+- **Sep 02**: Complex test frameworks break CI more than they help - keep it simple
