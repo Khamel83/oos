@@ -89,9 +89,9 @@ cat > .agents/agents.md <<'MD'
 - Never print secrets; reference by name; short, test-first plans
 MD
 echo "- Plan: Goal / Constraints / Steps (3–7) / Risks" > .claude/commands/plan.md
-printf "# Claude Code Overlay\n- Read .agents/agents.md\n" > CLAUDE.md
-printf "# Gemini CLI Overlay\n- Read .agents/agents.md\n" > GEMINI.md
-printf "# Qwen Code Overlay\n- Read .agents/agents.md\n" > qwen.md
+printf "# Claude Code Overlay\n- Read .agents/agents.md\n" > docs/CLAUDE.md
+printf "# Gemini CLI Overlay\n- Read .agents/agents.md\n" > docs/GEMINI.md
+printf "# Qwen Code Overlay\n- Read .agents/agents.md\n" > docs/qwen.md
 
 # ---------- MCP registry (active) ----------
 mkdir -p "$HOME/.mcp"

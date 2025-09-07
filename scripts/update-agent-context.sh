@@ -1,6 +1,6 @@
 #!/bin/bash
 # Incrementally update agent context files based on new feature plan
-# Supports: CLAUDE.md, GEMINI.md, and .github/copilot-instructions.md
+# Supports: docs/CLAUDE.md, docs/GEMINI.md, and .github/copilot-instructions.md
 # O(1) operation - only reads current context file and new plan.md
 
 set -e
@@ -11,8 +11,8 @@ FEATURE_DIR="$REPO_ROOT/specs/$CURRENT_BRANCH"
 NEW_PLAN="$FEATURE_DIR/plan.md"
 
 # Determine which agent context files to update
-CLAUDE_FILE="$REPO_ROOT/CLAUDE.md"
-GEMINI_FILE="$REPO_ROOT/GEMINI.md"
+CLAUDE_FILE="$REPO_ROOT/docs/CLAUDE.md"
+GEMINI_FILE="$REPO_ROOT/docs/GEMINI.md"
 COPILOT_FILE="$REPO_ROOT/.github/copilot-instructions.md"
 
 # Allow override via argument
@@ -229,6 +229,6 @@ fi
 echo ""
 echo "Usage: $0 [claude|gemini|copilot]"
 echo "  - No argument: Update all existing agent context files"
-echo "  - claude: Update only CLAUDE.md"
-echo "  - gemini: Update only GEMINI.md" 
+echo "  - claude: Update only docs/CLAUDE.md"
+echo "  - gemini: Update only docs/GEMINI.md" 
 echo "  - copilot: Update only .github/copilot-instructions.md"

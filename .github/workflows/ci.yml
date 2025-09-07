@@ -250,8 +250,8 @@ jobs:
     
     - name: Validate bootstrap script
       run: |
-        chmod +x bootstrap_enhanced.sh
-        ./bootstrap_enhanced.sh --dry-run --verbose test-ci /tmp/test-ci
+        chmod +x scripts/bootstrap_enhanced.sh
+        ./scripts/bootstrap_enhanced.sh --dry-run --verbose test-ci /tmp/test-ci
     
     - name: Create release package
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -260,13 +260,13 @@ jobs:
         mkdir -p dist
         
         # Copy essential files
-        cp bootstrap_enhanced.sh dist/
+        cp scripts/bootstrap_enhanced.sh dist/
         cp -r bin dist/
-        cp CLAUDE.md GEMINI.md qwen.md dist/
+        cp docs/CLAUDE.md docs/GEMINI.md docs/qwen.md dist/
         cp README.md LICENSE dist/ || true
         
         # Create installation script
-        cat > dist/install.sh << 'EOF'
+        cat > dist/scripts/install.sh << 'EOF'
         #!/usr/bin/env bash
         set -euo pipefail
         
@@ -280,13 +280,13 @@ jobs:
         fi
         
         # Make scripts executable
-        chmod +x bootstrap_enhanced.sh bin/*.sh
+        chmod +x scripts/bootstrap_enhanced.sh bin/*.sh
         
         echo "✅ OOS installed successfully!"
-        echo "Usage: ./bootstrap_enhanced.sh --help"
+        echo "Usage: ./scripts/bootstrap_enhanced.sh --help"
         EOF
         
-        chmod +x dist/install.sh
+        chmod +x dist/scripts/install.sh
         
         # Create archive
         tar -czf oos-$(date +%Y%m%d-%H%M%S).tar.gz -C dist .

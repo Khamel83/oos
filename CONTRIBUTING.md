@@ -20,7 +20,7 @@ git clone https://github.com/Khamel83/oos.git
 cd oos
 
 # Run the development bootstrap script
-./bootstrap_enhanced.sh
+./scripts/bootstrap_enhanced.sh
 ```
 
 ### 2. Running the Test Suite

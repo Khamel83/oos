@@ -27,7 +27,7 @@ def detect_context():
     current_dir = Path.cwd()
     
     # Check if we're in the OOS repo itself
-    if (current_dir / "bootstrap_enhanced.sh").exists():
+    if (current_dir / "scripts/bootstrap_enhanced.sh").exists():
         return "oos_repo"
     
     # Check if this is an existing project
@@ -199,9 +199,9 @@ def full_project_setup(project_name, project_path, existing=False):
     print(f"\n{Colors.BLUE}🚀 Running full OOS setup...{Colors.END}")
     
     # Find the bootstrap script
-    script_path = Path(__file__).parent / "bootstrap_enhanced.sh"
+    script_path = Path(__file__).parent / "scripts/bootstrap_enhanced.sh"
     if not script_path.exists():
-        print(f"{Colors.RED}❌ bootstrap_enhanced.sh not found{Colors.END}")
+        print(f"{Colors.RED}❌ scripts/bootstrap_enhanced.sh not found{Colors.END}")
         sys.exit(1)
     
     # Build command
@@ -390,7 +390,7 @@ def main():
             return
         if sys.argv[1] == '--integrate':
             # This is a special case where we don't want to be in the oos repo
-            if (Path.cwd() / "bootstrap_enhanced.sh").exists():
+            if (Path.cwd() / "scripts/bootstrap_enhanced.sh").exists():
                  print(f"{Colors.RED}❌ Cannot integrate OOS into itself.{Colors.END}")
                  sys.exit(1)
             integrate_oos()

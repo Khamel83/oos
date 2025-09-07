@@ -226,4 +226,4 @@ else
     echo "  $HOME/oos/run.py"
 fi
 echo ""
-echo "📚 Full documentation: $INSTALL_DIR/README_NEW_INTERFACE.md"
+echo "📚 Full documentation: $INSTALL_DIR/docs/README_NEW_INTERFACE.md"

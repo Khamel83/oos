@@ -10,7 +10,7 @@ This section is for end-users who want to **use** the `oos` command.
 
 ```bash
 # 1. Install OOS (downloads everything needed)
-curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/scripts/install.sh | bash
 
 # 2. Use anywhere
 mkdir my-project && cd my-project
@@ -27,11 +27,11 @@ oos
 ### For Users
 
 *   **Getting Started**
-    *   [Installation Guide](INSTALLATION.md)
+    *   [Installation Guide](docs/INSTALLATION.md)
     *   [Usage Guide](docs/USAGE_GUIDE.md)
-    *   [1Password Setup](1PASSWORD_SETUP.md)
+    *   [1Password Setup](docs/1PASSWORD_SETUP.md)
 *   **Advanced Topics**
-    *   [Advanced Installation](docs/ADVANCED_INSTALLATION.md)
+    *   [Advanced Installation](docs/ADVANCED_docs/INSTALLATION.md)
     *   [Advanced Usage](docs/ADVANCED_USAGE_GUIDE.md)
     *   [Troubleshooting](docs/TROUBLESHOOTING.md)
 
@@ -49,9 +49,9 @@ oos
     *   [Operations Guide](docs/OPERATIONS.md)
 *   **Agent-Specific Guidelines**
     *   [Agent Guidelines](.agents/agents.md)
-    *   [Claude](CLAUDE.md)
-    *   [Gemini](GEMINI.md)
-    *   [Qwen](qwen.md)
+    *   [Claude](docs/CLAUDE.md)
+    *   [Gemini](docs/GEMINI.md)
+    *   [Qwen](docs/qwen.md)
 
 ### Other Documents
 
