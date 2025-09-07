@@ -78,7 +78,7 @@ cd /home/ubuntu/dev/auth-service
 
 # Initialize OOS
 eval "$(op signin)"
-../oos/bootstrap_enhanced.sh
+../oos/scripts/bootstrap_enhanced.sh
 
 # Add Archon project ID to environment
 echo "ARCHON_PROJECT_ID=550e8400-e29b-41d4-a716-446655440000" >> .env
@@ -315,7 +315,7 @@ mcp__archon__create_document({
         ],
         setup_steps: [
             "Clone repository",
-            "Run OOS bootstrap: ./bootstrap_enhanced.sh",
+            "Run OOS bootstrap: ./scripts/scripts/bootstrap_enhanced.sh",
             "Install dependencies: pip install -r requirements.txt",
             "Setup database: ./bin/setup_db.sh", 
             "Run tests: ./bin/run_tests.sh all",
@@ -593,7 +593,7 @@ mcp__archon__update_project({
 ### Automated Task Creation
 ```bash
 # Hook into OOS bootstrap to create standard tasks
-# In bootstrap_enhanced.sh integration:
+# In scripts/bootstrap_enhanced.sh integration:
 
 create_standard_archon_tasks() {
     local project_id="$1"

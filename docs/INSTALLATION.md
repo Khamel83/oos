@@ -5,7 +5,7 @@
 For the fastest setup, run this command in your terminal. It will automatically download OOS, and make it available everywhere on your system.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/scripts/install.sh | bash
 ```
 
 That's it! You can now use the `oos` command from any directory.
@@ -30,4 +30,4 @@ cd my-new-project
 oos
 ```
 
-For more advanced installation options, see the [Advanced Installation Guide](docs/ADVANCED_INSTALLATION.md).
+For more advanced installation options, see the [Advanced Installation Guide](docs/ADVANCED_docs/INSTALLATION.md).

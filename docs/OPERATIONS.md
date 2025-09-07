@@ -6,7 +6,7 @@ mkdir -p /home/ubuntu/dev/<Name>
 eval "$(op signin)"
 OP_VAULT="Private" OP_ITEM="bootstrap-env" OP_FIELD="env" \
 ORG="Khamel83" VIS="public" \
-/home/ubuntu/dev/oos/bootstrap.sh "<Name>" "/home/ubuntu/dev/<Name>"
+/home/ubuntu/dev/oos/scripts/bootstrap.sh "<Name>" "/home/ubuntu/dev/<Name>"
 ```
 
 ## Daily use
@@ -28,7 +28,7 @@ sed -i 's/\r$//' .env
 
 ## Upgrade OOS
 - Pull latest from GitHub.
-- Rerun `bootstrap.sh` in existing projects (idempotent).
+- Rerun `scripts/bootstrap.sh` in existing projects (idempotent).
 
 ## Health checks
 ```bash

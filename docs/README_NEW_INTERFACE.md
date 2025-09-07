@@ -6,7 +6,7 @@
 
 **Before (Complex):**
 ```bash
-./bootstrap_enhanced.sh project-name /path/to/project --no-github --verbose --skip-secrets
+./scripts/scripts/bootstrap_enhanced.sh project-name /path/to/project --no-github --verbose --skip-secrets
 ```
 
 **After (Simple):**
@@ -73,7 +73,7 @@ Choice [1-4]:
 
 ### One-Line Install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/scripts/install.sh | bash
 ```
 
 ### Manual Install
@@ -134,7 +134,7 @@ oos  # Detects existing project automatically
 
 The old interface still works:
 ```bash
-./bootstrap_enhanced.sh project-name /path/to/project [options]
+./scripts/scripts/bootstrap_enhanced.sh project-name /path/to/project [options]
 ```
 
 But the new interactive interface is recommended for all new usage.

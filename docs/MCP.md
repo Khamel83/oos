@@ -5,7 +5,7 @@
 - Health: `curl -4 -I $ARCHON_URL` should return 200/405 quickly.
 
 ## Project-scoped registration
-`bootstrap.sh` ensures your project config (`~/.claude.json` scoped to the project) contains:
+`scripts/bootstrap.sh` ensures your project config (`~/.claude.json` scoped to the project) contains:
 - `archon` (HTTP transport → `ARCHON_URL`)
 - `context7` (if `CONTEXT7_API_KEY` present)
 

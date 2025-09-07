@@ -254,6 +254,31 @@ run_preflight_checks() {
   return 0
 }
 
+# Install Python dependencies
+install_python_dependencies() {
+  progress 1 1 "Installing Python dependencies..."
+
+  if [[ -f "requirements.txt" ]]; then
+    verbose "Installing dependencies from requirements.txt..."
+    if [[ "$DRY_RUN" == "false" ]]; then
+      python3 -m pip install -r requirements.txt || warn "Failed to install from requirements.txt"
+    else
+      log "Would install dependencies from requirements.txt"
+    fi
+  fi
+
+  if [[ -f "requirements-dev.txt" ]]; then
+    verbose "Installing development dependencies from requirements-dev.txt..."
+    if [[ "$DRY_RUN" == "false" ]]; then
+      python3 -m pip install -r requirements-dev.txt || warn "Failed to install from requirements-dev.txt"
+    else
+      log "Would install development dependencies from requirements-dev.txt"
+    fi
+  fi
+
+  success "Python dependencies installed."
+}
+
 # Backup existing files
 backup_existing_files() {
   if [[ "$BACKUP_EXISTING" == "false" ]]; then
@@ -987,6 +1012,14 @@ final_validation() {
       verbose "✓ OpenRouter key selection working"
     fi
   fi
+
+  # Generate code manifest
+  if [ -f bin/generate_code_manifest.sh ]; then
+      verbose "Generating code manifest..."
+      if [[ "$DRY_RUN" == "false" ]]; then
+          ./bin/generate_code_manifest.sh
+      fi
+  fi
   
   if [[ $issues -eq 0 ]]; then
     success "Final validation passed"
@@ -1058,6 +1091,7 @@ main() {
   
   # Run all bootstrap steps
   run_preflight_checks
+  install_python_dependencies
   validate_onepassword
   setup_environment
   create_utility_scripts

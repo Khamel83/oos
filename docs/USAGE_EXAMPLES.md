@@ -8,7 +8,7 @@
 
 ```bash
 # Install OOS once
-curl -fsSL https://example.com/install.sh | bash
+curl -fsSL https://example.com/scripts/install.sh | bash
 
 # Create new project
 mkdir my-api-project
@@ -76,7 +76,7 @@ node test.js  # Works with secure keys!
 # IT Department creates setup guide:
 
 # 1. Install OOS (one-time per developer)
-curl -fsSL https://company.com/oos-install.sh | bash
+curl -fsSL https://company.com/oos-scripts/install.sh | bash
 
 # 2. Each project uses standardized setup
 cd any-project
@@ -155,7 +155,7 @@ docker-compose up  # Uses environment variables
 which oos
 
 # If not found, install:
-curl -fsSL https://example.com/install.sh | bash
+curl -fsSL https://example.com/scripts/install.sh | bash
 
 # Or use full path temporarily:
 ~/oos/run.py

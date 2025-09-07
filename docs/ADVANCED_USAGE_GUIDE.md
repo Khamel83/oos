@@ -25,7 +25,7 @@ eval "$(op signin)"
 # 3. Bootstrap with enhanced setup
 OP_VAULT="Private" OP_ITEM="bootstrap-env" OP_FIELD="env" \
 ORG="YourOrg" VIS="public" \
-/home/ubuntu/dev/oos/bootstrap_enhanced.sh
+/home/ubuntu/dev/oos/scripts/bootstrap_enhanced.sh
 
 # 4. Verify setup
 ./bin/diagnose.sh
@@ -45,7 +45,7 @@ git submodule add https://github.com/your-org/oos .oos
 # 3. Setup OOS in existing project
 cd .oos
 eval "$(op signin)"
-./bootstrap_enhanced.sh --project-dir .. --existing-project
+./scripts/scripts/bootstrap_enhanced.sh --project-dir .. --existing-project
 
 # 4. Return to project root and verify
 cd ..
@@ -62,7 +62,7 @@ git submodule update --init --recursive
 # Setup individual environment
 eval "$(op signin)"  # Each dev uses their own 1Password
 cd .oos
-./bootstrap_enhanced.sh --project-dir .. --user-setup
+./scripts/scripts/bootstrap_enhanced.sh --project-dir .. --user-setup
 
 # Verify team setup
 ./bin/diagnose.sh --team-mode
@@ -79,7 +79,7 @@ cd .oos
 cd my-web-app
 
 # 2. Initialize with enhanced features
-../oos/bootstrap_enhanced.sh --template web-app
+../oos/scripts/bootstrap_enhanced.sh --template web-app
 
 # 3. Setup Archon project
 # In Claude Code:
@@ -101,7 +101,7 @@ echo "ARCHON_PROJECT_ID=your-project-id-from-step-3" >> .env
 cd my-cli-tool
 
 # 2. Bootstrap with CLI-specific settings
-../oos/bootstrap_enhanced.sh --template cli-tool
+../oos/scripts/bootstrap_enhanced.sh --template cli-tool
 
 # 3. Setup development environment
 ./bin/run_tests.sh unit
@@ -115,7 +115,7 @@ cd my-cli-tool
 cd my-api
 
 # 2. Enhanced bootstrap with security focus
-../oos/bootstrap_enhanced.sh --template api-service --security-hardened
+../oos/scripts/bootstrap_enhanced.sh --template api-service --security-hardened
 
 # 3. Setup API-specific monitoring
 ./bin/health_monitor.sh daemon --profile api-service
@@ -498,7 +498,7 @@ pkill -f "key_rotator"
 ./bin/diagnose.sh --collect-logs
 
 # 3. Reset to known good state
-./bootstrap_enhanced.sh --reset-config
+./scripts/scripts/bootstrap_enhanced.sh --reset-config
 
 # 4. Verify recovery
 ./bin/run_tests.sh all
@@ -514,7 +514,7 @@ pkill -f "key_rotator"
 
 # 3. Restore from git if necessary
 git reset --hard HEAD~1
-./bootstrap_enhanced.sh --force
+./scripts/scripts/bootstrap_enhanced.sh --force
 ```
 
 ### Getting Help

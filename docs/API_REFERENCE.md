@@ -17,13 +17,13 @@ This reference provides comprehensive documentation for all OOS tools, their com
 
 ## 🚀 Bootstrap System
 
-### `bootstrap_enhanced.sh`
+### `scripts/bootstrap_enhanced.sh`
 
 Enhanced bootstrap script with comprehensive project setup capabilities.
 
 #### Usage
 ```bash
-./bootstrap_enhanced.sh [PROJECT_NAME] [PROJECT_DIR] [OPTIONS]
+./scripts/scripts/bootstrap_enhanced.sh [PROJECT_NAME] [PROJECT_DIR] [OPTIONS]
 ```
 
 #### Options
@@ -62,16 +62,16 @@ Enhanced bootstrap script with comprehensive project setup capabilities.
 #### Examples
 ```bash
 # Basic project setup
-./bootstrap_enhanced.sh my-project /home/user/projects/my-project
+./scripts/scripts/bootstrap_enhanced.sh my-project /home/user/projects/my-project
 
 # Dry run preview
-./bootstrap_enhanced.sh --dry-run my-project /path/to/project
+./scripts/scripts/bootstrap_enhanced.sh --dry-run my-project /path/to/project
 
 # Existing project integration
-./bootstrap_enhanced.sh --existing-project --project-dir /existing/project
+./scripts/scripts/bootstrap_enhanced.sh --existing-project --project-dir /existing/project
 
 # Security-hardened setup
-./bootstrap_enhanced.sh --security-hardened --template api-service my-api
+./scripts/scripts/bootstrap_enhanced.sh --security-hardened --template api-service my-api
 ```
 
 ---
@@ -484,7 +484,7 @@ health_check_response   # Health monitoring latency
 #### Examples
 ```bash
 # Profile bootstrap script
-./bin/performance_monitor.sh profile ./bootstrap_enhanced.sh --verbose
+./bin/performance_monitor.sh profile ./scripts/scripts/bootstrap_enhanced.sh --verbose
 
 # Run benchmark suite
 ./bin/performance_monitor.sh benchmark --update-baselines

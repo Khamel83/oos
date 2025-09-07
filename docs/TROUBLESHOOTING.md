@@ -12,7 +12,7 @@ pkill -f key_rotator
 pkill -f performance_monitor
 
 # Reset to clean state
-./bootstrap_enhanced.sh --reset-config --force
+./scripts/scripts/bootstrap_enhanced.sh --reset-config --force
 
 # Verify basic functionality
 ./bin/diagnose.sh --self-heal
@@ -51,7 +51,7 @@ echo "ARCHON_URL=$ARCHON_URL" >> .env
 #### Issue: "Dependencies missing"
 ```bash
 # Symptoms
-./bootstrap_enhanced.sh
+./scripts/scripts/bootstrap_enhanced.sh
 ERROR: Required dependency not found: op
 
 # Solution
@@ -103,10 +103,10 @@ curl -I https://github.com
 #### Issue: "Permission denied errors"
 ```bash
 # Symptoms
-./bootstrap_enhanced.sh: Permission denied
+./scripts/scripts/bootstrap_enhanced.sh: Permission denied
 
 # Solutions
-chmod +x ./bootstrap_enhanced.sh
+chmod +x ./scripts/scripts/bootstrap_enhanced.sh
 chmod +x bin/*.sh
 
 # Fix all permissions
@@ -282,7 +282,7 @@ curl -I https://context7.liam.sh/mcp
 Bootstrap taking >5 minutes to complete
 
 # Diagnosis
-./bin/performance_monitor.sh profile ./bootstrap_enhanced.sh
+./bin/performance_monitor.sh profile ./scripts/scripts/bootstrap_enhanced.sh
 
 # Solutions
 # 1. Check system resources

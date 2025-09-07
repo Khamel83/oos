@@ -102,7 +102,7 @@ test_internal_cache_structure() {  # Brittle, changes frequently
   
 # DO test user-facing behavior  
 test_bootstrap_creates_project() {  # Stable, important to users
-  ./bootstrap_enhanced.sh test-project /tmp/test-project
+  ./scripts/scripts/bootstrap_enhanced.sh test-project /tmp/test-project
   assert_file_exists "/tmp/test-project/.env"
   assert_file_exists "/tmp/test-project/.agents/runners/run_claude.sh"
 }
@@ -297,7 +297,7 @@ This transforms development from reactive debugging to proactive quality assuran
 - **Learning**: Users need a "start here" approach, not exhaustive feature lists
 
 #### **Modular vs. Monolithic Tooling**
-- **Insight**: Users want the option to use just `bootstrap_enhanced.sh` without all the management tools
+- **Insight**: Users want the option to use just `scripts/bootstrap_enhanced.sh` without all the management tools
 - **Implementation**: Clear decision tree in documentation about what tools are actually needed
 - **Learning**: Power tools should be optional, core functionality should be simple
 

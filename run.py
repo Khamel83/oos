@@ -52,17 +52,32 @@ def is_op_signed_in():
         return False
 
 def ensure_op_signin():
-    """Ensure user is signed into 1Password"""
-    if not is_op_signed_in():
-        print(f"{Colors.YELLOW}🔐 1Password authentication required{Colors.END}")
-        print("Run: eval $(op signin)")
-        if input("Continue after signing in? [y/N]: ").lower().startswith('y'):
+    """Ensure user is signed into 1Password with a clear, guided process."""
+    if is_op_signed_in():
+        print(f"{Colors.GREEN}✅ 1Password is authenticated.{Colors.END}")
+        return
+
+    print(f"\n{Colors.YELLOW}🔐 1Password authentication required.{Colors.END}")
+
+    while not is_op_signed_in():
+        print("\n" + "-"*50)
+        print(f"{Colors.BOLD}To continue, please sign in to the 1Password CLI:{Colors.END}")
+        print("1. 👉 Open a new, separate terminal window.")
+        print("2. 👇 Copy and paste the following command into the new terminal:")
+        print(f"\n   {Colors.CYAN}eval $(op signin){Colors.END}\n")
+        print("3.  Follow the prompts in that terminal to unlock your vault.")
+        print("4. ✅ Once you are signed in, come back here and press Enter.")
+        print("-" * 50)
+        
+        try:
+            input(f"\n{Colors.YELLOW}Press Enter to continue or Ctrl+C to exit...{Colors.END}")
             if not is_op_signed_in():
-                print(f"{Colors.RED}❌ Still not signed in. Please run: eval $(op signin){Colors.END}")
-                sys.exit(1)
-        else:
+                print(f"\n{Colors.RED}❌ Still not signed in. Please follow the steps above carefully.{Colors.END}")
+        except KeyboardInterrupt:
+            print(f"\n{Colors.YELLOW}👋 Setup cancelled. Goodbye!{Colors.END}")
             sys.exit(0)
-    print(f"{Colors.GREEN}✅ 1Password authenticated{Colors.END}")
+
+    print(f"\n{Colors.GREEN}✅ 1Password authenticated successfully!{Colors.END}")
 
 def get_user_choice(options, prompt="Choice"):
     """Get user choice from numbered options"""
@@ -261,15 +276,42 @@ def show_general_menu():
     else:
         show_help()
 
+def run_health_check():
+    """Check for required dependencies and print a report."""
+    print("\n--- OOS Health Check ---")
+    all_ok = True
+    dependencies = {
+        "python": "python3",
+        "git": "git",
+        "op (1Password CLI)": "op"
+    }
+
+    for name, cmd in dependencies.items():
+        if shutil.which(cmd):
+            print(f"{Colors.GREEN}[OK]{Colors.END} {name}")
+        else:
+            print(f"{Colors.RED}[FAIL]{Colors.END} {name}")
+            all_ok = False
+    
+    print("------------------------")
+    if all_ok:
+        print(f"{Colors.GREEN}✅ All systems operational.{Colors.END}\n")
+        return 0
+    else:
+        print(f"{Colors.YELLOW}⚠️ Some dependencies are missing. Please run the installer.{Colors.END}\n")
+        return 1
+
 def show_help():
     """Show help information"""
-    print(f"\n{Colors.BOLD}📖 OOS Help{Colors.END}")
-    print("""
+    help_text = """
+{bold}📖 OOS Help{end}
 OOS provides secure, AI-ready development environments.
 
 Usage:
-  ./run.py                 # Interactive mode (recommended)
-  ./run.py --help         # Show this help
+  oos                 # Interactive mode (recommended)
+  oos --help          # Show this help
+  oos --integrate     # Add OOS spec-driven workflow to an existing project
+  oos health          # Run a health check of your environment
   
 Context-aware behavior:
   • Empty directory       → Offers to create new project
@@ -277,20 +319,66 @@ Context-aware behavior:
   • OOS repository        → Management options
   • Other directories     → Flexible options
 
-Features:
-  🔐 Secure environment management via 1Password
-  🤖 AI CLI runners (Claude, Gemini, Qwen) 
-  🔧 Development tools and diagnostics
-  📋 Project templates and documentation
+For advanced usage, see the full documentation in the repository.
+""".format(bold=Colors.BOLD, end=Colors.END)
+    print(help_text)
 
-Requirements:
-  • 1Password CLI (op) - for secure environment
-  • Git - for repository management
-  • GitHub CLI (gh) - optional, for GitHub integration
+def integrate_oos():
+    """Integrate OOS scaffolding into an existing project."""
+    print(f"\n{Colors.BLUE}🚀 Integrating OOS into the current project...{Colors.END}")
+    
+    # This script runs from the oos repo, so its path is the source
+    oos_repo_path = Path(__file__).resolve().parent
+    target_path = Path.cwd()
 
-For advanced usage, you can still use:
-  ./bootstrap_enhanced.sh project-name /path/to/project [options]
-    """)
+    if oos_repo_path == target_path:
+        print(f"{Colors.RED}❌ Cannot integrate OOS into itself.{Colors.END}")
+        sys.exit(1)
+
+    # 1. Copy scaffolding
+    scaffolding_dirs = ['.gemini', 'memory', 'specs', 'scripts', 'templates']
+
+    print("    - Copying spec-kit scaffolding...")
+    for d in scaffolding_dirs:
+        source = oos_repo_path / d
+        target = target_path / d
+        if not target.exists() and source.exists():
+            print(f"      Creating {target}")
+            shutil.copytree(source, target)
+        else:
+            print(f"      Skipping {target} (already exists)")
+
+    # 2. Update .gitignore
+    print("    - Updating .gitignore...")
+    gitignore_content = "\n# OOS Files\n.env*\n!/.env.example\nCODE_MANIFEST.md\n/site/\n"
+    try:
+        with open(target_path / '.gitignore', 'a') as f:
+            f.write(gitignore_content)
+    except IOError as e:
+        print(f"{Colors.YELLOW}    Could not write to .gitignore: {e}{Colors.END}")
+
+    # 3. Update requirements-dev.txt
+    print("    - Updating requirements-dev.txt...")
+    dev_deps = ['ruff', 'black', 'pytest']
+    req_file = target_path / 'requirements-dev.txt'
+    try:
+        existing_deps = []
+        if req_file.exists():
+            with open(req_file, 'r') as f:
+                existing_deps = [line.strip() for line in f.readlines()]
+        
+        with open(req_file, 'a') as f:
+            for dep in dev_deps:
+                if dep not in existing_deps:
+                    f.write(f"{dep}\n")
+
+    except IOError as e:
+        print(f"{Colors.YELLOW}    Could not write to requirements-dev.txt: {e}{Colors.END}")
+
+    print(f"\n{Colors.GREEN}✅ OOS integration complete!{Colors.END}")
+    print("\nNext Steps:")
+    print("1. If you haven't already, install dev dependencies: pip install -r requirements-dev.txt")
+    print(f"2. Set up your secure environment by running: {Colors.CYAN}oos{Colors.END}")
 
 def main():
     """Main entry point"""
@@ -299,6 +387,16 @@ def main():
     if len(sys.argv) > 1:
         if sys.argv[1] in ['--help', '-h']:
             show_help()
+            return
+        if sys.argv[1] == '--integrate':
+            # This is a special case where we don't want to be in the oos repo
+            if (Path.cwd() / "bootstrap_enhanced.sh").exists():
+                 print(f"{Colors.RED}❌ Cannot integrate OOS into itself.{Colors.END}")
+                 sys.exit(1)
+            integrate_oos()
+            return
+        if sys.argv[1] == 'health':
+            run_health_check()
             return
         else:
             print(f"{Colors.RED}❌ Unknown option: {sys.argv[1]}{Colors.END}")
@@ -328,7 +426,7 @@ def main():
         if choice == 1:
             auth_only_setup()
         elif choice == 2:
-            new_project_setup()
+            new__project_setup()
         else:
             show_help()
     

@@ -4,7 +4,7 @@
 
 **Before:** Complex command syntax that was hard to remember and easy to mess up
 ```bash
-./bootstrap_enhanced.sh atlas-test-project /tmp/atlas-test-project --no-github --verbose
+./scripts/scripts/bootstrap_enhanced.sh atlas-test-project /tmp/atlas-test-project --no-github --verbose
 # Users struggled with:
 # - Remembering exact syntax
 # - Spacing issues breaking commands  
@@ -27,16 +27,16 @@ oos
 - **Backward Compatible**: Old bootstrap script still works
 
 ### 2. Proper Installation System
-- **One-Line Install**: `curl -fsSL https://example.com/install.sh | bash`
+- **One-Line Install**: `curl -fsSL https://example.com/scripts/install.sh | bash`
 - **Global Command**: `oos` works from anywhere after installation
 - **Cross-Platform**: Works on Linux and macOS
 - **Graceful Fallbacks**: Works even without sudo access
 
 ### 3. Documentation Suite
-- **README_NEW_INTERFACE.md**: Main documentation
-- **INSTALLATION.md**: Detailed installation guide
-- **USAGE_EXAMPLES.md**: Real-world scenarios
-- **NEW_INTERFACE_SUMMARY.md**: This overview
+- **docs/README_NEW_INTERFACE.md**: Main documentation
+- **docs/INSTALLATION.md**: Detailed installation guide
+- **docs/USAGE_EXAMPLES.md**: Real-world scenarios
+- **docs/NEW_INTERFACE_SUMMARY.md**: This overview
 
 ### 4. Testing & Verification
 - **Automated Tests**: Context detection and help system
@@ -53,7 +53,7 @@ oos
 5. Easy to make mistakes
 
 ### New Flow (Smooth)
-1. Install once: `curl -fsSL https://example.com/install.sh | bash`
+1. Install once: `curl -fsSL https://example.com/scripts/install.sh | bash`
 2. Use anywhere: `oos`
 3. Answer simple questions
 4. Context-aware options
@@ -63,7 +63,7 @@ oos
 
 ```bash
 # For end users (dead simple):
-curl -fsSL https://example.com/install.sh | bash
+curl -fsSL https://example.com/scripts/install.sh | bash
 
 # Creates:
 # ~/oos/                     # OOS repository
@@ -81,7 +81,7 @@ oos  # Context-aware setup!
 |----------|-------------|---------------|
 | Empty directory | No files | New project or auth-only |
 | Existing git project | .git folder | Project enhancement options |
-| OOS repository | bootstrap_enhanced.sh | Management/creation options |
+| OOS repository | scripts/bootstrap_enhanced.sh | Management/creation options |
 | Non-empty directory | Files present | Flexible options |
 
 ## Key Features
@@ -99,12 +99,12 @@ oos  # Context-aware setup!
 ```
 oos/
 ├── run.py                      # Main interactive launcher
-├── install.sh                  # One-line installer
-├── README_NEW_INTERFACE.md     # Main documentation
-├── INSTALLATION.md             # Installation guide
-├── USAGE_EXAMPLES.md           # Real-world examples
-├── bootstrap_enhanced.sh       # Legacy script (still works)
-└── setup_new_interface.sh      # Setup verification
+├── scripts/install.sh                  # One-line installer
+├── docs/README_NEW_INTERFACE.md     # Main documentation
+├── docs/INSTALLATION.md             # Installation guide
+├── docs/USAGE_EXAMPLES.md           # Real-world examples
+├── scripts/bootstrap_enhanced.sh       # Legacy script (still works)
+└── scripts/setup_new_interface.sh      # Setup verification
 ```
 
 ## Success Metrics
