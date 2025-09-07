@@ -21,3 +21,8 @@ __pycache__/
 
 # generated files
 CODE_MANIFEST.md
+
+# bootstrap monitoring files (contain sensitive data)
+.bootstrap_history.log
+.bootstrap_stats.txt
+.bootstrap_feedback.log
