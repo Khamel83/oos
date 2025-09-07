@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import shutil
-import run  # Assuming run.py can be imported
+from lib.health_check import run_health_check, Colors
 
 class TestHealthCheck(unittest.TestCase):
 
@@ -13,13 +13,13 @@ class TestHealthCheck(unittest.TestCase):
         mock_which.side_effect = lambda cmd: f'/usr/bin/{cmd}' # Return a path for any command
         
         # Act
-        exit_code = run.run_health_check()
+        exit_code = run_health_check()
 
         # Assert
         self.assertEqual(exit_code, 0)
-        mock_print.assert_any_call(f"{run.Colors.GREEN}[OK]{run.Colors.END} python")
-        mock_print.assert_any_call(f"{run.Colors.GREEN}[OK]{run.Colors.END} git")
-        mock_print.assert_any_call(f"{run.Colors.GREEN}[OK]{run.Colors.END} op (1Password CLI)")
+        mock_print.assert_any_call(f"{Colors.GREEN}[OK]{Colors.END} python")
+        mock_print.assert_any_call(f"{Colors.GREEN}[OK]{Colors.END} git")
+        mock_print.assert_any_call(f"{Colors.GREEN}[OK]{Colors.END} op (1Password CLI)")
 
     @patch('shutil.which')
     @patch('builtins.print')
@@ -33,13 +33,13 @@ class TestHealthCheck(unittest.TestCase):
         mock_which.side_effect = which_se
 
         # Act
-        exit_code = run.run_health_check()
+        exit_code = run_health_check()
 
         # Assert
         self.assertEqual(exit_code, 1)
-        mock_print.assert_any_call(f"{run.Colors.GREEN}[OK]{run.Colors.END} python")
-        mock_print.assert_any_call(f"{run.Colors.GREEN}[OK]{run.Colors.END} git")
-        mock_print.assert_any_call(f"{run.Colors.RED}[FAIL]{run.Colors.END} op (1Password CLI)")
+        mock_print.assert_any_call(f"{Colors.GREEN}[OK]{Colors.END} python")
+        mock_print.assert_any_call(f"{Colors.GREEN}[OK]{Colors.END} git")
+        mock_print.assert_any_call(f"{Colors.RED}[FAIL]{Colors.END} op (1Password CLI)")
 
 if __name__ == '__main__':
     unittest.main()
