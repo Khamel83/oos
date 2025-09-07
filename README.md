@@ -20,14 +20,41 @@ oos
 # → Done!
 ```
 
-## 📖 Full Documentation
-
-- [Installation Guide](INSTALLATION.md)
-- [Usage Guide](docs/USAGE_GUIDE.md)
-- [1Password Setup](1PASSWORD_SETUP.md)
-- [System Overview](docs/SYSTEM_OVERVIEW.md)
-
 ---
-## 🎯 Contributing & Development
 
-For developers working on the OOS project itself, please see the [Contributing Guide](CONTRIBUTING.md).
+## 📖 Documentation
+
+### For Users
+
+*   **Getting Started**
+    *   [Installation Guide](INSTALLATION.md)
+    *   [Usage Guide](docs/USAGE_GUIDE.md)
+    *   [1Password Setup](1PASSWORD_SETUP.md)
+*   **Advanced Topics**
+    *   [Advanced Installation](docs/ADVANCED_INSTALLATION.md)
+    *   [Advanced Usage](docs/ADVANCED_USAGE_GUIDE.md)
+    *   [Troubleshooting](docs/TROUBLESHOOTING.md)
+
+### For Contributors
+
+*   **Core Concepts**
+    *   [Contributing Guide](CONTRIBUTING.md)
+    *   [System Overview](docs/SYSTEM_OVERVIEW.md)
+    *   [Development Philosophy](docs/DEVELOPMENT_PHILOSOPHY.md)
+    *   [Testing Philosophy](docs/TESTING_PHILOSOPHY.md)
+*   **Development Guides**
+    *   [AI Collaboration Guide](docs/AI_COLLABORATION_GUIDE.md)
+    *   [API Reference](docs/API_REFERENCE.md)
+    *   [Archon Integration](docs/ARCHON_INTEGRATION.md)
+    *   [Operations Guide](docs/OPERATIONS.md)
+*   **Agent-Specific Guidelines**
+    *   [Agent Guidelines](.agents/agents.md)
+    *   [Claude](CLAUDE.md)
+    *   [Gemini](GEMINI.md)
+    *   [Qwen](qwen.md)
+
+### Other Documents
+
+*   [Security Policy](SECURITY.md)
+*   [Code Manifest](CODE_MANIFEST.md)
+*   [License](LICENSE)
