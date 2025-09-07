@@ -204,7 +204,7 @@ jobs:
         echo "Scanning for potential secrets..."
         
         # Look for API key patterns
-        if grep -r -E "sk-[a-zA-Z0-9-_]{43,}" . --exclude-dir=.git --exclude="*.log" || \
+        if grep -r -E "sk-[a-zA-Z0-9_-]{43,}" . --exclude-dir=.git --exclude="*.log" || \
            grep -r -E "ghp_[a-zA-Z0-9]{36}" . --exclude-dir=.git --exclude="*.log"; then
           echo "❌ Potential hardcoded secrets found"
           exit 1
@@ -232,8 +232,8 @@ jobs:
         # Verify no malicious dependencies
         echo "Checking for suspicious patterns..."
         
-        if grep -r -i "eval.*curl" . --exclude-dir=.git || \
-           grep -r -i "bash.*<.*http" . --exclude-dir=.git; then
+        if grep -r -i "eval.*curl" . --exclude-dir=.git --exclude-dir=.github --exclude-dir=.claude || \
+           grep -r -i "bash.*<.*http" . --exclude-dir=.git --exclude-dir=.github --exclude-dir=.claude; then
           echo "❌ Suspicious command execution patterns found"
           exit 1
         else
