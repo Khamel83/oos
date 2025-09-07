@@ -1,3 +1,0 @@
-OPENAI_API_KEY="your_api_key_here"
-GITHUB_TOKEN="your_github_token_here"
-API_KEY="sk-test-example"

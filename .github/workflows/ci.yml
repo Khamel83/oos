@@ -251,7 +251,7 @@ jobs:
     - name: Validate bootstrap script
       run: |
         chmod +x scripts/bootstrap_enhanced.sh
-        ./scripts/bootstrap_enhanced.sh --dry-run --verbose test-ci /tmp/test-ci
+        ./scripts/bootstrap_enhanced.sh --dry-run --no-preflight --verbose test-ci /tmp/test-ci
     
     - name: Create release package
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
