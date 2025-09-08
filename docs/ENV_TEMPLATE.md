@@ -50,4 +50,12 @@ LOG_LEVEL=INFO
 ## Optional (Context7 & GitHub)
 CONTEXT7_API_KEY=
 GITHUB_PAT=
+
+# ==== LLM Gateway (Bifrost) ====
+# When using the gateway directly (outside Bifrost UI virtual keys)
+ZAI_API_KEY=replace_me
+ANTHROPIC_API_KEY=replace_me
+# Optional other Anthropic-compatible providers you may add later:
+DEEPSEEK_API_KEY=
+KIMI_API_KEY=
 ```

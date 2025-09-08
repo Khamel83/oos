@@ -33,6 +33,10 @@ cd oos
 
 ## 📖 Documentation
 
+**Quick Navigation:**
+- [For Users](#for-users) | [For Contributors](#for-contributors)
+- [Security Features](#-security--safety-features) | [LLM Gateway](#-llm-gateway-bifrost--zai-overflow)
+
 ### For Users
 
 *   **🚀 Getting Started**
@@ -109,6 +113,129 @@ git commit -m "add config"
 #         File: config.js:10
 #         Key: sk-proj-abc123... [REDACTED]
 ```
+
+---
+
+## 🌐 LLM Gateway (Bifrost) + Z.AI Overflow
+
+**Seamlessly switch between Anthropic Pro and cost-effective Z.AI GLM-4.5 while preserving your existing Claude Code + MCP setup.**
+
+**Quick Navigation:**
+- [How to Use (Day-to-Day)](#how-to-use-day-to-day)
+- [One-Time Setup](#one-time-setup)
+- [MCP (Archon + Others)](#mcp-archon--others)
+- [Gateway Management](#gateway-management)
+- [Keys & Safety](#keys--safety)
+
+### How to Use (Day-to-Day)
+
+**🎯 Best UX (Recommended):** Start every session through Bifrost on Anthropic → switch to Z.AI in-session when you hit Pro limits.
+
+```bash
+# 1. Start gateway once (on your OCI VM)
+bash scripts/llm_gateway_up.sh
+
+# 2. Start Claude Code on Anthropic (via gateway)
+source scripts/cc-launchers.sh
+cc-sona
+
+# 3. Work as usual. When you hit limits, don't restart—just:
+/model zai/glm-4.5
+
+# You can always switch back: /model anthropic/claude-4-sonnet
+# Model switching mid-session is fully supported
+```
+
+**Alternative:** Start direct Pro, switch to gateway when needed:
+```bash
+cc-pro                    # Start direct Pro
+# When you hit limits, exit and run:
+cc-sona                   # Switch to gateway mode  
+claude -c                 # Resume your last conversation
+# Or resume specific session: claude -r "<session-id>"
+```
+
+### One-Time Setup
+
+```bash
+# 1. Start the gateway
+bash scripts/llm_gateway_up.sh
+
+# 2. Open Bifrost UI → add providers
+# Open http://127.0.0.1:8080
+# Go to Providers → Add:
+#   • Anthropic: paste your console API key
+#   • Z.AI: paste your GLM Coding Plan API key
+
+# 3. Load launcher functions (add to your shell profile for persistence)
+source scripts/cc-launchers.sh
+```
+
+### Usage Options
+
+**Direct Anthropic Pro (unchanged):**
+```bash
+cc-pro              # Use normal Claude Code with Pro/Max
+# Inside Claude Code: /login once, then use /model claude-4-sonnet
+```
+
+**Via Gateway (switchable models):**
+```bash
+cc-sona             # Start on Anthropic Sonnet via gateway
+# Inside Claude Code: /status shows base URL .../anthropic
+# Switch models: /model zai/glm-4.5
+# Switch back: /model anthropic/claude-4-sonnet
+
+# Or launch directly on Z.AI
+cc-zai              # Start directly on Z.AI GLM-4.5
+```
+
+### MCP (Archon + Others)
+
+**Once you've added your MCP servers, they work the same in both modes (direct or gateway):**
+
+```bash
+# Add once, reuse everywhere
+claude mcp add-json archon '{"type":"sse","url":"https://archon.example.com:8051/mcp"}'
+claude mcp get archon
+
+# Works in both cc-pro and cc-sona/cc-zai sessions
+# Claude Code supports MCP; add once, reuse everywhere
+```
+
+### Gateway Management
+
+```bash
+# Start gateway
+bash scripts/llm_gateway_up.sh
+
+# Stop gateway  
+bash scripts/llm_gateway_down.sh
+
+# Check if running
+docker ps | grep oos-bifrost
+```
+
+### OCI Security Notes
+
+- **Default**: Gateway binds to `127.0.0.1:8080` (localhost only)
+- **For remote access**: SSH tunneling recommended
+- **If you must expose**: Add NSG ingress rule for TCP/8080 and open host firewall
+
+### Keys & Safety
+
+**Keep keys out of git.** Put API keys into Bifrost UI or a local `.env` that's already ignored by OOS:
+
+```bash
+# LLM Gateway (optional; store keys in Bifrost UI or local .env)
+ZAI_API_KEY=your_zai_key_here
+ANTHROPIC_API_KEY=your_anthropic_key_here
+# Optional future providers:
+DEEPSEEK_API_KEY=
+KIMI_API_KEY=
+```
+
+**Security:** Bifrost binds to `127.0.0.1` (localhost-only). If you must expose it on OCI, open an NSG ingress + host firewall, but localhost is safer.
 
 ---
 
