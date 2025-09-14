@@ -36,6 +36,28 @@ SAFE_KEYS=(
     "placeholder_key"
     "REPLACE_WITH_YOUR_KEY"
     "INSERT_YOUR_KEY_HERE"
+    # URL patterns that are safe
+    "https://"
+    "http://"
+    "dbreunig.com"
+    "rlancemartin.github.io"
+    "manus.im"
+    "trychroma.com"
+    "docs.google.com"
+    "anthropic.com"
+    "cognition.ai"
+    "github.com"
+    "langchain.com"
+    "x.com"
+    "youtube.com"
+    "lexfridman.com"
+    # Specific URLs from research
+    "how-contexts-fail-and-how-to-fix-them.html"
+    "why-the-term-context-engineering-matters.html"
+    "context_engineering"
+    "Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus"
+    "16aaXLu40GugY-kOpqDU4e-S0hD1FmHcNyF0rRRnb1OU"
+    "_generate_clarification_questions"
 )
 
 # Dangerous API key patterns - these should NEVER be committed
@@ -265,7 +287,7 @@ Dangerous patterns (blocked):
 Examples:
   ✅ OPENAI_API_KEY="your_api_key_here"           # Safe placeholder
   ✅ API_KEY="sk-test-example"                    # Obviously fake
-  ❌ OPENAI_API_KEY="sk-proj-abc123def456..."     # Real OpenAI key
+  ❌ OPENAI_API_KEY="sk-proj-abc123def456..."     # Real OpenAI key (example)
   ❌ GITHUB_TOKEN="ghp_1234567890abcdef..."       # Real GitHub token
 
 Security Philosophy:
