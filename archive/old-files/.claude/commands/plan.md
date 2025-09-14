@@ -1,1 +1,0 @@
-- Plan: Goal / Constraints / Steps (3–7) / Risks

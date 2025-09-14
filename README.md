@@ -126,6 +126,7 @@ git commit -m "add config"
 - [MCP (Archon + Others)](#mcp-archon--others)
 - [Gateway Management](#gateway-management)
 - [Keys & Safety](#keys--safety)
+- [Z.AI Integration Status](#zai-integration-status)
 
 ### How to Use (Day-to-Day)
 
@@ -236,6 +237,29 @@ KIMI_API_KEY=
 ```
 
 **Security:** Bifrost binds to `127.0.0.1` (localhost-only). If you must expose it on OCI, open an NSG ingress + host firewall, but localhost is safer.
+
+### Z.AI Integration Status
+
+**✅ READY FOR EXECUTION**
+
+Complete demonstration project created in Archon (`ba97acbf-4a87-48b6-831f-5866fe9fb8d6`) with 6-phase execution plan:
+
+- **Phase 0:** Repository selection + 1Password setup verification  
+- **Phase 1:** Environment verification (Bifrost, launchers, MCP)
+- **Phase 2:** Rapid project setup demo (< 5 minutes target)
+- **Phase 3:** Claude Code Pro baseline establishment
+- **Phase 4:** Z.AI overflow demonstration (> 70% capability target)
+- **Phase 5:** Complete workflow validation
+
+**Target Deliverable:** *"We're ready to use OOS and super clear on what to do when Claude tokens run out or we want to crank through tons of code"*
+
+**Prerequisites Completed:**
+- ✅ Z.AI API key added to 1Password bootstrap-env item
+- ✅ Bifrost gateway integration ready
+- ✅ cc-launchers.sh functions prepared
+- ✅ Complete execution plan in Archon project management
+
+**Estimated Execution Time:** ~2 hours total
 
 ---
 
