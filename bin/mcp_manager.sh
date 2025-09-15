@@ -39,7 +39,7 @@ Commands:
   profiles                Manage configuration profiles
   sync                    Sync with remote MCP registry
   health                  Check all MCP server health
-  
+
 Options:
   --profile NAME          Use specific profile
   --timeout SECONDS       Connection timeout (default: 10)
@@ -56,7 +56,7 @@ EOF
 # Initialize MCP management
 init_mcp_management() {
   mkdir -p "$(dirname "$MCP_REGISTRY")" "$MCP_PROFILES_DIR" "$MCP_BACKUP_DIR"
-  
+
   if [[ ! -f "$MCP_REGISTRY" ]]; then
     cat > "$MCP_REGISTRY" <<'JSON'
 {
@@ -78,12 +78,12 @@ test_mcp_server() {
   local name="$1"
   local timeout="${2:-10}"
   local verbose="${3:-false}"
-  
+
   if [[ ! -f "$MCP_REGISTRY" ]]; then
     error "MCP registry not found"
     return 1
   fi
-  
+
   local server_info
   server_info=$(python3 - "$name" <<'PY'
 import json
@@ -104,23 +104,23 @@ if name not in servers:
 print(json.dumps(servers[name]))
 PY
   )
-  
+
   if [[ $? -ne 0 ]]; then
     error "$server_info"
     return 1
   fi
-  
+
   local url transport
   url=$(echo "$server_info" | python3 -c "import sys, json; info=json.load(sys.stdin); print(info.get('url', ''))")
   transport=$(echo "$server_info" | python3 -c "import sys, json; info=json.load(sys.stdin); print(info.get('transport', 'http'))")
-  
+
   [[ "$verbose" == "true" ]] && log "Testing $name ($transport): $url"
-  
+
   case "$transport" in
     "http")
       local response
       response=$(curl -sS -o /dev/null -w "%{http_code}" --connect-timeout "$timeout" --max-time "$((timeout * 2))" "$url" 2>/dev/null || echo "000")
-      
+
       if [[ "$response" == "200" ]] || [[ "$response" == "405" ]]; then
         success "$name is healthy (HTTP $response)"
         return 0
@@ -140,14 +140,14 @@ PY
 check_all_health() {
   local profile="${1:-default}"
   local timeout="${2:-10}"
-  
+
   log "Checking health of all MCP servers (profile: $profile)..."
-  
+
   if [[ ! -f "$MCP_REGISTRY" ]]; then
     error "MCP registry not found"
     return 1
   fi
-  
+
   local server_list
   server_list=$(python3 - "$profile" <<'PY'
 import json
@@ -179,10 +179,10 @@ else:
         print(server)
 PY
   )
-  
+
   local healthy=0
   local total=0
-  
+
   while IFS= read -r server_name; do
     if [[ -n "$server_name" ]]; then
       ((total++))
@@ -191,7 +191,7 @@ PY
       fi
     fi
   done <<< "$server_list"
-  
+
   echo
   if [[ $healthy -eq $total ]]; then
     success "All MCP servers healthy ($healthy/$total)"
@@ -205,20 +205,20 @@ PY
 # Auto-discovery of MCP servers
 discover_mcp_servers() {
   log "Discovering available MCP servers..."
-  
+
   # Check common MCP endpoints
   local common_endpoints=(
     "archon:http://localhost:8051/mcp"
     "context7:https://context7.liam.sh/mcp"
     "filesystem:command:npx:-y:@modelcontextprotocol/server-filesystem"
   )
-  
+
   local discovered=()
-  
+
   for endpoint in "${common_endpoints[@]}"; do
     local name=${endpoint%%:*}
     local url=${endpoint#*:}
-    
+
     if [[ "$url" =~ ^http ]]; then
       log "Testing $name at $url..."
       if curl -sS -o /dev/null --connect-timeout 5 --max-time 10 "$url" 2>/dev/null; then
@@ -227,7 +227,7 @@ discover_mcp_servers() {
       fi
     fi
   done
-  
+
   if [[ ${#discovered[@]} -gt 0 ]]; then
     echo
     echo "Discovered MCP servers:"
@@ -243,12 +243,12 @@ discover_mcp_servers() {
 backup_mcp_config() {
   local backup_name="backup-$(date +%Y%m%d-%H%M%S).json"
   local backup_file="$MCP_BACKUP_DIR/$backup_name"
-  
+
   if [[ ! -f "$MCP_REGISTRY" ]]; then
     error "No MCP registry to backup"
     return 1
   fi
-  
+
   cp "$MCP_REGISTRY" "$backup_file"
   success "MCP configuration backed up to: $backup_file"
   echo "$backup_file"
@@ -256,22 +256,22 @@ backup_mcp_config() {
 
 restore_mcp_config() {
   local backup_file="$1"
-  
+
   if [[ ! -f "$backup_file" ]]; then
     error "Backup file not found: $backup_file"
     return 1
   fi
-  
+
   # Validate backup file
   if ! python3 -m json.tool "$backup_file" >/dev/null 2>&1; then
     error "Invalid JSON in backup file"
     return 1
   fi
-  
+
   # Create current backup before restore
   local current_backup
   current_backup=$(backup_mcp_config)
-  
+
   # Restore
   cp "$backup_file" "$MCP_REGISTRY"
   success "MCP configuration restored from: $backup_file"
@@ -282,7 +282,7 @@ restore_mcp_config() {
 manage_profiles() {
   local action="${1:-list}"
   local profile_name="${2:-}"
-  
+
   case "$action" in
     "list")
       log "Available MCP profiles:"
@@ -306,7 +306,7 @@ PY
         error "Profile name required"
         return 1
       fi
-      
+
       python3 - "$profile_name" <<'PY'
 import json
 import sys
@@ -327,7 +327,7 @@ profiles[profile_name] = {
 with open(registry_file, 'w') as f:
     json.dump(registry, f, indent=2)
 PY
-      
+
       success "Profile '$profile_name' created"
       ;;
     *)
@@ -340,9 +340,9 @@ PY
 # Main command dispatcher
 main() {
   init_mcp_management
-  
+
   local command="${1:-list}"
-  
+
   case "$command" in
     list)
       if [[ -f "$MCP_REGISTRY" ]]; then
@@ -374,11 +374,11 @@ PY
         error "Usage: test SERVER_NAME [--timeout SECONDS]"
         exit 1
       fi
-      
+
       local server_name="$2"
       local timeout=10
       local verbose=false
-      
+
       shift 2
       while [[ $# -gt 0 ]]; do
         case $1 in
@@ -387,13 +387,13 @@ PY
           *) error "Unknown option: $1"; exit 1 ;;
         esac
       done
-      
+
       test_mcp_server "$server_name" "$timeout" "$verbose"
       ;;
     health)
       local profile="default"
       local timeout=10
-      
+
       shift
       while [[ $# -gt 0 ]]; do
         case $1 in
@@ -402,7 +402,7 @@ PY
           *) error "Unknown option: $1"; exit 1 ;;
         esac
       done
-      
+
       check_all_health "$profile" "$timeout"
       ;;
     backup)

@@ -3,8 +3,8 @@ set -euo pipefail
 
 # Bulletproof API Key Detection and Prevention
 # This script prevents ANY meaningful API key from being committed to Git
-# 
-# Usage: 
+#
+# Usage:
 #   ./bin/prevent_api_key_commits.sh --check-staged  # Check staged files
 #   ./bin/prevent_api_key_commits.sh --check-all     # Check all tracked files
 #   ./bin/prevent_api_key_commits.sh --install       # Install as pre-commit hook
@@ -65,24 +65,24 @@ DANGEROUS_PATTERNS=(
     # OpenAI API keys (real ones start with sk- and are long)
     'sk-[A-Za-z0-9]{32,}'
     'sk-proj-[A-Za-z0-9_-]{32,}'
-    
+
     # Anthropic Claude keys
     'sk-ant-[A-Za-z0-9_-]{95,}'
-    
+
     # Google/Gemini API keys
     'AIza[A-Za-z0-9_-]{35}'
-    
+
     # GitHub tokens
     'ghp_[A-Za-z0-9]{36}'
     'gho_[A-Za-z0-9]{36}'
     'ghu_[A-Za-z0-9]{36}'
     'ghs_[A-Za-z0-9]{36}'
     'ghr_[A-Za-z0-9]{36}'
-    
+
     # AWS keys
     'AKIA[0-9A-Z]{16}'
     'ASIA[0-9A-Z]{16}'
-    
+
     # Generic long keys that look real
     '[A-Za-z0-9+/]{40,}={0,2}'  # Base64-like strings 40+ chars
     '[A-Fa-f0-9]{64}'           # 64 char hex strings
@@ -92,24 +92,24 @@ DANGEROUS_PATTERNS=(
 # Check if a key looks like a safe placeholder
 is_safe_key() {
     local key="$1"
-    
+
     # Check against known safe patterns
     for safe in "${SAFE_KEYS[@]}"; do
         if [[ "$key" == "$safe" ]]; then
             return 0  # Safe
         fi
     done
-    
+
     # Additional heuristics for safe keys
     if [[ "$key" =~ (example|placeholder|demo|test|fake|dummy|YOUR_KEY|REPLACE) ]]; then
         return 0  # Safe
     fi
-    
+
     # If it's obviously too short to be a real API key
     if [[ ${#key} -lt 20 ]]; then
         return 0  # Safe
     fi
-    
+
     return 1  # Potentially dangerous
 }
 
@@ -117,27 +117,27 @@ is_safe_key() {
 scan_file() {
     local file="$1"
     local found_dangerous=0
-    
+
     # Skip binary files
     if ! [[ -f "$file" && -r "$file" ]] || file "$file" | grep -q binary; then
         return 0
     fi
-    
+
     # Skip files that are obviously safe
     case "$file" in
         *.png|*.jpg|*.jpeg|*.gif|*.pdf|*.zip|*.tar.gz|*.bin|*.exe) return 0 ;;
         *node_modules/*|*/.git/*|*/venv/*|*/__pycache__/*) return 0 ;;
     esac
-    
+
     info "Scanning: $file"
-    
+
     # Look for dangerous patterns
     for pattern in "${DANGEROUS_PATTERNS[@]}"; do
         while IFS=':' read -r line_num line_content; do
             if [[ -n "$line_content" ]]; then
                 # Extract the potential key
                 potential_key=$(echo "$line_content" | grep -oE "$pattern" | head -1)
-                
+
                 if [[ -n "$potential_key" ]] && ! is_safe_key "$potential_key"; then
                     error "🚨 DANGEROUS API KEY DETECTED!"
                     error "File: $file:$line_num"
@@ -150,16 +150,16 @@ scan_file() {
             fi
         done < <(grep -n -E "$pattern" "$file" 2>/dev/null || true)
     done
-    
+
     # Also look for suspicious variable assignments
     while IFS=':' read -r line_num line_content; do
         if [[ -n "$line_content" ]]; then
             # Extract the value after the equals sign
             potential_key=$(echo "$line_content" | sed -n 's/.*[Kk][Ee][Yy][^=]*=\s*["\047]\?\([^"'\'' ]*\)["\047]\?.*/\1/p')
-            
+
             if [[ -n "$potential_key" ]] && [[ ${#potential_key} -ge 20 ]] && ! is_safe_key "$potential_key"; then
                 error "🚨 SUSPICIOUS API KEY ASSIGNMENT!"
-                error "File: $file:$line_num" 
+                error "File: $file:$line_num"
                 error "Key: ${potential_key:0:20}... [REDACTED]"
                 error "Line: $line_content"
                 echo
@@ -167,7 +167,7 @@ scan_file() {
             fi
         fi
     done < <(grep -n -i -E '(api_?key|access_?key|secret_?key|auth_?key|token).*=' "$file" 2>/dev/null || true)
-    
+
     return $found_dangerous
 }
 
@@ -175,7 +175,7 @@ scan_file() {
 check_staged() {
     info "Checking staged files for API keys..."
     local found_any=0
-    
+
     # Get list of staged files
     while IFS= read -r file; do
         if [[ -n "$file" ]]; then
@@ -184,7 +184,7 @@ check_staged() {
             fi
         fi
     done < <(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
-    
+
     return $found_any
 }
 
@@ -192,7 +192,7 @@ check_staged() {
 check_all() {
     info "Checking all tracked files for API keys..."
     local found_any=0
-    
+
     while IFS= read -r file; do
         if [[ -n "$file" ]]; then
             if scan_file "$file"; then
@@ -200,7 +200,7 @@ check_all() {
             fi
         fi
     done < <(git ls-files 2>/dev/null || find . -type f -name "*.sh" -o -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.md" -o -name "*.json" -o -name "*.yaml" -o -name "*.yml" | grep -v node_modules | head -100)
-    
+
     return $found_any
 }
 
@@ -208,14 +208,14 @@ check_all() {
 install_hook() {
     local git_hooks_dir="$PROJECT_ROOT/.git/hooks"
     local pre_commit_hook="$git_hooks_dir/pre-commit"
-    
+
     if [[ ! -d "$git_hooks_dir" ]]; then
         error "Not in a git repository or .git/hooks directory not found"
         return 1
     fi
-    
+
     info "Installing pre-commit hook..."
-    
+
     # Create or update pre-commit hook
     cat > "$pre_commit_hook" <<EOF
 #!/usr/bin/env bash
@@ -243,10 +243,10 @@ else
     echo "✅ No API keys detected - commit allowed"
 fi
 EOF
-    
+
     chmod +x "$pre_commit_hook"
     success "Pre-commit hook installed at: $pre_commit_hook"
-    
+
     # Test the hook
     info "Testing the hook..."
     if "$pre_commit_hook" >/dev/null 2>&1; then
@@ -266,20 +266,20 @@ safe placeholder values.
 
 Usage:
   ./bin/prevent_api_key_commits.sh --check-staged   # Check staged files (for pre-commit)
-  ./bin/prevent_api_key_commits.sh --check-all      # Check all tracked files  
+  ./bin/prevent_api_key_commits.sh --check-all      # Check all tracked files
   ./bin/prevent_api_key_commits.sh --install        # Install as pre-commit hook
   ./bin/prevent_api_key_commits.sh --help           # Show this help
 
 Safe patterns (allowed):
   - your_api_key_here
-  - sk-test-example  
+  - sk-test-example
   - example_key
   - placeholder_key
   - Any key containing: example, placeholder, demo, test, fake, dummy
 
 Dangerous patterns (blocked):
   - sk-[real OpenAI keys]
-  - ghp_[GitHub tokens]  
+  - ghp_[GitHub tokens]
   - AIza[Google API keys]
   - Long base64 or hex strings
   - Any realistic-looking API key

@@ -57,9 +57,9 @@ EOF
 # Initialize template system
 init_template_system() {
   log "Initializing OOS template system..."
-  
+
   mkdir -p "$TEMPLATES_DIR/builtin" "$TEMPLATES_DIR/community" "$TEMPLATES_DIR/custom"
-  
+
   # Create template registry
   if [[ ! -f "$TEMPLATE_REGISTRY" ]]; then
     cat > "$TEMPLATE_REGISTRY" <<'JSON'
@@ -71,7 +71,7 @@ init_template_system() {
 }
 JSON
   fi
-  
+
   create_builtin_templates
   success "Template system initialized"
 }
@@ -79,19 +79,19 @@ JSON
 # Create built-in templates
 create_builtin_templates() {
   log "Creating built-in templates..."
-  
+
   # Web Application Template
   create_web_template
-  
+
   # CLI Tool Template
   create_cli_template
-  
+
   # API Service Template
   create_api_template
-  
+
   # Library Template
   create_library_template
-  
+
   # Update registry
   update_template_registry
 }
@@ -100,7 +100,7 @@ create_builtin_templates() {
 create_web_template() {
   local template_dir="$TEMPLATES_DIR/builtin/web-app"
   mkdir -p "$template_dir"
-  
+
   cat > "$template_dir/template.json" <<'JSON'
 {
   "name": "web-app",
@@ -122,7 +122,7 @@ create_web_template() {
     },
     "BACKEND_TYPE": {
       "description": "Backend type",
-      "type": "choice", 
+      "type": "choice",
       "options": ["express", "fastify", "koa"],
       "default": "express"
     },
@@ -142,7 +142,7 @@ JSON
 
   # Create template structure
   mkdir -p "$template_dir/template/src" "$template_dir/template/public" "$template_dir/template/api"
-  
+
   cat > "$template_dir/template/package.json" <<'JSON'
 {
   "name": "{{PROJECT_NAME}}",
@@ -197,11 +197,11 @@ MD
 create_cli_template() {
   local template_dir="$TEMPLATES_DIR/builtin/cli-tool"
   mkdir -p "$template_dir"
-  
+
   cat > "$template_dir/template.json" <<'JSON'
 {
   "name": "cli-tool",
-  "version": "1.0.0", 
+  "version": "1.0.0",
   "description": "Command-line tool with argument parsing and subcommands",
   "category": "cli",
   "tags": ["cli", "bash", "python"],
@@ -227,7 +227,7 @@ create_cli_template() {
 JSON
 
   mkdir -p "$template_dir/template/bin" "$template_dir/template/lib" "$template_dir/template/tests"
-  
+
   cat > "$template_dir/template/bin/{{PROJECT_NAME}}" <<'BASH'
 #!/usr/bin/env {{#if_eq LANGUAGE 'bash'}}bash{{/if_eq}}{{#if_eq LANGUAGE 'python'}}python3{{/if_eq}}
 {{#if_eq LANGUAGE 'bash'}}
@@ -254,7 +254,7 @@ EOF
 
 main() {
   local command="${1:-help}"
-  
+
   case "$command" in
     help|--help|-h) show_help ;;
     version|--version|-v) echo "{{PROJECT_NAME}} v$VERSION" ;;
@@ -271,7 +271,7 @@ BASH
 create_api_template() {
   local template_dir="$TEMPLATES_DIR/builtin/api-service"
   mkdir -p "$template_dir"
-  
+
   cat > "$template_dir/template.json" <<'JSON'
 {
   "name": "api-service",
@@ -312,13 +312,13 @@ JSON
 create_library_template() {
   local template_dir="$TEMPLATES_DIR/builtin/library"
   mkdir -p "$template_dir"
-  
+
   cat > "$template_dir/template.json" <<'JSON'
 {
   "name": "library",
   "version": "1.0.0",
   "description": "Reusable library with comprehensive testing and documentation",
-  "category": "library", 
+  "category": "library",
   "tags": ["library", "npm", "package"],
   "variables": {
     "PROJECT_NAME": {
@@ -361,7 +361,7 @@ for root, dirs, files in os.walk(templates_dir):
         try:
             with open(template_path) as f:
                 template_config = json.load(f)
-            
+
             template_name = template_config['name']
             registry['templates'][template_name] = {
                 'path': root,
@@ -380,7 +380,7 @@ with open(registry_file, 'w') as f:
 print("Template registry updated")
 PY
 )
-  
+
   echo "$registry_content"
 }
 
@@ -390,10 +390,10 @@ list_templates() {
     warn "Template registry not found. Run 'init' first."
     return 1
   fi
-  
+
   echo -e "${PURPLE}Available Templates:${NC}"
   echo
-  
+
   TEMPLATE_REGISTRY="$TEMPLATE_REGISTRY" python3 - <<'PY'
 import json
 import os
@@ -422,7 +422,7 @@ substitute_template_vars() {
   local template_file="$1"
   local vars_file="$2"
   local output_file="$3"
-  
+
   python3 - "$template_file" "$vars_file" "$output_file" <<'PY'
 import sys
 import json
@@ -430,7 +430,7 @@ import re
 from pathlib import Path
 
 template_file = sys.argv[1]
-vars_file = sys.argv[2] 
+vars_file = sys.argv[2]
 output_file = sys.argv[3]
 
 # Load variables
@@ -456,13 +456,13 @@ def handle_conditional(match):
     var_name = match.group(1)
     expected_value = match.group(2).strip('"\'')
     block_content = match.group(3)
-    
+
     actual_value = variables.get(var_name, '')
     if str(actual_value) == expected_value:
         return block_content
     return ''
 
-content = re.sub(r'\{\{#if_eq\s+([A-Z_][A-Z0-9_]*)\s+["\']([^"\']*)["\']}\}(.*?)\{\{/if_eq}\}', 
+content = re.sub(r'\{\{#if_eq\s+([A-Z_][A-Z0-9_]*)\s+["\']([^"\']*)["\']}\}(.*?)\{\{/if_eq}\}',
                  handle_conditional, content, flags=re.DOTALL)
 
 # Write output
@@ -478,14 +478,14 @@ create_from_template() {
   local output_dir="${3:-$(pwd)/$project_name}"
   local vars_file="${4:-}"
   local dry_run="${5:-false}"
-  
+
   if [[ ! -f "$TEMPLATE_REGISTRY" ]]; then
     error "Template registry not found. Run 'init' first."
     return 1
   fi
-  
+
   log "Creating project '$project_name' from template '$template_name'..."
-  
+
   # Get template info
   local template_info
   template_info=$(python3 - "$template_name" <<'PY'
@@ -508,38 +508,38 @@ template_info = templates[template_name]
 print(json.dumps(template_info))
 PY
 )
-  
+
   if [[ $? -ne 0 ]]; then
     error "$template_info"
     return 1
   fi
-  
+
   local template_path
   template_path=$(echo "$template_info" | python3 -c "import sys, json; info=json.load(sys.stdin); print(info['path'])")
-  
+
   if [[ "$dry_run" == "true" ]]; then
     log "Would create project at: $output_dir"
     log "Using template at: $template_path"
     return 0
   fi
-  
+
   # Create output directory
   mkdir -p "$output_dir"
-  
+
   # Collect variables
   local collected_vars_file
   collected_vars_file=$(mktemp)
-  
+
   collect_template_variables "$template_path/template.json" "$project_name" "$collected_vars_file" "$vars_file"
-  
+
   # Copy and process template files
   process_template_files "$template_path/template" "$output_dir" "$collected_vars_file"
-  
+
   # Run post-creation hooks
   run_template_hooks "$template_path/template.json" "post_create" "$output_dir" "$collected_vars_file"
-  
+
   rm -f "$collected_vars_file"
-  
+
   success "Project '$project_name' created successfully at $output_dir"
 }
 
@@ -549,7 +549,7 @@ collect_template_variables() {
   local project_name="$2"
   local output_file="$3"
   local input_vars_file="${4:-}"
-  
+
   python3 - "$template_config" "$project_name" "$output_file" "$input_vars_file" <<'PY'
 import json
 import sys
@@ -581,7 +581,7 @@ template_vars = config.get('variables', {})
 for var_name, var_config in template_vars.items():
     if var_name in variables:
         continue  # Already provided
-    
+
     if var_config.get('default'):
         variables[var_name] = var_config['default']
     elif var_config.get('required', False):
@@ -602,16 +602,16 @@ PY
 # Process template files
 process_template_files() {
   local src_dir="$1"
-  local dest_dir="$2" 
+  local dest_dir="$2"
   local vars_file="$3"
-  
+
   find "$src_dir" -type f | while read -r file; do
     local rel_path="${file#$src_dir/}"
     local dest_file="$dest_dir/$rel_path"
-    
+
     # Create destination directory
     mkdir -p "$(dirname "$dest_file")"
-    
+
     # Process file based on type
     if [[ "$file" =~ \.(md|json|js|py|sh|yml|yaml|toml|txt)$ ]]; then
       # Text files: apply variable substitution
@@ -629,7 +629,7 @@ run_template_hooks() {
   local hook_type="$2"
   local project_dir="$3"
   local vars_file="$4"
-  
+
   python3 - "$template_config" "$hook_type" "$project_dir" "$vars_file" <<'PY'
 import json
 import sys
@@ -673,7 +673,7 @@ PY
 # Main command dispatcher
 main() {
   local command="${1:-help}"
-  
+
   case "$command" in
     init)
       init_template_system
@@ -686,13 +686,13 @@ main() {
         error "Usage: create PROJECT_NAME [OPTIONS]"
         exit 1
       fi
-      
+
       local project_name="$2"
       local template_name="web-app"
       local output_dir=""
       local vars_file=""
       local dry_run=false
-      
+
       shift 2
       while [[ $# -gt 0 ]]; do
         case $1 in
@@ -703,7 +703,7 @@ main() {
           *) error "Unknown option: $1"; exit 1 ;;
         esac
       done
-      
+
       create_from_template "$project_name" "$template_name" "$output_dir" "$vars_file" "$dry_run"
       ;;
     validate)

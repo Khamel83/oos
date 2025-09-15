@@ -54,7 +54,7 @@ EOF
 # Setup performance monitoring
 setup_monitoring() {
   mkdir -p "$PERF_LOG_DIR" "$BENCHMARK_DIR"
-  
+
   # Create performance baseline if it doesn't exist
   local baseline_file="$BENCHMARK_DIR/baseline.json"
   if [[ ! -f "$baseline_file" ]]; then
@@ -67,46 +67,46 @@ setup_monitoring() {
 profile_script() {
   local script_path="$1"
   local output_file="${2:-$PERF_LOG_DIR/profile-$(date +%Y%m%d-%H%M%S).json}"
-  
+
   if [[ ! -f "$script_path" ]]; then
     error "Script not found: $script_path"
     return 1
   fi
-  
+
   log "Profiling: $script_path"
-  
+
   local start_time_ns start_time_s end_time_ns end_time_s
   local cpu_before cpu_after mem_before mem_after
-  
+
   # Get initial resource usage
   cpu_before=$(cat /proc/loadavg | awk '{print $1}')
   mem_before=$(free -m | awk 'NR==2{print $3}')
-  
+
   # Profile execution
   start_time_ns=$(date +%s%N)
   start_time_s=$(date +%s)
-  
+
   # Run with time and resource monitoring
   local exit_code=0
   timeout 300 /usr/bin/time -v bash "$script_path" 2>"$PERF_LOG_DIR/time_output.tmp" || exit_code=$?
-  
+
   end_time_ns=$(date +%s%N)
   end_time_s=$(date +%s)
-  
+
   # Get final resource usage
   cpu_after=$(cat /proc/loadavg | awk '{print $1}')
   mem_after=$(free -m | awk '{print $3}')
-  
+
   # Calculate metrics
   local duration_ms=$(( (end_time_ns - start_time_ns) / 1000000 ))
   local duration_s=$(( end_time_s - start_time_s ))
-  
+
   # Parse time output
   local time_data=""
   if [[ -f "$PERF_LOG_DIR/time_output.tmp" ]]; then
     time_data=$(cat "$PERF_LOG_DIR/time_output.tmp")
   fi
-  
+
   # Create JSON report
   cat > "$output_file" <<JSON
 {
@@ -125,12 +125,12 @@ profile_script() {
   "time_output": $(echo "$time_data" | python3 -c "import sys, json; print(json.dumps(sys.stdin.read()))")
 }
 JSON
-  
+
   # Cleanup
   rm -f "$PERF_LOG_DIR/time_output.tmp"
-  
+
   success "Profile saved to: $output_file"
-  
+
   # Show summary
   echo
   echo "Performance Summary:"
@@ -145,15 +145,15 @@ JSON
 run_benchmarks() {
   local baseline_mode="${1:-false}"
   local output_file="$BENCHMARK_DIR/benchmark-$(date +%Y%m%d-%H%M%S).json"
-  
+
   if [[ "$baseline_mode" == "true" ]]; then
     output_file="$BENCHMARK_DIR/baseline.json"
   fi
-  
+
   log "Running comprehensive benchmarks..."
-  
+
   local results=()
-  
+
   # Bootstrap performance
   if [[ -f "bootstrap_enhanced.sh" ]]; then
     log "Benchmarking bootstrap (dry-run)..."
@@ -163,7 +163,7 @@ run_benchmarks() {
     local bootstrap_ms=$(( (bootstrap_end - bootstrap_start) / 1000000 ))
     results+=("\"bootstrap_dry_run_ms\": $bootstrap_ms")
   fi
-  
+
   # Environment loading performance
   if [[ -f ".env" && -f "bin/safe_source_env.sh" ]]; then
     log "Benchmarking environment loading..."
@@ -177,7 +177,7 @@ run_benchmarks() {
     local env_avg_ms=$(( env_total / 5000000 ))
     results+=("\"env_loading_avg_ms\": $env_avg_ms")
   fi
-  
+
   # Key selection performance
   if [[ -f "bin/select_or_key.sh" && -f ".env" ]]; then
     log "Benchmarking key selection..."
@@ -188,7 +188,7 @@ run_benchmarks() {
     results+=("\"key_selection_ms\": $key_ms")
     rm -f .env.bench
   fi
-  
+
   # Diagnostic performance
   if [[ -f "bin/diagnose.sh" ]]; then
     log "Benchmarking diagnostics..."
@@ -198,7 +198,7 @@ run_benchmarks() {
     local diag_ms=$(( (diag_end - diag_start) / 1000000 ))
     results+=("\"diagnostics_ms\": $diag_ms")
   fi
-  
+
   # Health check performance
   if [[ -f "bin/health_monitor.sh" ]]; then
     log "Benchmarking health check..."
@@ -208,12 +208,12 @@ run_benchmarks() {
     local health_ms=$(( (health_end - health_start) / 1000000 ))
     results+=("\"health_check_ms\": $health_ms")
   fi
-  
+
   # System info
   local cpu_count=$(nproc)
   local memory_gb=$(( $(free -m | awk 'NR==2{print $2}') / 1024 ))
   local disk_gb=$(df -BG . | awk 'NR==2{gsub(/G/, "", $2); print $2}')
-  
+
   # Create benchmark report
   cat > "$output_file" <<JSON
 {
@@ -232,9 +232,9 @@ run_benchmarks() {
   }
 }
 JSON
-  
+
   success "Benchmark results saved to: $output_file"
-  
+
   # Show results
   echo
   echo "Benchmark Results:"
@@ -266,24 +266,24 @@ create_baseline() {
 analyze_performance() {
   local baseline_file="$BENCHMARK_DIR/baseline.json"
   local latest_file=""
-  
+
   # Find latest benchmark file
   if [[ -d "$BENCHMARK_DIR" ]]; then
     latest_file=$(find "$BENCHMARK_DIR" -name "benchmark-*.json" -type f | sort | tail -1)
   fi
-  
+
   if [[ ! -f "$baseline_file" ]]; then
     warn "No baseline found. Run 'benchmark --baseline' first."
     return 1
   fi
-  
+
   if [[ ! -f "$latest_file" ]]; then
     warn "No recent benchmarks found. Run 'benchmark' first."
     return 1
   fi
-  
+
   log "Analyzing performance: baseline vs latest"
-  
+
   python3 - "$baseline_file" "$latest_file" <<'PY'
 import json
 import sys
@@ -315,9 +315,9 @@ for metric, latest_value in latest_bench.items():
         baseline_value = baseline_bench[metric]
         if baseline_value > 0:
             change_percent = ((latest_value - baseline_value) / baseline_value) * 100
-            
+
             clean_name = metric.replace('_', ' ').replace('ms', '').strip()
-            
+
             if change_percent > 5:  # Regression
                 regressions.append((clean_name, baseline_value, latest_value, change_percent))
                 print(f"🔴 {clean_name}: {baseline_value} → {latest_value} (+{change_percent:.1f}%)")
@@ -348,26 +348,26 @@ monitor_performance() {
   local duration="${1:-300}"
   local interval="${2:-5}"
   local output_file="$PERF_LOG_DIR/monitor-$(date +%Y%m%d-%H%M%S).json"
-  
+
   log "Starting continuous monitoring (${duration}s duration, ${interval}s interval)"
-  
+
   local end_time=$(( $(date +%s) + duration ))
   local samples=()
-  
+
   while [[ $(date +%s) -lt $end_time ]]; do
     local timestamp=$(date +%s)
     local cpu_load=$(cat /proc/loadavg | awk '{print $1}')
     local memory_used=$(free -m | awk 'NR==2{print $3}')
     local disk_io=$(iostat -d 1 1 | awk 'NR==4{print $4}' 2>/dev/null || echo "0")
-    
+
     samples+=("{\"timestamp\": $timestamp, \"cpu_load\": $cpu_load, \"memory_mb\": $memory_used, \"disk_io\": $disk_io}")
-    
+
     echo -ne "\rMonitoring... CPU: $cpu_load, Memory: ${memory_used}MB"
     sleep "$interval"
   done
-  
+
   echo
-  
+
   # Save monitoring data
   cat > "$output_file" <<JSON
 {
@@ -380,9 +380,9 @@ monitor_performance() {
   ]
 }
 JSON
-  
+
   success "Monitoring data saved to: $output_file"
-  
+
   # Show summary statistics
   python3 - "$output_file" <<'PY'
 import json
@@ -410,9 +410,9 @@ PY
 # Generate optimization recommendations
 generate_recommendations() {
   log "Analyzing system for optimization opportunities..."
-  
+
   local recommendations=()
-  
+
   # Check if baseline exists
   if [[ -f "$BENCHMARK_DIR/baseline.json" ]]; then
     local slow_operations
@@ -439,36 +439,36 @@ else:
     print("No significantly slow operations detected")
 PY
     )
-    
+
     if [[ "$slow_operations" != "No significantly slow operations detected" ]]; then
       recommendations+=("$slow_operations")
     fi
   fi
-  
+
   # Check system resources
   local memory_gb=$(( $(free -m | awk 'NR==2{print $2}') / 1024 ))
   local cpu_count=$(nproc)
-  
+
   if [[ $memory_gb -lt 4 ]]; then
     recommendations+=("Consider increasing system memory (current: ${memory_gb}GB)")
   fi
-  
+
   if [[ $cpu_count -lt 2 ]]; then
     recommendations+=("Consider using a multi-core system for better performance")
   fi
-  
+
   # Check for large log files
   local large_logs
   large_logs=$(find . -name "*.log" -size +10M 2>/dev/null | head -5)
   if [[ -n "$large_logs" ]]; then
     recommendations+=("Large log files detected - consider log rotation")
   fi
-  
+
   # Generate report
   echo
   echo "🚀 Optimization Recommendations:"
   echo "================================"
-  
+
   if [[ ${#recommendations[@]} -eq 0 ]]; then
     success "System performance looks good! No specific recommendations."
   else
@@ -476,7 +476,7 @@ PY
       echo -e "${YELLOW}💡${NC} $rec"
     done
   fi
-  
+
   echo
   echo "General Best Practices:"
   echo "• Run diagnostics regularly to catch issues early"
@@ -489,9 +489,9 @@ PY
 # Main command dispatcher
 main() {
   setup_monitoring
-  
+
   local command="${1:-help}"
-  
+
   case "$command" in
     profile)
       if [[ $# -lt 2 ]]; then

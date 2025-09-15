@@ -96,7 +96,7 @@ rotate_logs() {
       log_health "Rotated log file: $log_file"
     fi
   done
-  
+
   # Clean old logs
   find "$PROJECT_ROOT" -name "*.log.old" -mtime +$RETENTION_DAYS -delete 2>/dev/null || true
 }
@@ -105,7 +105,7 @@ rotate_logs() {
 check_archon_mcp() {
   local archon_url="${ARCHON_URL:-https://archon.khamel.com:8051/mcp}"
   local response=$(curl -sS -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 30 "$archon_url" 2>/dev/null || echo "000")
-  
+
   if [[ "$response" == "200" ]]; then
     health_status[archon]="OK"
     failure_counts[archon]=0
@@ -121,15 +121,15 @@ check_archon_mcp() {
 check_openrouter_keys() {
   local working_keys=0
   local total_keys=0
-  
+
   if [[ -f "$PROJECT_ROOT/.env" ]]; then
     cd "$PROJECT_ROOT"
     source bin/safe_source_env.sh .env 2>/dev/null || return 1
-    
+
     if [[ -n "${OPENROUTER_KEYS:-}" ]]; then
       IFS=',' read -ra KEYS <<< "$OPENROUTER_KEYS"
       total_keys=${#KEYS[@]}
-      
+
       for key in "${KEYS[@]}"; do
         key=$(echo "$key" | tr -d ' "'"'"'')
         if [[ -n "$key" ]]; then
@@ -137,13 +137,13 @@ check_openrouter_keys() {
             --connect-timeout 10 --max-time 30 \
             -H "Authorization: Bearer $key" \
             https://openrouter.ai/api/v1/models 2>/dev/null || echo "000")
-          
+
           if [[ "$response" == "200" ]]; then
             ((working_keys++))
           fi
         fi
       done
-      
+
       if [[ $working_keys -gt 0 ]]; then
         health_status[openrouter]="OK ($working_keys/$total_keys keys working)"
         failure_counts[openrouter]=0
@@ -243,7 +243,7 @@ check_disk_space() {
 
 check_file_permissions() {
   local issues=0
-  
+
   # Check bin directory permissions
   if [[ -d "$PROJECT_ROOT/bin" ]]; then
     find "$PROJECT_ROOT/bin" -name "*.sh" -type f ! -perm -u+x | while read -r file; do
@@ -251,7 +251,7 @@ check_file_permissions() {
       log_health "File permission issue: $file not executable"
     done
   fi
-  
+
   if [[ $issues -eq 0 ]]; then
     health_status[file_permissions]="OK"
     failure_counts[file_permissions]=0
@@ -268,55 +268,55 @@ run_health_checks() {
   local start_time=$(date +%s)
   local total_checks=0
   local failed_checks=0
-  
+
   log_health "Starting health check cycle"
-  
+
   # Initialize failure counts if not set
   for service in archon openrouter onepassword github mcp_registration disk_space file_permissions; do
     [[ -z "${failure_counts[$service]:-}" ]] && failure_counts[$service]=0
   done
-  
+
   # Run individual checks
   check_archon_mcp || ((failed_checks++))
   ((total_checks++))
-  
+
   check_openrouter_keys || ((failed_checks++))
   ((total_checks++))
-  
+
   check_onepassword_cli || ((failed_checks++))
   ((total_checks++))
-  
+
   check_github_cli || ((failed_checks++))
   ((total_checks++))
-  
+
   check_mcp_registration || ((failed_checks++))
   ((total_checks++))
-  
+
   check_disk_space || ((failed_checks++))
   ((total_checks++))
-  
+
   check_file_permissions || ((failed_checks++))
   ((total_checks++))
-  
+
   local end_time=$(date +%s)
   local duration=$((end_time - start_time))
-  
+
   # Check for services that need alerts
   for service in "${!failure_counts[@]}"; do
     if [[ ${failure_counts[$service]} -ge $ALERT_THRESHOLD ]]; then
       log_alert "Service $service has failed ${failure_counts[$service]} consecutive times: ${health_status[$service]}"
     fi
   done
-  
+
   local status_summary=""
   if [[ $failed_checks -eq 0 ]]; then
     status_summary="ALL OK"
   else
     status_summary="$failed_checks/$total_checks FAILED"
   fi
-  
+
   log_health "Health check completed: $status_summary (${duration}s)"
-  
+
   # Log individual service statuses
   for service in "${!health_status[@]}"; do
     log_health "  $service: ${health_status[$service]}"
@@ -326,38 +326,38 @@ run_health_checks() {
 # Generate health report
 generate_health_report() {
   local report_file="$PROJECT_ROOT/health_report.txt"
-  
+
   {
     echo "OOS Health Report"
     echo "Generated: $(date)"
     echo "========================="
     echo
-    
+
     echo "Service Status:"
     for service in "${!health_status[@]}"; do
       printf "  %-20s %s\n" "$service:" "${health_status[$service]}"
     done
     echo
-    
+
     echo "Failure Counts:"
     for service in "${!failure_counts[@]}"; do
       printf "  %-20s %d\n" "$service:" "${failure_counts[$service]}"
     done
     echo
-    
+
     if [[ -f "$ALERTS_LOG" ]]; then
       echo "Recent Alerts:"
       tail -10 "$ALERTS_LOG" 2>/dev/null || echo "  No recent alerts"
       echo
     fi
-    
+
     echo "System Information:"
     echo "  Disk Usage: $(df -h "$PROJECT_ROOT" | tail -1)"
     echo "  Load Average: $(uptime | awk -F'load average:' '{print $2}')"
     echo "  Memory: $(free -h | grep Mem: || echo 'N/A')"
-    
+
   } > "$report_file"
-  
+
   echo "Health report generated: $report_file"
 }
 
@@ -368,26 +368,26 @@ run_daemon() {
   echo "Interval: ${CHECK_INTERVAL}s"
   echo "Alert threshold: $ALERT_THRESHOLD"
   echo "Log file: $HEALTH_LOG"
-  
+
   # Save PID
   echo $$ > "$PID_FILE"
-  
+
   # Setup signal handlers
   cleanup() {
     log_health "Health monitor daemon stopping"
     rm -f "$PID_FILE"
     exit 0
   }
-  
+
   trap cleanup TERM INT
-  
+
   log_health "Health monitor daemon started (PID: $$)"
-  
+
   # Main monitoring loop
   while true; do
     rotate_logs
     run_health_checks
-    
+
     # Sleep in chunks to allow for signal handling
     local remaining=$CHECK_INTERVAL
     while [[ $remaining -gt 0 ]]; do
@@ -401,14 +401,14 @@ run_daemon() {
 run_single_check() {
   echo "Running single health check..."
   run_health_checks
-  
+
   echo
   echo "Health Status Summary:"
   echo "======================"
   for service in "${!health_status[@]}"; do
     printf "%-20s %s\n" "$service:" "${health_status[$service]}"
   done
-  
+
   # Check if any service needs immediate attention
   local critical_issues=0
   for service in "${!failure_counts[@]}"; do
@@ -416,7 +416,7 @@ run_single_check() {
       ((critical_issues++))
     fi
   done
-  
+
   if [[ $critical_issues -gt 0 ]]; then
     echo
     echo "⚠️  $critical_issues service(s) require attention"
@@ -425,7 +425,7 @@ run_single_check() {
     echo
     echo "✅ All services are healthy"
   fi
-  
+
   generate_health_report
 }
 
@@ -447,10 +447,10 @@ check_running_daemon() {
 # Initialize
 init_monitoring() {
   cd "$PROJECT_ROOT"
-  
+
   # Create log files if they don't exist
   touch "$HEALTH_LOG" "$ALERTS_LOG"
-  
+
   # Initialize failure counts
   for service in archon openrouter onepassword github mcp_registration disk_space file_permissions; do
     failure_counts[$service]=0
@@ -460,7 +460,7 @@ init_monitoring() {
 # Main execution
 main() {
   init_monitoring
-  
+
   if [[ "$DAEMON_MODE" == "true" ]]; then
     check_running_daemon
     run_daemon

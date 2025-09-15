@@ -37,7 +37,7 @@ Commands:
   encrypt-env             Encrypt environment files
   decrypt-env             Decrypt environment files
   compliance             Generate compliance report
-  
+
 Options:
   --fix                  Auto-fix security issues
   --verbose              Show detailed output
@@ -54,11 +54,11 @@ EOF
 # Initialize security system
 init_security() {
   mkdir -p "$AUDIT_DIR"
-  
+
   # Create audit log with proper permissions
   touch "$SECURITY_LOG"
   chmod 600 "$SECURITY_LOG"
-  
+
   audit "Security audit system initialized"
 }
 
@@ -66,7 +66,7 @@ init_security() {
 create_secure_temp() {
   local template="${1:-secure_temp.XXXXXX}"
   local temp_file
-  
+
   temp_file=$(mktemp "$template")
   chmod 600 "$temp_file"
   audit "Created secure temporary file: $temp_file"
@@ -78,7 +78,7 @@ audit_secret_access() {
   local operation="$1"
   local resource="$2"
   local user="${3:-$(whoami)}"
-  
+
   audit "SECRET_ACCESS: operation=$operation resource=$resource user=$user timestamp=$(date -Iseconds)"
 }
 
@@ -87,22 +87,22 @@ encrypt_env_file() {
   local env_file="${1:-.env}"
   local encrypted_file="${env_file}.enc"
   local key_file="${env_file}.key"
-  
+
   if [[ ! -f "$env_file" ]]; then
     error "Environment file not found: $env_file"
     return 1
   fi
-  
+
   audit_secret_access "ENCRYPT" "$env_file"
-  
+
   # Generate random key
   openssl rand -hex 32 > "$key_file"
   chmod 600 "$key_file"
-  
+
   # Encrypt file
   openssl aes-256-cbc -in "$env_file" -out "$encrypted_file" -pass "file:$key_file"
   chmod 600 "$encrypted_file"
-  
+
   success "Environment encrypted: $encrypted_file"
   warn "Store key file securely: $key_file"
 }
@@ -112,34 +112,34 @@ decrypt_env_file() {
   local encrypted_file="${env_file}.enc"
   local key_file="${env_file}.key"
   local output_file="${2:-$env_file.decrypted}"
-  
+
   if [[ ! -f "$encrypted_file" ]]; then
     error "Encrypted file not found: $encrypted_file"
     return 1
   fi
-  
+
   if [[ ! -f "$key_file" ]]; then
     error "Key file not found: $key_file"
     return 1
   fi
-  
+
   audit_secret_access "DECRYPT" "$encrypted_file"
-  
+
   # Decrypt file
   openssl aes-256-cbc -d -in "$encrypted_file" -out "$output_file" -pass "file:$key_file"
   chmod 600 "$output_file"
-  
+
   success "Environment decrypted: $output_file"
 }
 
 # Secret scanning
 scan_for_secrets() {
   local fix_issues="${1:-false}"
-  
+
   log "Scanning for exposed secrets..."
-  
+
   local issues_found=0
-  
+
   # Patterns to scan for
   local secret_patterns=(
     "sk-[a-zA-Z0-9-_]{43,}"      # OpenAI/OpenRouter keys
@@ -150,11 +150,11 @@ scan_for_secrets() {
     "AKIA[0-9A-Z]{16}"           # AWS Access Keys
     "-----BEGIN PRIVATE KEY-----" # Private keys
   )
-  
+
   # Files to scan
   local scan_files=(
     "*.sh"
-    "*.py" 
+    "*.py"
     "*.js"
     "*.json"
     "*.md"
@@ -162,7 +162,7 @@ scan_for_secrets() {
     "*.yml"
     "*.yaml"
   )
-  
+
   for pattern in "${secret_patterns[@]}"; do
     while IFS= read -r -d '' file; do
       if grep -l -E "$pattern" "$file" >/dev/null 2>&1; then
@@ -170,35 +170,35 @@ scan_for_secrets() {
         if [[ "$file" =~ \.(env|key|pem)$ ]] || [[ "$file" =~ test|mock|example ]]; then
           continue
         fi
-        
+
         error "Potential secret found in: $file"
         audit "SECRET_LEAK: file=$file pattern_type=${pattern:0:20}"
         ((issues_found++))
-        
+
         if [[ "$fix_issues" == "true" ]]; then
           warn "Manual review required for: $file"
         fi
       fi
     done < <(find . -name "*.sh" -o -name "*.py" -o -name "*.js" -o -name "*.json" -print0 2>/dev/null)
   done
-  
+
   if [[ $issues_found -eq 0 ]]; then
     success "No exposed secrets found"
   else
     error "$issues_found potential secret exposure(s) found"
   fi
-  
+
   return $issues_found
 }
 
 # Permission validation
 check_file_permissions() {
   local fix_issues="${1:-false}"
-  
+
   log "Checking file permissions..."
-  
+
   local issues_found=0
-  
+
   # Check sensitive files
   local sensitive_files=(
     ".env"
@@ -207,19 +207,19 @@ check_file_permissions() {
     "*.pem"
     "**/secrets/**"
   )
-  
+
   for pattern in "${sensitive_files[@]}"; do
     while IFS= read -r -d '' file; do
       if [[ -f "$file" ]]; then
         local perms
         perms=$(stat -c "%a" "$file" 2>/dev/null || stat -f "%Lp" "$file" 2>/dev/null)
-        
+
         # Check if file is readable by others
         if [[ ! "$perms" =~ ^[67][0-7][0-7]$ ]]; then
           error "Insecure permissions on sensitive file: $file ($perms)"
           audit "PERMISSION_ISSUE: file=$file permissions=$perms"
           ((issues_found++))
-          
+
           if [[ "$fix_issues" == "true" ]]; then
             chmod 600 "$file"
             success "Fixed permissions for: $file"
@@ -229,13 +229,13 @@ check_file_permissions() {
       fi
     done < <(find . -name "$pattern" -print0 2>/dev/null)
   done
-  
+
   # Check script executability
   while IFS= read -r -d '' script; do
     if [[ -f "$script" && ! -x "$script" ]]; then
       warn "Script not executable: $script"
       ((issues_found++))
-      
+
       if [[ "$fix_issues" == "true" ]]; then
         chmod +x "$script"
         success "Made executable: $script"
@@ -243,13 +243,13 @@ check_file_permissions() {
       fi
     fi
   done < <(find bin -name "*.sh" -print0 2>/dev/null)
-  
+
   if [[ $issues_found -eq 0 ]]; then
     success "File permissions are secure"
   else
     error "$issues_found permission issue(s) found"
   fi
-  
+
   return $issues_found
 }
 
@@ -257,25 +257,25 @@ check_file_permissions() {
 run_security_scan() {
   local fix_issues="${1:-false}"
   local report_file="${2:-$AUDIT_DIR/scan-$(date +%Y%m%d-%H%M%S).json}"
-  
+
   log "Running comprehensive security scan..."
   audit "SECURITY_SCAN: started fix_mode=$fix_issues"
-  
+
   local scan_results=()
   local total_issues=0
-  
+
   # Secret scanning
   local secret_issues=0
   scan_for_secrets "$fix_issues" || secret_issues=$?
   scan_results+=("\"secret_issues\": $secret_issues")
   ((total_issues += secret_issues))
-  
+
   # Permission checking
   local permission_issues=0
   check_file_permissions "$fix_issues" || permission_issues=$?
   scan_results+=("\"permission_issues\": $permission_issues")
   ((total_issues += permission_issues))
-  
+
   # Dependency scanning
   local dependency_issues=0
   if command -v npm >/dev/null 2>&1 && [[ -f "package.json" ]]; then
@@ -289,7 +289,7 @@ run_security_scan() {
   fi
   scan_results+=("\"dependency_issues\": $dependency_issues")
   ((total_issues += dependency_issues))
-  
+
   # Network security
   local network_issues=0
   if netstat -tuln 2>/dev/null | grep -E ":22|:80|:443|:8080" | grep "0.0.0.0" >/dev/null; then
@@ -298,7 +298,7 @@ run_security_scan() {
   fi
   scan_results+=("\"network_issues\": $network_issues")
   ((total_issues += network_issues))
-  
+
   # Generate report
   cat > "$report_file" <<JSON
 {
@@ -312,15 +312,15 @@ run_security_scan() {
   "recommendations": [
     "Regularly rotate API keys and secrets",
     "Use environment encryption for production",
-    "Monitor file permission changes", 
+    "Monitor file permission changes",
     "Keep dependencies updated",
     "Review network service exposure"
   ]
 }
 JSON
-  
+
   audit "SECURITY_SCAN: completed total_issues=$total_issues report=$report_file"
-  
+
   # Summary
   echo
   if [[ $total_issues -eq 0 ]]; then
@@ -329,35 +329,35 @@ JSON
     error "⚠️ Security scan found $total_issues issue(s)"
     echo "Review detailed report: $report_file"
   fi
-  
+
   return $total_issues
 }
 
 # Compliance reporting
 generate_compliance_report() {
   local output_file="${1:-$AUDIT_DIR/compliance-$(date +%Y%m%d).json}"
-  
+
   log "Generating security compliance report..."
-  
+
   # Collect compliance data
   local env_encrypted="false"
   [[ -f ".env.enc" ]] && env_encrypted="true"
-  
+
   local audit_logging="true"
   local secure_temp_usage="true"
   local permission_compliance="false"
-  
+
   # Check permission compliance
   local perm_issues=0
   check_file_permissions "false" >/dev/null 2>&1 || perm_issues=$?
   [[ $perm_issues -eq 0 ]] && permission_compliance="true"
-  
+
   # Check secret rotation policy
   local last_rotation="unknown"
   if [[ -f "$SECURITY_LOG" ]]; then
     last_rotation=$(grep "SECRET_ACCESS" "$SECURITY_LOG" | tail -1 | grep -o 'timestamp=[^[:space:]]*' | cut -d= -f2 || echo "unknown")
   fi
-  
+
   # Generate compliance report
   cat > "$output_file" <<JSON
 {
@@ -391,9 +391,9 @@ generate_compliance_report() {
   ]
 }
 JSON
-  
+
   success "Compliance report generated: $output_file"
-  
+
   # Show summary
   echo
   echo "Compliance Summary:"
@@ -425,9 +425,9 @@ PY
 # Main command dispatcher
 main() {
   init_security
-  
+
   local command="${1:-scan}"
-  
+
   case "$command" in
     scan)
       local fix_issues=false

@@ -1,0 +1,54 @@
+{
+  "commands": [
+    {
+      "name": "help-me",
+      "description": "Smart context engineering help - automatically optimizes your request and guides you through clarification",
+      "script": "bin/claude-help-me.sh"
+    },
+    {
+      "name": "clarify",
+      "description": "Start clarification workflow to refine vague requests",
+      "script": "bin/claude-clarify.sh"
+    },
+    {
+      "name": "meta-ai",
+      "description": "Generate prompt for external AI assistance with current questions",
+      "script": "bin/claude-meta-ai.sh"
+    },
+    {
+      "name": "optimize",
+      "description": "Optimize current context for token efficiency",
+      "script": "bin/claude-optimize.sh"
+    },
+    {
+      "name": "smart-commit",
+      "description": "Generate intelligent commit message for current changes",
+      "script": "bin/claude-smart-commit.sh"
+    },
+    {
+      "name": "doc-check",
+      "description": "Check documentation completeness and code consistency",
+      "script": "bin/claude-doc-check.sh"
+    },
+    {
+      "name": "auto-fix",
+      "description": "Automatically fix code consistency issues",
+      "script": "bin/claude-auto-fix.sh"
+    },
+    {
+      "name": "context-stats",
+      "description": "Show current context size and optimization stats",
+      "script": "bin/claude-context-stats.sh"
+    },
+    {
+      "name": "workflow",
+      "description": "Start structured workflow for complex tasks",
+      "script": "bin/claude-workflow.sh"
+    },
+    {
+      "name": "brain-dump",
+      "description": "Smart processing of rambling input - automatically clarifies and optimizes",
+      "script": "bin/claude-brain-dump.sh"
+    }
+  ]
+}
