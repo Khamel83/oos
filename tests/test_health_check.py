@@ -11,7 +11,7 @@ class TestHealthCheck(unittest.TestCase):
         """Test the health check when all dependencies are found."""
         # Arrange: Mock that all executables are found
         mock_which.side_effect = lambda cmd: f'/usr/bin/{cmd}' # Return a path for any command
-        
+
         # Act
         exit_code = run_health_check()
 

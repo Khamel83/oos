@@ -24,7 +24,7 @@ def run_health_check():
         else:
             print(f"{Colors.RED}[FAIL]{Colors.END} {name}")
             all_ok = False
-    
+
     print("------------------------")
     if all_ok:
         print(f"{Colors.GREEN}✅ All systems operational.{Colors.END}\n")

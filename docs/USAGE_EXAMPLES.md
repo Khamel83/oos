@@ -38,7 +38,7 @@ oos
 # OOS detects git repository and shows:
 # 🛠️ Enhancing existing project...
 # Project: my-react-dashboard
-# 
+#
 # What would you like to add?
 # 1. 🔐 Add secure environment (.env from 1Password)
 # 2. 🤖 Add AI CLI runners (Claude, Gemini, etc.)
@@ -120,7 +120,7 @@ cd my-project
 oos  # Setup environment
 code .  # Open in VS Code with secure environment
 
-# Cursor integration  
+# Cursor integration
 cd my-project
 oos
 cursor .  # AI-powered coding with secure keys
@@ -194,7 +194,7 @@ sudo ln -sf /opt/oos/run.py /usr/local/bin/oos
 cd ~/dev/my-project
 oos  # Choose development options
 
-# Production environment  
+# Production environment
 cd ~/prod/my-project
 oos  # Choose production-safe options
 ```

@@ -37,7 +37,7 @@ def demo_empty_directory():
 
 def demo_existing_project():
     """Demo what happens in existing project"""
-    print("🎬 DEMO: Existing Project Enhancement")  
+    print("🎬 DEMO: Existing Project Enhancement")
     print("=" * 50)
     print("$ cd my-existing-react-app")
     print("$ ~/oos/run.py")
@@ -67,7 +67,7 @@ def demo_existing_project():
 def demo_oos_repo():
     """Demo what happens when run from OOS repo"""
     print("🎬 DEMO: OOS Repository Management")
-    print("=" * 50) 
+    print("=" * 50)
     print("$ cd oos")
     print("$ ./run.py")
     print()
@@ -79,7 +79,7 @@ def demo_oos_repo():
     print("What would you like to do?")
     print("1. 🆕 Create new project elsewhere")
     print("2. 🔧 Run diagnostics")
-    print("3. 📖 Show documentation") 
+    print("3. 📖 Show documentation")
     print("4. 🔍 Test OOS installation")
     print()
     print("Choice [1-4]: 1")
@@ -100,15 +100,15 @@ def main():
     print("=" * 60)
     print("One command, context-aware behavior, no complex flags!")
     print()
-    
+
     demo_empty_directory()
     input("Press Enter to continue...")
-    
-    demo_existing_project() 
+
+    demo_existing_project()
     input("Press Enter to continue...")
-    
+
     demo_oos_repo()
-    
+
     print("🎉 THAT'S IT!")
     print("=" * 60)
     print("Compare to old way:")

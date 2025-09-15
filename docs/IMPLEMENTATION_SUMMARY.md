@@ -155,7 +155,7 @@ sudo make install
 
 # Service operations
 make start      # Start service
-make stop       # Stop service  
+make stop       # Stop service
 make restart    # Restart service
 make status     # Show status
 make logs       # Show logs
@@ -216,7 +216,7 @@ from lib.google_search_fallback import GoogleSearchFallback
 with GoogleSearchFallback() as search_client:
     # Perform search with automatic retry and fallback
     response = search_client.search("python programming", num_results=5)
-    
+
     if response.success:
         for result in response.results:
             print(f"{result['title']}: {result['link']}")

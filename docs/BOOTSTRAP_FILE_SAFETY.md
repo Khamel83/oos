@@ -151,7 +151,7 @@ If automated systems use this script:
 
 The fix ensures:
 - ✅ No data loss from unexpected overwrites
-- ✅ User agency in file management decisions  
+- ✅ User agency in file management decisions
 - ✅ Clear communication of all file operations
 - ✅ Robust handling of filesystem edge cases
 - ✅ Backward compatibility with `--force` flag

@@ -86,7 +86,7 @@ if [[ -f "$PROJECT_ROOT/.gitignore" ]]; then
     "*.log"
     ".venv"
   )
-  
+
   all_patterns_found=true
   for pattern in "${required_patterns[@]}"; do
     if ! grep -q "$pattern" "$PROJECT_ROOT/.gitignore"; then
@@ -94,7 +94,7 @@ if [[ -f "$PROJECT_ROOT/.gitignore" ]]; then
       all_patterns_found=false
     fi
   done
-  
+
   if [[ "$all_patterns_found" == "true" ]]; then
     echo -e "  ${T_GREEN}✓${T_NC} All required gitignore patterns present"
     ((PASS_COUNT++))

@@ -32,7 +32,7 @@ What do you need?
 2. 🆕 Full project setup with AI tools
 3. ❓ Show help
 
-Choice [1-3]: 
+Choice [1-3]:
 ```
 
 ### 🛠️ Existing Git Project

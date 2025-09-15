@@ -7,7 +7,7 @@
 4. Add a **custom field** named **env** (type: **Text**).
 5. Paste your KEY=VALUE lines (see `docs/ENV_TEMPLATE.md`).
 
-> ✅ Each line must be exactly `KEY=value` (no trailing text).  
+> ✅ Each line must be exactly `KEY=value` (no trailing text).
 > ❌ Do not paste shell errors like `: No such file or directory`.
 
 ## CLI sign-in (each shell)

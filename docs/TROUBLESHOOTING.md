@@ -8,7 +8,7 @@ This guide provides solutions for common issues, diagnostic procedures, and reco
 ```bash
 # Stop all processes
 pkill -f health_monitor
-pkill -f key_rotator  
+pkill -f key_rotator
 pkill -f performance_monitor
 
 # Reset to clean state
@@ -81,7 +81,7 @@ op item get "bootstrap-env" --vault "Private"
 op item get "bootstrap-env" --vault "Private" --fields env
 ```
 
-#### Issue: "Network connectivity issues" 
+#### Issue: "Network connectivity issues"
 ```bash
 # Symptoms
 Failed to connect to github.com:443
@@ -135,7 +135,7 @@ mv .env.new .env
 
 #### Issue: "API key validation failures"
 ```bash
-# Symptoms  
+# Symptoms
 OpenRouter key invalid/expired: sk-or-v1-...
 
 # Diagnosis
@@ -260,7 +260,7 @@ export ARCHON_URL=https://archon.khamel.com:8051/mcp
 
 #### Issue: "Context7 MCP unreachable"
 ```bash
-# Symptoms  
+# Symptoms
 Context7 MCP server unreachable
 
 # Solutions
@@ -300,7 +300,7 @@ ps aux | grep -E "(curl|op|git)"
 # Symptoms
 System running out of memory
 
-# Diagnosis  
+# Diagnosis
 free -h
 ./bin/performance_monitor.sh monitor --interval 5 --duration 60
 
@@ -340,7 +340,7 @@ echo "*.key" >> .gitignore
 
 #### Issue: "File permission violations"
 ```bash
-# Symptoms  
+# Symptoms
 Insecure permissions on sensitive file: .env (644)
 
 # Solutions
@@ -364,7 +364,7 @@ Unit tests failing: 5/10 passed
 ./bin/run_tests.sh unit --verbose
 
 # Solutions
-# 1. Reset test environment  
+# 1. Reset test environment
 ./bin/run_tests.sh reset
 
 # 2. Run specific failing test
@@ -379,7 +379,7 @@ Unit tests failing: 5/10 passed
 # Symptoms
 Security scan found 3 issue(s)
 
-# Solutions  
+# Solutions
 # 1. Run security scan with fixes
 ./bin/security_audit.sh scan --fix
 
@@ -400,7 +400,7 @@ Security scan found 3 issue(s)
 # View recent diagnostic logs
 tail -f diagnostic.log
 
-# Health monitoring logs  
+# Health monitoring logs
 tail -f health_monitor.log
 
 # Security audit logs

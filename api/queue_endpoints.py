@@ -23,9 +23,9 @@ def get_queue_status():
     try:
         queue_name = request.args.get('queue', 'default')
         queue_manager = get_queue_manager(queue_name)
-        
+
         stats = queue_manager.get_queue_stats()
-        
+
         # Add additional status information
         status = {
             'queue_name': queue_name,
@@ -33,10 +33,10 @@ def get_queue_status():
             'status': 'healthy' if not stats.get('error') else 'error',
             'statistics': stats
         }
-        
+
         # Check for alerts
         alerts = []
-        
+
         # Alert if queue depth > 1000
         pending_count = stats.get('tasks_pending', 0)
         if pending_count > 1000:
@@ -44,7 +44,7 @@ def get_queue_status():
                 'level': 'warning',
                 'message': f'High queue depth: {pending_count} pending tasks'
             })
-        
+
         # Alert if dead letter queue has items
         dlq_count = stats.get('tasks_in_dlq', 0)
         if dlq_count > 0:
@@ -52,7 +52,7 @@ def get_queue_status():
                 'level': 'warning',
                 'message': f'Dead letter queue has {dlq_count} failed tasks'
             })
-        
+
         # Alert if circuit breaker is open
         cb_status = stats.get('circuit_breaker', {})
         if cb_status.get('state') == 'open':
@@ -60,11 +60,11 @@ def get_queue_status():
                 'level': 'critical',
                 'message': 'Circuit breaker is open - queue processing disabled'
             })
-        
+
         status['alerts'] = alerts
-        
+
         return jsonify(status)
-        
+
     except Exception as e:
         app.logger.error(f"Error getting queue status: {e}")
         return jsonify({
@@ -78,13 +78,13 @@ def get_specific_queue_stats(queue_name):
     try:
         queue_manager = get_queue_manager(queue_name)
         stats = queue_manager.get_queue_stats()
-        
+
         return jsonify({
             'queue_name': queue_name,
             'timestamp': datetime.now().isoformat(),
             'statistics': stats
         })
-        
+
     except Exception as e:
         app.logger.error(f"Error getting stats for queue {queue_name}: {e}")
         return jsonify({
@@ -99,13 +99,13 @@ def get_circuit_breaker_status(queue_name):
     try:
         queue_manager = get_queue_manager(queue_name)
         status = queue_manager.circuit_breaker.get_status()
-        
+
         return jsonify({
             'queue_name': queue_name,
             'timestamp': datetime.now().isoformat(),
             'circuit_breaker': status
         })
-        
+
     except Exception as e:
         app.logger.error(f"Error getting circuit breaker status for queue {queue_name}: {e}")
         return jsonify({
@@ -119,22 +119,22 @@ def reset_circuit_breaker(queue_name):
     """Reset circuit breaker for queue"""
     try:
         queue_manager = get_queue_manager(queue_name)
-        
+
         # Reset circuit breaker
         with queue_manager.circuit_breaker.lock:
             queue_manager.circuit_breaker.state = queue_manager.circuit_breaker.CircuitBreakerState.CLOSED
             queue_manager.circuit_breaker.failure_count = 0
             queue_manager.circuit_breaker.last_failure_time = None
             queue_manager.circuit_breaker.consecutive_successes = 0
-        
+
         app.logger.info(f"Circuit breaker reset for queue {queue_name}")
-        
+
         return jsonify({
             'message': f'Circuit breaker reset for queue {queue_name}',
             'queue_name': queue_name,
             'timestamp': datetime.now().isoformat()
         })
-        
+
     except Exception as e:
         app.logger.error(f"Error resetting circuit breaker for queue {queue_name}: {e}")
         return jsonify({
@@ -148,27 +148,27 @@ def enqueue_task(queue_name):
     """Enqueue a new task"""
     try:
         data = request.get_json()
-        
+
         if not data:
             return jsonify({'error': 'No JSON data provided'}), 400
-        
+
         task_type = data.get('task_type')
         task_data = data.get('task_data', {})
         max_attempts = data.get('max_attempts', 9)
-        
+
         if not task_type:
             return jsonify({'error': 'task_type is required'}), 400
-        
+
         queue_manager = get_queue_manager(queue_name)
         task_id = queue_manager.enqueue(task_type, task_data, max_attempts)
-        
+
         return jsonify({
             'task_id': task_id,
             'queue_name': queue_name,
             'message': 'Task enqueued successfully',
             'timestamp': datetime.now().isoformat()
         }), 201
-        
+
     except Exception as e:
         app.logger.error(f"Error enqueuing task to queue {queue_name}: {e}")
         return jsonify({
@@ -182,17 +182,17 @@ def get_dead_letter_tasks(queue_name):
     """Get dead letter queue tasks"""
     try:
         queue_manager = get_queue_manager(queue_name)
-        
+
         with queue_manager.db_manager.pool.get_connection() as conn:
             cursor = conn.execute('''
-                SELECT id, original_task_id, task_type, task_data, 
+                SELECT id, original_task_id, task_type, task_data,
                        final_error_message, attempt_count, moved_to_dlq_at
                 FROM dead_letter_tasks
                 WHERE queue_name = ?
                 ORDER BY moved_to_dlq_at DESC
                 LIMIT 100
             ''', (queue_name,))
-            
+
             tasks = []
             for row in cursor.fetchall():
                 tasks.append({
@@ -204,14 +204,14 @@ def get_dead_letter_tasks(queue_name):
                     'attempt_count': row[5],
                     'moved_to_dlq_at': row[6]
                 })
-        
+
         return jsonify({
             'queue_name': queue_name,
             'dead_letter_tasks': tasks,
             'count': len(tasks),
             'timestamp': datetime.now().isoformat()
         })
-        
+
     except Exception as e:
         app.logger.error(f"Error getting dead letter tasks for queue {queue_name}: {e}")
         return jsonify({
@@ -226,7 +226,7 @@ def retry_dead_letter_task(queue_name, dlq_task_id):
     try:
         queue_manager = get_queue_manager(queue_name)
         success = queue_manager.retry_dead_letter_task(dlq_task_id)
-        
+
         if success:
             return jsonify({
                 'message': f'Dead letter task {dlq_task_id} retried successfully',
@@ -241,7 +241,7 @@ def retry_dead_letter_task(queue_name, dlq_task_id):
                 'queue_name': queue_name,
                 'timestamp': datetime.now().isoformat()
             }), 404
-        
+
     except Exception as e:
         app.logger.error(f"Error retrying dead letter task {dlq_task_id}: {e}")
         return jsonify({

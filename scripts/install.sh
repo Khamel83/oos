@@ -166,7 +166,7 @@ fi
 # Create personal alias if global install failed
 if [ "$GLOBAL_INSTALL" = false ]; then
     echo "🔗 Adding personal alias..."
-    
+
     # Detect shell
     SHELL_RC=""
     if [ -n "$BASH_VERSION" ]; then
@@ -176,7 +176,7 @@ if [ "$GLOBAL_INSTALL" = false ]; then
     else
         SHELL_RC="$HOME/.profile"
     fi
-    
+
     # Add alias if not already present
     ALIAS_LINE='alias oos="$HOME/oos/run.py"'
     if ! grep -q "alias oos=" "$SHELL_RC" 2>/dev/null; then

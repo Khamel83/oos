@@ -47,7 +47,7 @@ Drawing from product launch best practices, our bootstrap script should be treat
 **Success Criteria**: All files created, no errors, user understands output
 
 #### Scenario 2: Existing Environment
-**Goal**: User runs script in directory with existing customizations  
+**Goal**: User runs script in directory with existing customizations
 **Expected**: Script preserves existing files, shows clear warnings
 **Success Criteria**: No data loss, user understands what was skipped
 
@@ -87,7 +87,7 @@ Drawing from product launch best practices, our bootstrap script should be treat
 - [ ] **Network dependency handling** - 1Password, GitHub connectivity
 - [ ] **Resource constraints** - Low disk space, memory limitations
 
-### Performance Optimization  
+### Performance Optimization
 - [ ] **Execution time benchmarks** - Baseline performance metrics
 - [ ] **Resource usage monitoring** - CPU, memory, disk I/O
 - [ ] **Optimization opportunities** - Parallel operations, caching

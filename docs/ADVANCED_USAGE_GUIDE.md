@@ -94,7 +94,7 @@ echo "ARCHON_PROJECT_ID=your-project-id-from-step-3" >> .env
 ./bin/security_audit.sh scan --fix
 ```
 
-#### CLI Tool Project  
+#### CLI Tool Project
 ```bash
 # 1. Create CLI tool template
 ./bin/template_manager.sh create cli-tool my-cli-tool
@@ -110,7 +110,7 @@ cd my-cli-tool
 
 #### API Service Project
 ```bash
-# 1. Create API service template  
+# 1. Create API service template
 ./bin/template_manager.sh create api-service my-api
 cd my-api
 
@@ -135,7 +135,7 @@ cat > template.json <<'EOF'
   "description": "My custom project template",
   "variables": {
     "PROJECT_NAME": "{{project_name}}",
-    "AUTHOR": "{{author|default:Anonymous}}", 
+    "AUTHOR": "{{author|default:Anonymous}}",
     "LICENSE": "{{license|default:MIT}}"
   },
   "files": [
@@ -177,7 +177,7 @@ cd ../..
 
 # Create unique project
 mcp__archon__create_project(
-    title="Project Alpha - Authentication Service", 
+    title="Project Alpha - Authentication Service",
     description="JWT-based authentication service with OAuth2 providers",
     github_repo="https://github.com/myorg/project-alpha"
 )
@@ -191,7 +191,7 @@ mcp__archon__create_project(
 echo "ARCHON_PROJECT_ID=550e8400-e29b-41d4-a716-446655440000" >> .env
 echo "ARCHON_URL=http://localhost:8051/mcp" >> .env
 
-# Verify environment isolation  
+# Verify environment isolation
 ./bin/diagnose.sh --verify-archon-separation
 ```
 
@@ -209,12 +209,12 @@ mcp__archon__create_task(
     task_order=10
 )
 
-# Feature: OAuth Integration  
+# Feature: OAuth Integration
 mcp__archon__create_task(
-    project_id="550e8400-e29b-41d4-a716-446655440000", 
+    project_id="550e8400-e29b-41d4-a716-446655440000",
     title="Add Google OAuth2 provider",
     description="Integrate Google OAuth2 with PKCE security",
-    assignee="AI IDE Agent", 
+    assignee="AI IDE Agent",
     feature="oauth",
     task_order=20
 )
@@ -222,23 +222,23 @@ mcp__archon__create_task(
 # Feature: Database
 mcp__archon__create_task(
     project_id="550e8400-e29b-41d4-a716-446655440000",
-    title="Setup user database schema", 
+    title="Setup user database schema",
     description="PostgreSQL schema for users, sessions, and oauth tokens",
     assignee="AI IDE Agent",
-    feature="database", 
+    feature="database",
     task_order=5
 )
 ```
 
 #### 4. Document Management with Isolation
-```bash  
+```bash
 # In Claude Code - Create project-specific documents:
 
 # Technical specification
 mcp__archon__create_document(
     project_id="550e8400-e29b-41d4-a716-446655440000",
     title="Authentication API Specification",
-    document_type="spec", 
+    document_type="spec",
     content={
         "endpoints": [
             {"path": "/auth/login", "method": "POST", "description": "User login"},
@@ -253,7 +253,7 @@ mcp__archon__create_document(
 
 # Design document
 mcp__archon__create_document(
-    project_id="550e8400-e29b-41d4-a716-446655440000", 
+    project_id="550e8400-e29b-41d4-a716-446655440000",
     title="OAuth2 Integration Design",
     document_type="design",
     content={
@@ -272,7 +272,7 @@ mcp__archon__create_document(
 # List tasks (should only show current project)
 mcp__archon__list_tasks(project_id="550e8400-e29b-41d4-a716-446655440000")
 
-# List documents (should only show current project)  
+# List documents (should only show current project)
 mcp__archon__list_documents(project_id="550e8400-e29b-41d4-a716-446655440000")
 
 # Get project features (isolated to this project)
@@ -292,11 +292,11 @@ cat .env | grep ARCHON_PROJECT_ID
 # (In Claude Code - tasks will be filtered to this project ID)
 ```
 
-#### Project Beta (E-commerce API)  
+#### Project Beta (E-commerce API)
 ```bash
 # Project directory: /home/ubuntu/dev/project-beta
 cd /home/ubuntu/dev/project-beta
-cat .env | grep ARCHON_PROJECT_ID  
+cat .env | grep ARCHON_PROJECT_ID
 # ARCHON_PROJECT_ID=7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456
 
 # Completely isolated from Project Alpha
@@ -313,7 +313,7 @@ cat .env | grep ARCHON_PROJECT_ID
 # 2. Validate API keys
 ./bin/key_rotator.sh validate
 
-# 3. Review overnight logs  
+# 3. Review overnight logs
 ./bin/health_monitor.sh status
 tail -20 health_monitor.log
 
@@ -321,18 +321,18 @@ tail -20 health_monitor.log
 ./bin/security_audit.sh scan
 
 # 5. Start development environment
-./bin/health_monitor.sh daemon & 
+./bin/health_monitor.sh daemon &
 .agents/runners/run_claude.sh
 ```
 
 ### Development Session Workflow
 ```bash
 # 1. Start working on a task (in Claude Code)
-# mcp__archon__get_task(task_id="task-uuid") 
+# mcp__archon__get_task(task_id="task-uuid")
 # mcp__archon__update_task(task_id="task-uuid", status="doing")
 
 # 2. Monitor performance during development
-./bin/performance_monitor.sh monitor & 
+./bin/performance_monitor.sh monitor &
 
 # 3. Run tests frequently
 ./bin/run_tests.sh unit
@@ -345,11 +345,11 @@ tail -20 health_monitor.log
 ```
 
 ### End-of-Day Routine
-```bash  
+```bash
 # 1. Run comprehensive test suite
 ./bin/run_tests.sh all
 
-# 2. Security audit  
+# 2. Security audit
 ./bin/security_audit.sh scan --fix
 
 # 3. Performance check
@@ -418,7 +418,7 @@ python3 api/server.py
 # Features:
 # - Real-time system status
 # - Project management
-# - Environment variable management  
+# - Environment variable management
 # - Live health monitoring
 # - Performance metrics
 ```
@@ -444,7 +444,7 @@ curl -I http://localhost:8051/mcp
 # Symptom: Authentication failures
 ./bin/key_rotator.sh validate
 
-# Check key status  
+# Check key status
 ./bin/key_rotator.sh analytics
 
 # Force rotation
@@ -525,7 +525,7 @@ git reset --hard HEAD~1
 tail -f diagnostic.log
 
 # Health monitoring logs
-tail -f health_monitor.log  
+tail -f health_monitor.log
 
 # Security audit logs
 tail -f security_audit.log

@@ -10,7 +10,7 @@ class OOSDashboard {
         this.systemStatus = {};
         this.connectionRetryCount = 0;
         this.maxRetries = 5;
-        
+
         this.init();
     }
 
@@ -101,7 +101,7 @@ class OOSDashboard {
     setupSocketIO() {
         try {
             this.socket = io();
-            
+
             this.socket.on('connect', () => {
                 console.log('Connected to OOS Dashboard');
                 this.updateConnectionStatus('connected');
@@ -137,7 +137,7 @@ class OOSDashboard {
         const text = statusEl.querySelector('.status-text');
 
         dot.className = 'status-dot';
-        
+
         switch (status) {
             case 'connected':
                 dot.classList.add('status-connected');
@@ -217,10 +217,10 @@ class OOSDashboard {
         try {
             const response = await fetch('/api/status');
             const data = await response.json();
-            
+
             this.systemStatus = data;
             this.updateSystemStatusUI(data);
-            
+
         } catch (error) {
             console.error('Failed to load system status:', error);
             this.showNotification('Failed to load system status', 'error');
@@ -232,7 +232,7 @@ class OOSDashboard {
         const healthScore = document.getElementById('health-score');
         healthScore.textContent = status.health_score + '%';
         healthScore.className = 'health-score';
-        
+
         if (status.health_score >= 80) {
             healthScore.classList.add('health-good');
         } else if (status.health_score >= 60) {
@@ -259,7 +259,7 @@ class OOSDashboard {
 
     updateServicesList(services) {
         const servicesList = document.getElementById('services-list');
-        
+
         if (!services || Object.keys(services).length === 0) {
             servicesList.innerHTML = '<div class="no-data">No service data available</div>';
             return;
@@ -278,7 +278,7 @@ class OOSDashboard {
 
     updateSystemInfo(system) {
         const systemInfo = document.getElementById('system-info');
-        
+
         if (!system) {
             systemInfo.innerHTML = '<div class="no-data">No system data available</div>';
             return;
@@ -304,13 +304,13 @@ class OOSDashboard {
         try {
             const response = await fetch('/api/projects');
             const data = await response.json();
-            
+
             if (data.success) {
                 this.updateProjectsList(data.projects);
             } else {
                 throw new Error(data.error || 'Failed to load projects');
             }
-            
+
         } catch (error) {
             console.error('Failed to load projects:', error);
             this.showNotification('Failed to load projects', 'error');
@@ -319,7 +319,7 @@ class OOSDashboard {
 
     updateProjectsList(projects) {
         const projectsList = document.getElementById('projects-list');
-        
+
         if (!projects || projects.length === 0) {
             projectsList.innerHTML = '<div class="no-data">No projects found</div>';
             return;
@@ -347,13 +347,13 @@ class OOSDashboard {
         try {
             const response = await fetch('/api/environment');
             const data = await response.json();
-            
+
             if (data.success) {
                 this.updateEnvironmentEditor(data.variables);
             } else {
                 throw new Error(data.error || 'Failed to load environment');
             }
-            
+
         } catch (error) {
             console.error('Failed to load environment:', error);
             this.showNotification('Failed to load environment', 'error');
@@ -362,11 +362,11 @@ class OOSDashboard {
 
     updateEnvironmentEditor(variables) {
         const editor = document.getElementById('env-editor');
-        
+
         editor.innerHTML = Object.entries(variables).map(([key, value]) => `
             <div class="env-variable">
                 <label class="env-label">${key}</label>
-                <input type="text" class="env-input" data-key="${key}" value="${value}" 
+                <input type="text" class="env-input" data-key="${key}" value="${value}"
                        ${value.includes('***') ? 'readonly' : ''}>
             </div>
         `).join('');
@@ -382,17 +382,17 @@ class OOSDashboard {
     async loadLogs() {
         const logType = document.getElementById('log-type').value;
         const search = document.getElementById('log-search').value;
-        
+
         try {
             const response = await fetch(`/api/logs?type=${logType}&search=${encodeURIComponent(search)}&limit=100`);
             const data = await response.json();
-            
+
             if (data.success) {
                 this.updateLogViewer(data.logs);
             } else {
                 throw new Error(data.error || 'Failed to load logs');
             }
-            
+
         } catch (error) {
             console.error('Failed to load logs:', error);
             this.showNotification('Failed to load logs', 'error');
@@ -401,7 +401,7 @@ class OOSDashboard {
 
     updateLogViewer(logs) {
         const viewer = document.getElementById('log-viewer');
-        
+
         if (!logs || logs.length === 0) {
             viewer.innerHTML = '<div class="no-data">No logs found</div>';
             return;
@@ -418,10 +418,10 @@ class OOSDashboard {
 
     async runDiagnostics(type = 'quick') {
         const autoFix = document.getElementById('auto-fix')?.checked || false;
-        
+
         try {
             this.showLoading(true);
-            
+
             const response = await fetch('/api/diagnostics/run', {
                 method: 'POST',
                 headers: {
@@ -432,16 +432,16 @@ class OOSDashboard {
                     auto_fix: autoFix
                 })
             });
-            
+
             const data = await response.json();
-            
+
             if (data.success) {
                 this.updateDiagnosticResults(data.output, data.errors);
                 this.showNotification('Diagnostics completed successfully', 'success');
             } else {
                 throw new Error(data.error || 'Diagnostics failed');
             }
-            
+
         } catch (error) {
             console.error('Failed to run diagnostics:', error);
             this.showNotification('Failed to run diagnostics', 'error');
@@ -452,7 +452,7 @@ class OOSDashboard {
 
     updateDiagnosticResults(output, errors) {
         const results = document.getElementById('diagnostic-results');
-        
+
         results.innerHTML = `
             ${output ? `<div class="diagnostic-output"><pre>${output}</pre></div>` : ''}
             ${errors ? `<div class="diagnostic-errors"><pre>${errors}</pre></div>` : ''}
@@ -486,7 +486,7 @@ class OOSDashboard {
                 <input type="url" id="project-github" class="form-control">
             </div>
         `;
-        
+
         document.getElementById('modal-confirm').onclick = () => this.createProject();
         modal.classList.add('active');
     }
@@ -495,12 +495,12 @@ class OOSDashboard {
         const name = document.getElementById('project-name').value;
         const description = document.getElementById('project-description').value;
         const githubUrl = document.getElementById('project-github').value;
-        
+
         if (!name) {
             this.showNotification('Project name is required', 'error');
             return;
         }
-        
+
         try {
             const response = await fetch('/api/projects', {
                 method: 'POST',
@@ -514,9 +514,9 @@ class OOSDashboard {
                     github_url: githubUrl
                 })
             });
-            
+
             const data = await response.json();
-            
+
             if (data.success) {
                 this.hideModal();
                 await this.loadProjects();
@@ -524,7 +524,7 @@ class OOSDashboard {
             } else {
                 throw new Error(data.error || 'Failed to create project');
             }
-            
+
         } catch (error) {
             console.error('Failed to create project:', error);
             this.showNotification('Failed to create project', 'error');
@@ -535,21 +535,21 @@ class OOSDashboard {
         if (!confirm('Are you sure you want to delete this project?')) {
             return;
         }
-        
+
         try {
             const response = await fetch(`/api/projects/${projectId}`, {
                 method: 'DELETE'
             });
-            
+
             const data = await response.json();
-            
+
             if (data.success) {
                 await this.loadProjects();
                 this.showNotification('Project deleted successfully', 'success');
             } else {
                 throw new Error(data.error || 'Failed to delete project');
             }
-            
+
         } catch (error) {
             console.error('Failed to delete project:', error);
             this.showNotification('Failed to delete project', 'error');
@@ -565,7 +565,7 @@ class OOSDashboard {
                 variables[key] = value;
             }
         });
-        
+
         try {
             const response = await fetch('/api/environment', {
                 method: 'POST',
@@ -574,16 +574,16 @@ class OOSDashboard {
                 },
                 body: JSON.stringify({ variables })
             });
-            
+
             const data = await response.json();
-            
+
             if (data.success) {
                 document.getElementById('save-env').disabled = true;
                 this.showNotification('Environment saved successfully', 'success');
             } else {
                 throw new Error(data.error || 'Failed to save environment');
             }
-            
+
         } catch (error) {
             console.error('Failed to save environment:', error);
             this.showNotification('Failed to save environment', 'error');
@@ -620,17 +620,17 @@ class OOSDashboard {
             <span class="notification-message">${message}</span>
             <button class="notification-close">&times;</button>
         `;
-        
+
         // Add to page
         document.body.appendChild(notification);
-        
+
         // Auto-remove after 5 seconds
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
             }
         }, 5000);
-        
+
         // Manual close
         notification.querySelector('.notification-close').onclick = () => {
             if (notification.parentNode) {

@@ -15,7 +15,7 @@ This document captures the testing approach and learnings from building robust, 
 ┌─────────────────────────────────────┐
 │ End-to-End Tests                    │ ← Full user workflows
 ├─────────────────────────────────────┤
-│ Integration Tests                   │ ← Component integration  
+│ Integration Tests                   │ ← Component integration
 ├─────────────────────────────────────┤
 │ Unit Tests                          │ ← Individual functions
 ├─────────────────────────────────────┤
@@ -99,8 +99,8 @@ assert_equals() {
 ```bash
 # DON'T test implementation details
 test_internal_cache_structure() {  # Brittle, changes frequently
-  
-# DO test user-facing behavior  
+
+# DO test user-facing behavior
 test_bootstrap_creates_project() {  # Stable, important to users
   ./scripts/scripts/bootstrap_enhanced.sh test-project /tmp/test-project
   assert_file_exists "/tmp/test-project/.env"
@@ -125,7 +125,7 @@ validate_api_key() {
 test_environment_loading() {
   echo "OPENROUTER_KEYS=sk-test-1,sk-test-2" > test.env
   echo "GITHUB_PAT=ghp_test123" >> test.env
-  
+
   source ./bin/safe_source_env.sh test.env
   assert_equals "sk-test-1,sk-test-2" "$OPENROUTER_KEYS"
 }
@@ -198,7 +198,7 @@ test_file_permissions() {
 ```bash
 # BAD: Testing internal functions
 test_parse_config_line_47() {
-  
+
 # GOOD: Testing user outcomes
 test_config_loads_successfully() {
 ```
@@ -333,7 +333,7 @@ assert_equals() {
 
 Good tests answer these questions:
 - **"What does this feature do?"** → Behavioral tests
-- **"How should I use this tool?"** → Integration tests  
+- **"How should I use this tool?"** → Integration tests
 - **"What happens when things go wrong?"** → Error condition tests
 - **"Is this system healthy?"** → End-to-end tests
 

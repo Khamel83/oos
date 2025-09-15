@@ -7,7 +7,7 @@ This guide explains how to properly integrate OOS with Archon MCP for project ma
 Archon MCP provides project and task management capabilities integrated with OOS. The key principle is **complete project isolation** - each project operates independently with its own:
 
 - Unique project ID
-- Isolated task management  
+- Isolated task management
 - Separate documentation
 - Independent monitoring
 - Isolated security audit trails
@@ -43,7 +43,7 @@ ARCHON_URL=http://localhost:8051/mcp
 PROJECT_NAME=auth-service
 PROJECT_TYPE=api
 
-# Project Beta - E-commerce Frontend  
+# Project Beta - E-commerce Frontend
 ARCHON_PROJECT_ID=7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456
 ARCHON_URL=http://localhost:8051/mcp
 PROJECT_NAME=ecommerce-web
@@ -98,10 +98,10 @@ echo "ARCHON_PROJECT_ID=550e8400-e29b-41d4-a716-446655440000" >> .env
 // Authentication Feature Tasks
 mcp__archon__create_task({
     project_id: "550e8400-e29b-41d4-a716-446655440000",
-    title: "Design JWT token architecture", 
+    title: "Design JWT token architecture",
     description: `Design JWT token structure with:
 - Access token (15 min expiry)
-- Refresh token (30 day expiry) 
+- Refresh token (30 day expiry)
 - Token rotation strategy
 - Secure token storage patterns`,
     assignee: "AI IDE Agent",
@@ -110,7 +110,7 @@ mcp__archon__create_task({
     sources: [
         {
             url: "https://tools.ietf.org/rfc/rfc7519.txt",
-            type: "specification", 
+            type: "specification",
             relevance: "JWT standard specification"
         }
     ]
@@ -124,13 +124,13 @@ mcp__archon__create_task({
 - Rate limiting (5 attempts per minute)
 - JWT generation on success
 - Secure password hashing verification`,
-    assignee: "AI IDE Agent", 
+    assignee: "AI IDE Agent",
     feature: "authentication",
     task_order: 10,
     code_examples: [
         {
             file: "examples/auth/login.py",
-            function: "login_handler", 
+            function: "login_handler",
             purpose: "Reference implementation pattern"
         }
     ]
@@ -146,17 +146,17 @@ mcp__archon__create_task({
 - oauth_tokens table (provider, provider_id, user_id, tokens)
 - Proper indexes and constraints`,
     assignee: "AI IDE Agent",
-    feature: "database", 
+    feature: "database",
     task_order: 3
 })
 
 // OAuth Integration Tasks
 mcp__archon__create_task({
-    project_id: "550e8400-e29b-41d4-a716-446655440000", 
+    project_id: "550e8400-e29b-41d4-a716-446655440000",
     title: "Implement Google OAuth2 provider",
     description: `OAuth2 integration with PKCE:
 - Authorization URL generation
-- Code exchange implementation  
+- Code exchange implementation
 - User info retrieval and mapping
 - Account linking logic`,
     assignee: "AI IDE Agent",
@@ -175,7 +175,7 @@ mcp__archon__list_tasks({
     filter_value: "todo"
 })
 
-// Start working on a task  
+// Start working on a task
 mcp__archon__update_task({
     task_id: "task-uuid-from-above",
     status: "doing"
@@ -189,7 +189,7 @@ mcp__archon__update_task({
 
 // Move task to review
 mcp__archon__update_task({
-    task_id: "task-uuid", 
+    task_id: "task-uuid",
     status: "review"
 })
 ```
@@ -211,7 +211,7 @@ mcp__archon__create_document({
         endpoints: [
             {
                 path: "/login",
-                method: "POST", 
+                method: "POST",
                 description: "User authentication",
                 request: {
                     email: "string (required)",
@@ -224,7 +224,7 @@ mcp__archon__create_document({
                 }
             },
             {
-                path: "/refresh", 
+                path: "/refresh",
                 method: "POST",
                 description: "Token refresh",
                 headers: {
@@ -237,7 +237,7 @@ mcp__archon__create_document({
             },
             {
                 path: "/logout",
-                method: "POST", 
+                method: "POST",
                 description: "User logout",
                 headers: {
                     "Authorization": "Bearer <access_token>"
@@ -261,7 +261,7 @@ mcp__archon__create_document({
 // Architecture Design Document
 mcp__archon__create_document({
     project_id: "550e8400-e29b-41d4-a716-446655440000",
-    title: "Authentication System Architecture", 
+    title: "Authentication System Architecture",
     document_type: "design",
     content: {
         overview: "JWT-based authentication system with OAuth2 integration",
@@ -272,20 +272,20 @@ mcp__archon__create_document({
                 dependencies: ["UserService", "TokenService", "RateLimiter"]
             },
             {
-                name: "TokenService", 
+                name: "TokenService",
                 responsibility: "JWT generation and validation",
                 dependencies: ["SecretManager", "DatabaseService"]
             },
             {
                 name: "OAuth2Service",
                 responsibility: "OAuth provider integration",
-                dependencies: ["HttpClient", "UserService"] 
+                dependencies: ["HttpClient", "UserService"]
             }
         ],
         data_flow: [
             "User submits credentials",
             "AuthController validates input",
-            "UserService verifies credentials", 
+            "UserService verifies credentials",
             "TokenService generates JWT tokens",
             "Response sent with tokens"
         ],
@@ -305,11 +305,11 @@ mcp__archon__create_document({
 mcp__archon__create_document({
     project_id: "550e8400-e29b-41d4-a716-446655440000",
     title: "Development Setup Guide",
-    document_type: "guide", 
+    document_type: "guide",
     content: {
         prerequisites: [
             "Python 3.9+",
-            "PostgreSQL 13+", 
+            "PostgreSQL 13+",
             "Redis 6+",
             "1Password CLI access"
         ],
@@ -317,13 +317,13 @@ mcp__archon__create_document({
             "Clone repository",
             "Run OOS bootstrap: ./scripts/scripts/bootstrap_enhanced.sh",
             "Install dependencies: pip install -r requirements.txt",
-            "Setup database: ./bin/setup_db.sh", 
+            "Setup database: ./bin/setup_db.sh",
             "Run tests: ./bin/run_tests.sh all",
             "Start development server: ./bin/dev_server.sh"
         ],
         environment_variables: {
             "DATABASE_URL": "PostgreSQL connection string",
-            "REDIS_URL": "Redis connection string", 
+            "REDIS_URL": "Redis connection string",
             "JWT_SECRET": "JWT signing secret",
             "OAUTH_GOOGLE_CLIENT_ID": "Google OAuth client ID",
             "OAUTH_GOOGLE_CLIENT_SECRET": "Google OAuth client secret"
@@ -345,7 +345,7 @@ mcp__archon__create_document({
 // Create version snapshots for important milestones
 mcp__archon__create_version({
     project_id: "550e8400-e29b-41d4-a716-446655440000",
-    field_name: "docs", 
+    field_name: "docs",
     content: [
         // Current state of all documents
     ],
@@ -365,7 +365,7 @@ mcp__archon__create_version({
             tests_passing: true
         },
         oauth: {
-            status: "planned", 
+            status: "planned",
             providers: ["google", "github"],
             completion: 0
         },
@@ -389,7 +389,7 @@ cat /home/ubuntu/dev/auth-service/.env
 ARCHON_PROJECT_ID=550e8400-e29b-41d4-a716-446655440000
 PROJECT_SECRETS_PREFIX=AUTH_SERVICE_
 
-# Project Beta  
+# Project Beta
 cat /home/ubuntu/dev/ecommerce-web/.env
 ARCHON_PROJECT_ID=7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456
 PROJECT_SECRETS_PREFIX=ECOMMERCE_WEB_
@@ -407,8 +407,8 @@ cd /home/ubuntu/dev/auth-service
 # mcp__archon__list_tasks(project_id="550e8400-e29b-41d4-a716-446655440000")
 # Result: Only auth-service tasks
 
-# Project Beta - completely isolated 
-cd /home/ubuntu/dev/ecommerce-web  
+# Project Beta - completely isolated
+cd /home/ubuntu/dev/ecommerce-web
 # In Claude Code:
 # mcp__archon__list_tasks(project_id="7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456")
 # Result: Only ecommerce-web tasks
@@ -436,7 +436,7 @@ tail -f security_audit.log | grep "PROJECT_ID=550e8400"
 # In Claude Code - review project tasks:
 # mcp__archon__list_tasks(
 #     project_id="550e8400-e29b-41d4-a716-446655440000",
-#     filter_by="status", 
+#     filter_by="status",
 #     filter_value="doing"
 # )
 
@@ -478,7 +478,7 @@ tail -f security_audit.log | grep "PROJECT_ID=550e8400"
 #     document_type="note",
 #     content={
 #         "implementation_summary": "...",
-#         "security_review": "...", 
+#         "security_review": "...",
 #         "test_coverage": "...",
 #         "performance_analysis": "..."
 #     }
@@ -502,7 +502,7 @@ mcp__archon__create_task({
     description: "Connect frontend to auth-service API endpoints",
     sources: [
         {
-            url: "http://localhost:3001/auth-service/docs", 
+            url: "http://localhost:3001/auth-service/docs",
             type: "api_documentation",
             relevance: "Authentication API endpoints from Project Alpha"
         }
@@ -539,7 +539,7 @@ mcp__archon__create_document({
 cd /home/ubuntu/dev/auth-service
 ./bin/health_monitor.sh daemon --profile auth-service
 
-cd /home/ubuntu/dev/ecommerce-web  
+cd /home/ubuntu/dev/ecommerce-web
 ./bin/health_monitor.sh daemon --profile ecommerce-web
 
 # Separate log files and monitoring data
@@ -555,7 +555,7 @@ mcp__archon__update_project({
     data: {
         performance_metrics: {
             api_response_time: "120ms avg",
-            database_query_time: "45ms avg", 
+            database_query_time: "45ms avg",
             memory_usage: "256MB",
             cpu_utilization: "15%"
         },
@@ -584,7 +584,7 @@ mcp__archon__update_project({
   --project-description "RESTful API service with authentication"
 
 # Template automatically:
-# 1. Creates Archon project  
+# 1. Creates Archon project
 # 2. Sets ARCHON_PROJECT_ID in .env
 # 3. Creates initial task structure
 # 4. Sets up project documentation
@@ -598,12 +598,12 @@ mcp__archon__update_project({
 create_standard_archon_tasks() {
     local project_id="$1"
     local project_type="$2"
-    
+
     case "$project_type" in
         "api-service")
             # Create API-specific tasks
             ;;
-        "web-app") 
+        "web-app")
             # Create web app tasks
             ;;
         "cli-tool")

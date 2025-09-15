@@ -96,7 +96,7 @@ Interactive diagnostic wizard with automated troubleshooting.
 | `self-heal` | Attempt automated fixes | `./bin/diagnose.sh self-heal` |
 | `interactive` | Interactive troubleshooting | `./bin/diagnose.sh interactive` |
 
-#### Options  
+#### Options
 | Option | Description | Example |
 |--------|-------------|---------|
 | `--verbose` | Show detailed output | `--verbose` |
@@ -120,7 +120,7 @@ Interactive diagnostic wizard with automated troubleshooting.
 #### Return Codes
 - `0`: All diagnostics passed
 - `1`: Minor issues detected
-- `2`: Major issues requiring attention  
+- `2`: Major issues requiring attention
 - `3`: Critical failures preventing operation
 
 #### Examples
@@ -198,7 +198,7 @@ Continuous health monitoring with daemon mode and alerting.
 # Single health check
 ./bin/health_monitor.sh check --verbose
 
-# Start monitoring daemon  
+# Start monitoring daemon
 ./bin/health_monitor.sh daemon --interval 30 --background
 
 # Production monitoring with alerts
@@ -260,7 +260,7 @@ PERFORMANCE_BASELINE="baseline.json"
 ```
 tests/
 ├── unit/           # Unit tests
-├── integration/    # Integration tests  
+├── integration/    # Integration tests
 ├── security/       # Security tests
 ├── performance/    # Performance tests
 ├── e2e/           # End-to-end tests
@@ -454,7 +454,7 @@ Performance profiling and optimization tools.
 ```bash
 # Available benchmarks
 bootstrap_time          # Bootstrap execution time
-diagnostic_runtime      # Diagnostic completion time  
+diagnostic_runtime      # Diagnostic completion time
 test_suite_performance  # Test execution speed
 security_scan_time      # Security audit duration
 health_check_response   # Health monitoring latency
@@ -538,7 +538,7 @@ Comprehensive security scanning and compliance reporting.
 #### Secret Patterns
 ```regex
 sk-[a-zA-Z0-9-_]{43,}      # OpenAI/OpenRouter keys
-ghp_[a-zA-Z0-9]{36}        # GitHub Personal Access Tokens  
+ghp_[a-zA-Z0-9]{36}        # GitHub Personal Access Tokens
 pk_live_[a-zA-Z0-9]{24,}   # Stripe public keys
 sk_live_[a-zA-Z0-9]{24,}   # Stripe secret keys
 AKIA[0-9A-Z]{16}           # AWS Access Keys
@@ -626,7 +626,7 @@ Model Context Protocol server configuration and management.
     "production": {
       "active_servers": ["archon-remote", "context7"],
       "config": {
-        "timeout": 30, 
+        "timeout": 30,
         "retry_attempts": 5
       }
     }
@@ -646,7 +646,7 @@ Model Context Protocol server configuration and management.
     },
     "context7": {
       "url": "https://context7.liam.sh/mcp",
-      "transport": "http", 
+      "transport": "http",
       "description": "Context7 documentation server",
       "health_check_interval": 300
     }
@@ -657,7 +657,7 @@ Model Context Protocol server configuration and management.
 #### Auto-Discovery
 Automatically detects common MCP servers:
 - `archon`: http://localhost:8051/mcp
-- `context7`: https://context7.liam.sh/mcp  
+- `context7`: https://context7.liam.sh/mcp
 - `filesystem`: npx @modelcontextprotocol/server-filesystem
 
 #### Examples
@@ -668,7 +668,7 @@ Automatically detects common MCP servers:
 # Add new server
 ./bin/mcp_manager.sh add myserver http://localhost:9000/mcp
 
-# Test server connectivity  
+# Test server connectivity
 ./bin/mcp_manager.sh test archon --verbose --timeout 15
 
 # Health check with specific profile
@@ -715,7 +715,7 @@ Automated OpenRouter API key management and rotation.
 
 #### Key Management Features
 - **Smart Rotation**: Automatically switch to working keys
-- **Rate Limit Detection**: Monitor and respond to rate limits  
+- **Rate Limit Detection**: Monitor and respond to rate limits
 - **Usage Analytics**: Track key usage patterns
 - **Health Monitoring**: Continuous key validation
 - **Failover Logic**: Intelligent key selection
@@ -840,7 +840,7 @@ POST /api/environment
 PUT /api/environment
 ```
 
-#### Project Management  
+#### Project Management
 ```http
 GET /api/projects
 POST /api/projects
@@ -879,7 +879,7 @@ const ws = new WebSocket('ws://localhost:5000/ws');
 
 #### Event Types
 - `system_status`: Real-time system metrics
-- `health_update`: Service health changes  
+- `health_update`: Service health changes
 - `security_alert`: Security issue notifications
 - `performance_update`: Performance metrics
 - `log_entry`: New log entries
@@ -888,7 +888,7 @@ const ws = new WebSocket('ws://localhost:5000/ws');
 ```javascript
 ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
-    
+
     switch(data.type) {
         case 'system_status':
             updateSystemMetrics(data.metrics);

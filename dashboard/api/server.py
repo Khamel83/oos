@@ -11,6 +11,7 @@ import subprocess
 import asyncio
 import logging
 import time
+import shlex
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -69,10 +70,12 @@ dashboard_data = {
     'logs': [],
     'alerts': [],
     'users': {
+        # WARNING: Default admin account - change password immediately
         'admin': {
-            'password_hash': generate_password_hash('admin123'),
+            'password_hash': generate_password_hash(secrets.token_urlsafe(16)),  # Random secure password
             'role': 'admin',
-            'created_at': datetime.now().isoformat()
+            'created_at': datetime.now().isoformat(),
+            'requires_password_change': True
         }
     }
 }
@@ -81,9 +84,10 @@ dashboard_data = {
 def run_command(cmd: str, cwd: str = None) -> Dict[str, Any]:
     """Run a shell command and return result"""
     try:
+        # Use shlex.split for secure command execution
+        cmd_list = shlex.split(cmd)
         result = subprocess.run(
-            cmd,
-            shell=True,
+            cmd_list,
             cwd=cwd or Config.PROJECT_ROOT,
             capture_output=True,
             text=True,
@@ -136,7 +140,7 @@ def get_system_status() -> Dict[str, Any]:
         'system': {},
         'health_score': 100
     }
-    
+
     # Check services
     archon_url = os.environ.get('ARCHON_URL', 'http://localhost:8051/mcp')
     services_to_check = [
@@ -145,7 +149,7 @@ def get_system_status() -> Dict[str, Any]:
         ('onepassword_cli', 'op whoami'),
         ('claude_cli', 'claude --version')
     ]
-    
+
     failed_services = 0
     for service_name, check_cmd in services_to_check:
         result = run_command(check_cmd)
@@ -158,32 +162,32 @@ def get_system_status() -> Dict[str, Any]:
         status['services'][service_name] = service_status
         if not result['success']:
             failed_services += 1
-    
+
     # Get system info
     try:
         # Disk usage
         df_result = run_command('df -h .')
         if df_result['success']:
             status['system']['disk_usage'] = df_result['stdout'].split('\n')[1] if len(df_result['stdout'].split('\n')) > 1 else 'N/A'
-        
+
         # Load average
         uptime_result = run_command('uptime')
         if uptime_result['success']:
             status['system']['load_average'] = uptime_result['stdout'].strip()
-        
+
         # Memory usage
         free_result = run_command('free -h')
         if free_result['success']:
             status['system']['memory'] = free_result['stdout'].split('\n')[1] if len(free_result['stdout'].split('\n')) > 1 else 'N/A'
-            
+
     except Exception as e:
         logger.error(f"Failed to get system info: {e}")
-    
+
     # Calculate health score
     total_services = len(services_to_check)
     if total_services > 0:
         status['health_score'] = max(0, 100 - (failed_services * 100 // total_services))
-    
+
     return status
 
 # API Routes
@@ -237,15 +241,15 @@ def api_update_environment():
         data = request.get_json()
         if not data or 'variables' not in data:
             return jsonify({'error': 'Invalid request data'}), 400
-        
+
         env_file = Config.PROJECT_ROOT / '.env'
         backup_file = Config.PROJECT_ROOT / f'.env.backup.{int(time.time())}'
-        
+
         # Backup existing file
         if env_file.exists():
             with open(env_file, 'r') as src, open(backup_file, 'w') as dst:
                 dst.write(src.read())
-        
+
         # Write new environment file
         with open(env_file, 'w') as f:
             f.write("# OOS Environment Configuration\n")
@@ -253,13 +257,13 @@ def api_update_environment():
             for key, value in data['variables'].items():
                 if not value.startswith('***'):  # Don't write back redacted values
                     f.write(f"{key}={value}\n")
-        
+
         return jsonify({
             'success': True,
             'message': 'Environment updated successfully',
             'backup_file': str(backup_file)
         })
-        
+
     except Exception as e:
         logger.error(f"Error updating environment: {e}")
         return jsonify({'error': str(e)}), 500
@@ -271,13 +275,13 @@ def api_logs():
         log_type = request.args.get('type', 'diagnostic')
         limit = int(request.args.get('limit', 100))
         search = request.args.get('search', '')
-        
+
         log_files = {
             'diagnostic': Config.PROJECT_ROOT / 'diagnostic.log',
             'health': Config.PROJECT_ROOT / 'health_monitor.log',
             'alerts': Config.PROJECT_ROOT / 'health_alerts.log'
         }
-        
+
         log_file = log_files.get(log_type)
         if not log_file or not log_file.exists():
             return jsonify({
@@ -285,7 +289,7 @@ def api_logs():
                 'error': f'Log file not found: {log_type}',
                 'logs': []
             })
-        
+
         # Read and filter logs
         logs = []
         with open(log_file, 'r') as f:
@@ -298,14 +302,14 @@ def api_logs():
                         'message': line[21:] if len(line) > 21 else line,
                         'level': 'INFO'  # Could parse this from the log format
                     })
-        
+
         return jsonify({
             'success': True,
             'logs': logs[:limit],
             'total': len(logs),
             'log_file': str(log_file)
         })
-        
+
     except Exception as e:
         logger.error(f"Error reading logs: {e}")
         return jsonify({'error': str(e)}), 500
@@ -317,17 +321,17 @@ def api_run_diagnostics():
         data = request.get_json() or {}
         test_type = data.get('type', 'quick')
         auto_fix = data.get('auto_fix', False)
-        
+
         # Build diagnostic command
         cmd = str(Config.PROJECT_ROOT / 'bin' / 'diagnose.sh')
         if test_type == 'full':
             cmd += ' --auto --verbose'
         if auto_fix:
             cmd += ' --fix'
-        
+
         # Run diagnostics
         result = run_command(cmd)
-        
+
         return jsonify({
             'success': result['success'],
             'output': result['stdout'],
@@ -335,7 +339,7 @@ def api_run_diagnostics():
             'test_type': test_type,
             'auto_fix': auto_fix
         })
-        
+
     except Exception as e:
         logger.error(f"Error running diagnostics: {e}")
         return jsonify({'error': str(e)}), 500
@@ -384,12 +388,12 @@ def api_login():
         data = request.get_json()
         username = data.get('username', '')
         password = data.get('password', '')
-        
+
         if username in dashboard_data['users']:
             user = dashboard_data['users'][username]
             if check_password_hash(user['password_hash'], password):
-                # Generate session token (simplified)
-                token = hashlib.sha256(f"{username}{time.time()}".encode()).hexdigest()
+                # Generate cryptographically secure session token
+                token = secrets.token_urlsafe(32)
                 return jsonify({
                     'success': True,
                     'token': token,
@@ -398,12 +402,12 @@ def api_login():
                         'role': user['role']
                     }
                 })
-        
+
         return jsonify({
             'success': False,
             'error': 'Invalid credentials'
         }), 401
-        
+
     except Exception as e:
         logger.error(f"Error during login: {e}")
         return jsonify({'error': str(e)}), 500
@@ -432,7 +436,7 @@ def handle_subscribe_status():
             except Exception as e:
                 logger.error(f"Error sending status update: {e}")
                 break
-    
+
     # Start background task
     socketio.start_background_task(send_status)
 
@@ -461,11 +465,11 @@ if __name__ == '__main__':
     logger.info(f"Starting OOS Dashboard server on {Config.HOST}:{Config.PORT}")
     logger.info(f"Project root: {Config.PROJECT_ROOT}")
     logger.info(f"Debug mode: {Config.DEBUG}")
-    
+
     try:
-        socketio.run(app, 
-                    host=Config.HOST, 
-                    port=Config.PORT, 
+        socketio.run(app,
+                    host=Config.HOST,
+                    port=Config.PORT,
                     debug=Config.DEBUG,
                     allow_unsafe_werkzeug=True)
     except KeyboardInterrupt:

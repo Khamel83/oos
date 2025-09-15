@@ -1,4 +1,15 @@
-# Security posture
+# OOS Security Guidelines
+
+## Security Status
+
+**Current Risk Level: MODERATE**
+**Last Updated: 2025-09-14**
+
+### Critical Issues Fixed ✅
+- [x] Removed hardcoded API key from `.env` file
+- [x] Fixed command injection vulnerability in `dashboard/api/server.py`
+- [x] Improved session token generation to use cryptographically secure random tokens
+- [x] Replaced default admin password with randomly generated secure password
 
 ## Secrets management
 - **Source of truth**: 1Password vault (`Private` → `bootstrap-env` → `env` field)
@@ -37,6 +48,27 @@
 - 1Password vault security
 - Local machine security
 - Network transport security for remote MCPs
+
+## Remaining Security Tasks
+
+### High Priority 🚨
+- [ ] Implement comprehensive input validation for all API endpoints
+- [ ] Add file path validation for all file operations
+- [ ] Implement proper error handling without information disclosure
+- [ ] Add rate limiting to API endpoints
+- [ ] Implement authentication and authorization for all endpoints
+
+### Medium Priority ⚠️
+- [ ] Implement proper subprocess sandboxing
+- [ ] Add database security controls
+- [ ] Implement security headers (CSP, HSTS, X-Frame-Options)
+- [ ] Add secure cookie configuration
+- [ ] Implement comprehensive audit logging
+
+### Low Priority ℹ️
+- [ ] Add content security policies
+- [ ] Implement penetration testing in CI/CD pipeline
+- [ ] Add security monitoring and alerting
 
 ## Recovery procedures
 1. **Leaked API key**: Rotate in 1Password → re-sync projects

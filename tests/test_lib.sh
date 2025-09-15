@@ -28,7 +28,7 @@ assert_equals() {
   local expected="$1"
   local actual="$2"
   local message="${3:-}"
-  
+
   if [[ "$expected" == "$actual" ]]; then
     echo -e "  ${T_GREEN}✓${T_NC} ${message:-Values match}"
     ((PASS_COUNT++))
@@ -47,7 +47,7 @@ assert_not_equals() {
   local unexpected="$1"
   local actual="$2"
   local message="${3:-}"
-  
+
   if [[ "$unexpected" != "$actual" ]]; then
     echo -e "  ${T_GREEN}✓${T_NC} ${message:-Values are different}"
     ((PASS_COUNT++))
@@ -65,7 +65,7 @@ assert_not_equals() {
 assert_true() {
   local condition="$1"
   local message="${2:-}"
-  
+
   if [[ "$condition" == "true" ]] || [[ "$condition" == "0" ]]; then
     echo -e "  ${T_GREEN}✓${T_NC} ${message:-Condition is true}"
     ((PASS_COUNT++))
@@ -82,7 +82,7 @@ assert_true() {
 assert_false() {
   local condition="$1"
   local message="${2:-}"
-  
+
   if [[ "$condition" == "false" ]] || [[ "$condition" == "1" ]]; then
     echo -e "  ${T_GREEN}✓${T_NC} ${message:-Condition is false}"
     ((PASS_COUNT++))
@@ -99,7 +99,7 @@ assert_false() {
 assert_file_exists() {
   local file="$1"
   local message="${2:-}"
-  
+
   if [[ -f "$file" ]]; then
     echo -e "  ${T_GREEN}✓${T_NC} ${message:-File exists: $file}"
     ((PASS_COUNT++))
@@ -115,7 +115,7 @@ assert_file_exists() {
 assert_command_success() {
   local command="$1"
   local message="${2:-}"
-  
+
   if eval "$command" >/dev/null 2>&1; then
     echo -e "  ${T_GREEN}✓${T_NC} ${message:-Command succeeded: $command}"
     ((PASS_COUNT++))
@@ -131,7 +131,7 @@ assert_command_success() {
 assert_command_fails() {
   local command="$1"
   local message="${2:-}"
-  
+
   if ! eval "$command" >/dev/null 2>&1; then
     echo -e "  ${T_GREEN}✓${T_NC} ${message:-Command failed as expected: $command}"
     ((PASS_COUNT++))
@@ -151,7 +151,7 @@ finish_tests() {
   echo -e "Tests run: ${TEST_COUNT}"
   echo -e "${T_GREEN}Passed: ${PASS_COUNT}${T_NC}"
   echo -e "${T_RED}Failed: ${FAIL_COUNT}${T_NC}"
-  
+
   if [[ ${#FAILED_TESTS[@]} -gt 0 ]]; then
     echo
     echo "Failed Tests:"
@@ -159,7 +159,7 @@ finish_tests() {
       echo -e "  ${T_RED}✗${T_NC} $test"
     done
   fi
-  
+
   if [[ $FAIL_COUNT -eq 0 ]]; then
     echo -e "\n${T_GREEN}All tests passed!${T_NC}"
     return 0

@@ -1,7 +1,7 @@
 # OOS - Personal Operational Intelligence System
 
 [![Context Engineering](https://img.shields.io/badge/Context%20Engineering-Ready-brightgreen)](docs/context_engineering_completion_summary.md)
-[![Slash Commands](https://img.shields.io/badge/Slash%20Commands-10%20Available-blue)](.claude/slash_commands.json)
+[![Slash Commands](https://img.shields.io/badge/Slash%20Commands-10%20Available-blue)](.claude/commands/)
 [![Token Optimization](https://img.shields.io/badge/Token%20Reduction-40--60%25-orange)](src/token_optimization.py)
 
 **Intelligent middleware that transforms Claude Code into a context-aware, token-optimized, self-documenting development environment.**
@@ -308,7 +308,7 @@ cd oos
 - **Allows safe placeholders**: `your_api_key_here`, `sk-test-example`, etc.
 - **Works everywhere**: OOS projects and all created projects get automatic protection
 
-### Safe File Operations  
+### Safe File Operations
 - **Never overwrites existing files** without explicit `--force` flag
 - **Clear user warnings** with guidance on how to proceed
 - **Automatic backups** when overwriting with `--force`
@@ -375,7 +375,7 @@ cc-sona
 ```bash
 cc-pro                    # Start direct Pro
 # When you hit limits, exit and run:
-cc-sona                   # Switch to gateway mode  
+cc-sona                   # Switch to gateway mode
 claude -c                 # Resume your last conversation
 # Or resume specific session: claude -r "<session-id>"
 ```
@@ -434,7 +434,7 @@ claude mcp get archon
 # Start gateway
 bash scripts/llm_gateway_up.sh
 
-# Stop gateway  
+# Stop gateway
 bash scripts/llm_gateway_down.sh
 
 # Check if running
@@ -468,7 +468,7 @@ KIMI_API_KEY=
 
 Complete demonstration project created in Archon (`ba97acbf-4a87-48b6-831f-5866fe9fb8d6`) with 6-phase execution plan:
 
-- **Phase 0:** Repository selection + 1Password setup verification  
+- **Phase 0:** Repository selection + 1Password setup verification
 - **Phase 1:** Environment verification (Bifrost, launchers, MCP)
 - **Phase 2:** Rapid project setup demo (< 5 minutes target)
 - **Phase 3:** Claude Code Pro baseline establishment

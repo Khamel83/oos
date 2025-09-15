@@ -36,7 +36,7 @@ run_test() {
     shift
     log "Running: $test_name"
     ((TESTS_RUN++))
-    
+
     if "$@"; then
         pass "$test_name"
     else
@@ -50,7 +50,7 @@ setup_test_env() {
     rm -rf "$test_dir"
     mkdir -p "$test_dir"
     cd "$test_dir"
-    
+
     # Create minimal .env for testing
     cat > .env <<'EOF'
 OPENROUTER_KEYS=sk-test-key-123
@@ -69,7 +69,7 @@ cleanup_test_env() {
 test_new_file_creation() {
     local test_dir="$PROJECT_ROOT/test_env_new"
     setup_test_env "$test_dir"
-    
+
     # Run bootstrap in dry-run mode first
     if "$BOOTSTRAP_SCRIPT" --dry-run --no-git --no-github test_project "$test_dir" >/dev/null 2>&1; then
         # Run actual bootstrap
@@ -81,7 +81,7 @@ test_new_file_creation() {
             fi
         fi
     fi
-    
+
     cleanup_test_env "$test_dir"
     return 1
 }
@@ -90,24 +90,24 @@ test_new_file_creation() {
 test_existing_file_skip() {
     local test_dir="$PROJECT_ROOT/test_env_skip"
     setup_test_env "$test_dir"
-    
+
     # Pre-create files with different content
     mkdir -p docs .agents
     echo "# Existing Claude content" > docs/CLAUDE.md
     echo "# Existing agents content" > .agents/agents.md
-    
+
     # Run bootstrap without --force
     local output
     output=$("$BOOTSTRAP_SCRIPT" --no-git --no-github --no-preflight test_project "$test_dir" 2>&1 || true)
-    
+
     # Check that original content is preserved
-    if [[ "$(cat docs/CLAUDE.md)" == "# Existing Claude content" ]] && 
+    if [[ "$(cat docs/CLAUDE.md)" == "# Existing Claude content" ]] &&
        [[ "$(cat .agents/agents.md)" == "# Existing agents content" ]] &&
        echo "$output" | grep -q "Skipping existing"; then
         cleanup_test_env "$test_dir"
         return 0
     fi
-    
+
     cleanup_test_env "$test_dir"
     return 1
 }
@@ -116,16 +116,16 @@ test_existing_file_skip() {
 test_existing_file_force_overwrite() {
     local test_dir="$PROJECT_ROOT/test_env_force"
     setup_test_env "$test_dir"
-    
+
     # Pre-create files with different content
     mkdir -p docs .agents
     echo "# Existing Claude content" > docs/CLAUDE.md
     echo "# Existing agents content" > .agents/agents.md
-    
+
     # Run bootstrap with --force
     if "$BOOTSTRAP_SCRIPT" --force --no-git --no-github --no-preflight test_project "$test_dir" >/dev/null 2>&1; then
         # Check that content was overwritten (should contain bootstrap-generated content)
-        if [[ "$(cat docs/CLAUDE.md)" != "# Existing Claude content" ]] && 
+        if [[ "$(cat docs/CLAUDE.md)" != "# Existing Claude content" ]] &&
            [[ "$(cat .agents/agents.md)" != "# Existing agents content" ]] &&
            grep -q "Claude Code Overlay" docs/CLAUDE.md &&
            grep -q "Agent Instructions" .agents/agents.md; then
@@ -133,7 +133,7 @@ test_existing_file_force_overwrite() {
             return 0
         fi
     fi
-    
+
     cleanup_test_env "$test_dir"
     return 1
 }
@@ -142,19 +142,19 @@ test_existing_file_force_overwrite() {
 test_permission_errors() {
     local test_dir="$PROJECT_ROOT/test_env_perms"
     setup_test_env "$test_dir"
-    
+
     # Create read-only directory
     mkdir -p docs
     chmod 444 docs
-    
+
     # Run bootstrap (should handle permission error gracefully)
     local exit_code=0
     "$BOOTSTRAP_SCRIPT" --no-git --no-github --no-preflight test_project "$test_dir" >/dev/null 2>&1 || exit_code=$?
-    
+
     # Restore permissions for cleanup
     chmod 755 docs
     cleanup_test_env "$test_dir"
-    
+
     # Should have failed but not crashed
     [[ $exit_code -ne 0 ]]
 }
@@ -163,16 +163,16 @@ test_permission_errors() {
 test_directory_vs_file_conflict() {
     local test_dir="$PROJECT_ROOT/test_env_conflict"
     setup_test_env "$test_dir"
-    
+
     # Create directory where file should be
     mkdir -p docs/CLAUDE.md
-    
+
     # Run bootstrap (should handle conflict)
     local exit_code=0
     "$BOOTSTRAP_SCRIPT" --no-git --no-github --no-preflight test_project "$test_dir" >/dev/null 2>&1 || exit_code=$?
-    
+
     cleanup_test_env "$test_dir"
-    
+
     # Should have failed gracefully
     [[ $exit_code -ne 0 ]]
 }
@@ -181,22 +181,22 @@ test_directory_vs_file_conflict() {
 test_symlink_handling() {
     local test_dir="$PROJECT_ROOT/test_env_symlink"
     setup_test_env "$test_dir"
-    
+
     # Create symlink where file should be
     mkdir -p docs
     echo "# Target content" > docs/target.md
     ln -s target.md docs/CLAUDE.md
-    
+
     # Run bootstrap without --force (should skip symlink)
     local output
     output=$("$BOOTSTRAP_SCRIPT" --no-git --no-github --no-preflight test_project "$test_dir" 2>&1 || true)
-    
+
     # Check that symlink is preserved
     if [[ -L "docs/CLAUDE.md" ]] && echo "$output" | grep -q "Skipping existing"; then
         cleanup_test_env "$test_dir"
         return 0
     fi
-    
+
     cleanup_test_env "$test_dir"
     return 1
 }
@@ -205,12 +205,12 @@ test_symlink_handling() {
 test_backup_functionality() {
     local test_dir="$PROJECT_ROOT/test_env_backup"
     setup_test_env "$test_dir"
-    
+
     # Create some existing files
     mkdir -p docs .agents bin
     echo "# Existing content" > docs/CLAUDE.md
     echo "#!/bin/bash" > bin/test.sh
-    
+
     # Run bootstrap (should create backup)
     if "$BOOTSTRAP_SCRIPT" --no-git --no-github --no-preflight test_project "$test_dir" >/dev/null 2>&1; then
         # Check if backup was created
@@ -220,7 +220,7 @@ test_backup_functionality() {
             return 0
         fi
     fi
-    
+
     cleanup_test_env "$test_dir"
     return 1
 }
@@ -229,40 +229,40 @@ test_backup_functionality() {
 test_user_understanding() {
     local test_dir="$PROJECT_ROOT/test_env_understanding"
     setup_test_env "$test_dir"
-    
+
     # Create existing file with important user content
     mkdir -p docs
     echo "# Important user customizations - DO NOT DELETE" > docs/CLAUDE.md
-    
+
     # Run bootstrap and capture output
     local output
     output=$("$BOOTSTRAP_SCRIPT" --verbose --no-git --no-github --no-preflight test_project "$test_dir" 2>&1 || true)
-    
+
     # Validate communication clarity (what users need to understand)
     local understanding_checks=0
-    
+
     # Check 1: User knows files were skipped
     if echo "$output" | grep -q "Skipping existing"; then
         ((understanding_checks++))
     fi
-    
+
     # Check 2: User knows how to override if desired
     if echo "$output" | grep -q "use --force to overwrite"; then
         ((understanding_checks++))
     fi
-    
+
     # Check 3: User knows backup will be created if forcing
     if echo "$output" | grep -q "backup will be created"; then
         ((understanding_checks++))
     fi
-    
+
     # Check 4: Original content is preserved (most important)
     if [[ "$(cat docs/CLAUDE.md)" == "# Important user customizations - DO NOT DELETE" ]]; then
         ((understanding_checks++))
     fi
-    
+
     cleanup_test_env "$test_dir"
-    
+
     # Success if all understanding indicators are present
     [[ $understanding_checks -eq 4 ]]
 }
@@ -271,20 +271,20 @@ test_user_understanding() {
 test_error_communication() {
     local test_dir="$PROJECT_ROOT/test_env_errors"
     setup_test_env "$test_dir"
-    
+
     # Create problematic scenarios
     mkdir -p docs/CLAUDE.md  # Directory where file should be
-    
+
     # Run bootstrap and capture error output
     local output
     output=$("$BOOTSTRAP_SCRIPT" --verbose --no-git --no-github --no-preflight test_project "$test_dir" 2>&1 || true)
-    
+
     # Validate error communication
     if echo "$output" | grep -q "Cannot create.*is a directory"; then
         cleanup_test_env "$test_dir"
         return 0
     fi
-    
+
     cleanup_test_env "$test_dir"
     return 1
 }
@@ -293,17 +293,17 @@ test_error_communication() {
 test_predictable_behavior() {
     local test_dir="$PROJECT_ROOT/test_env_predictable"
     setup_test_env "$test_dir"
-    
+
     # Run 1: Clean slate
     local output1
     output1=$("$BOOTSTRAP_SCRIPT" --dry-run --verbose --no-git --no-github --no-preflight test_project "$test_dir" 2>&1 || true)
-    
+
     # Run 2: Same command again (should have identical output)
     local output2
     output2=$("$BOOTSTRAP_SCRIPT" --dry-run --verbose --no-git --no-github --no-preflight test_project "$test_dir" 2>&1 || true)
-    
+
     cleanup_test_env "$test_dir"
-    
+
     # Behavior should be identical between runs
     [[ "$output1" == "$output2" ]]
 }
@@ -313,13 +313,13 @@ main() {
     echo "🧪 Bootstrap Safe File Creation Test Suite"
     echo "=========================================="
     echo
-    
+
     # Check if bootstrap script exists
     if [[ ! -f "$BOOTSTRAP_SCRIPT" ]]; then
         fail "Bootstrap script not found: $BOOTSTRAP_SCRIPT"
         exit 1
     fi
-    
+
     # Run all tests
     run_test "New file creation" test_new_file_creation
     run_test "Existing file skip (no --force)" test_existing_file_skip
@@ -331,7 +331,7 @@ main() {
     run_test "User understanding validation" test_user_understanding
     run_test "Error communication clarity" test_error_communication
     run_test "Predictable behavior" test_predictable_behavior
-    
+
     # Results summary
     echo
     echo "=========================================="
@@ -339,7 +339,7 @@ main() {
     echo "  Total: $TESTS_RUN"
     echo "  Passed: $TESTS_PASSED"
     echo "  Failed: $TESTS_FAILED"
-    
+
     if [[ $TESTS_FAILED -eq 0 ]]; then
         echo -e "${GREEN}✅ All tests passed!${NC}"
         exit 0
