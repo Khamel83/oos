@@ -471,6 +471,83 @@ with open(output_file, 'w') as f:
 PY
 }
 
+# Validate template structure and requirements
+validate_template() {
+  local template_name="$1"
+
+  if [[ ! -f "$TEMPLATE_REGISTRY" ]]; then
+    error "Template registry not found. Run 'init' first."
+    return 1
+  fi
+
+  log "Validating template '$template_name'..."
+
+  # Check if template exists in registry
+  if ! grep -q "^$template_name:" "$TEMPLATE_REGISTRY"; then
+    error "Template '$template_name' not found in registry"
+    return 1
+  fi
+
+  # Get template directory
+  local template_dir
+  template_dir=$(grep "^$template_name:" "$TEMPLATE_REGISTRY" | cut -d: -f2)
+
+  if [[ ! -d "$template_dir" ]]; then
+    error "Template directory '$template_dir' does not exist"
+    return 1
+  fi
+
+  # Check required files
+  local required_files=("template.yaml" "README.md")
+  for file in "${required_files[@]}"; do
+    if [[ ! -f "$template_dir/$file" ]]; then
+      error "Required file '$file' missing from template"
+      return 1
+    fi
+  done
+
+  # Validate template.yaml structure
+  if ! python3 -c "
+import yaml
+import sys
+try:
+    with open('$template_dir/template.yaml') as f:
+        data = yaml.safe_load(f)
+    required = ['name', 'description', 'type', 'files']
+    for field in required:
+        if field not in data:
+            sys.exit(1)
+    print('Template structure is valid')
+except Exception as e:
+    sys.exit(1)
+"; then
+    error "Template.yaml structure is invalid"
+    return 1
+  fi
+
+  # Check template files exist
+  if ! python3 -c "
+import yaml
+import sys
+import os
+try:
+    with open('$template_dir/template.yaml') as f:
+        data = yaml.safe_load(f)
+    for file_info in data.get('files', []):
+        if not os.path.exists('$template_dir/' + file_info['path']):
+            sys.exit(1)
+    print('All template files exist')
+except Exception as e:
+    sys.exit(1)
+"; then
+    error "Some template files are missing"
+    return 1
+  fi
+
+  success "Template '$template_name' is valid ✓"
+  return 0
+}
+
 # Create project from template
 create_from_template() {
   local project_name="$1"
@@ -707,8 +784,14 @@ main() {
       create_from_template "$project_name" "$template_name" "$output_dir" "$vars_file" "$dry_run"
       ;;
     validate)
-      # TODO: Implement template validation
-      warn "Template validation not yet implemented"
+      shift
+      local template_name="$1"
+      if [[ -z "$template_name" ]]; then
+        error "Template name required for validation"
+        exit 1
+      fi
+
+      validate_template "$template_name"
       ;;
     sync)
       update_template_registry

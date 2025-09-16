@@ -98,8 +98,16 @@ Transform brief requests into detailed, structured prompts that get better respo
 - **Clarification Workflow** ([src/clarification_workflow.py](src/clarification_workflow.py)) - Structured question/answer system
 - **Token Optimization** ([src/token_optimization.py](src/token_optimization.py)) - Multi-strategy context compression
 - **Auto Documentation** ([src/auto_documentation.py](src/auto_documentation.py)) - Smart git integration and consistency
+- **Simple Command Handler** ([src/simple_command_handler.py](src/simple_command_handler.py)) - Clean slash command management
 - **MCP Server** ([mcp_server.py](mcp_server.py)) - Claude Code integration layer
 - **Learning System** ([bin/archon_learning.sh](bin/archon_learning.sh)) - Lesson tracking and anti-pattern detection
+
+### 📉 Code Simplification
+
+**Recently simplified by 27.5% (1,794 lines removed):**
+- Replaced overly complex 1,363-line `command_generator.py` with clean 104-line `simple_command_handler.py`
+- Simplified `claude_integration.py` from 613 lines to 78 lines
+- Maintained all functionality while dramatically reducing complexity
 
 ## 📚 Documentation
 
