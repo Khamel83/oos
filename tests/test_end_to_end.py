@@ -1,42 +1,35 @@
 #!/usr/bin/env python3
 """
-End-to-End Integration Test for OOS System
-Tests all components working together in a realistic scenario
+Simplified End-to-End Integration Test for OOS System
+Tests the simple command handler functionality in realistic scenarios
 """
 
 import json
-import asyncio
 import tempfile
 import os
 import sys
 from pathlib import Path
-from datetime import datetime, timedelta
 import unittest.mock as mock
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch, MagicMock
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.repository_analyzer import RepositoryAnalyzer
-from src.command_generator import IdeaToCommandTransformer
-from src.orchestrator import WorkflowOrchestrator
 from src.claude_integration import ClaudeCodeIntegration
-from src.learning_system import LearningSystem
+from src.simple_command_handler import SimpleCommandHandler, CommandInfo
 
 
-class TestEndToEndIntegration:
-    """End-to-end integration test suite"""
-
-    def __init__(self):
-        self.test_results = []
-        self.temp_dir = None
-        self.db_path = None
+class TestSimplifiedEndToEndIntegration:
+    """Simplified end-to-end integration test suite"""
 
     def setup_method(self):
         """Setup test environment"""
         self.temp_dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.temp_dir, "test_learning.db")
+        # Create temporary commands directory
+        self.commands_dir = Path(self.temp_dir) / ".claude" / "commands"
+        self.commands_dir.mkdir(parents=True, exist_ok=True)
+        self.test_results = []
 
     def teardown_method(self):
         """Clean up test environment"""
@@ -44,504 +37,361 @@ class TestEndToEndIntegration:
             import shutil
             shutil.rmtree(self.temp_dir)
 
-    def run_test(self, test_name, test_func):
-        """Run a single test and track results"""
-        try:
-            self.setup_method()
-            test_func()
-            print(f"✅ {test_name}")
-            self.test_results.append({"name": test_name, "status": "passed"})
-            return True
-        except Exception as e:
-            print(f"❌ {test_name}: {e}")
-            self.test_results.append({"name": test_name, "status": "failed", "error": str(e)})
-            return False
-        finally:
-            self.teardown_method()
+  
+    def test_complete_command_workflow(self):
+        """Test complete workflow from command definition to execution"""
+        print("\n🧪 Testing Complete Command Workflow...")
 
-    def test_full_analysis_to_command_workflow(self):
-        """Test complete workflow from repository analysis to command generation"""
-        print("\n🧪 Testing Full Analysis to Command Workflow...")
+        # Step 1: Create realistic command definitions
+        help_me_content = """---
+description: Get AI-optimized processing for any request
+script_path: ./bin/claude-help-me.sh
+category: optimization
+---
 
-        # Create a mock repository structure
-        repo_dir = os.path.join(self.temp_dir, "test_repo")
-        os.makedirs(repo_dir, exist_ok=True)
+Provides automatic context optimization and intelligent processing for any request.
+"""
 
-        # Create sample files
-        with open(os.path.join(repo_dir, "requirements.txt"), "w") as f:
-            f.write("requests==2.31.0\n")
-            f.write("flask==2.3.3\n")
+        brain_dump_content = """---
+description: Transform messy thoughts into clear structure
+script_path: ./bin/claude-brain-dump.sh
+category: optimization
+---
 
-        with open(os.path.join(repo_dir, "main.py"), "w") as f:
-            f.write("""
-import requests
-from flask import Flask
+Turns rambling thoughts into organized, actionable plans with context optimization.
+"""
 
-app = Flask(__name__)
+        meta_ai_content = """---
+description: Generate prompts for external AI assistance
+script_path: ./bin/claude-meta-ai.sh
+category: assistance
+---
 
-@app.route('/')
-def hello():
-    return 'Hello World!'
-""")
+Creates structured prompts for getting better answers from external AI systems.
+"""
 
-        # Step 1: Analyze repository (mock GitHub auth to avoid token requirement)
-        with patch('src.repository_analyzer.Github') as mock_github, \
-             patch.dict(os.environ, {'GITHUB_TOKEN': 'fake_token_for_testing'}):
+        # Write command files
+        (self.commands_dir / "help-me.md").write_text(help_me_content)
+        (self.commands_dir / "brain-dump.md").write_text(brain_dump_content)
+        (self.commands_dir / "meta-ai.md").write_text(meta_ai_content)
 
-            mock_github.return_value.get_repo.return_value.full_name = "test/repo"
-            mock_github.return_value.get_repo.return_value.description = "Test repository"
-            mock_github.return_value.get_repo.return_value.language = "Python"
+        # Step 2: Initialize command handler
+        handler = SimpleCommandHandler(str(self.commands_dir))
 
-            analyzer = RepositoryAnalyzer()
-            patterns = analyzer.analyze_repository(repo_dir)
+        # Step 3: Verify all commands loaded
+        commands = handler.list_commands()
+        assert len(commands) == 3
 
-        # Verify analysis results
-        assert patterns["metadata"]["name"] == "test_repo"
-        assert "python" in patterns["metadata"]["language"]
-        assert len(patterns["file_structure"]["package_files"]) > 0
+        command_names = [cmd.name for cmd in commands]
+        expected_commands = ["help-me", "brain-dump", "meta-ai"]
+        for expected in expected_commands:
+            assert expected in command_names, f"Command {expected} not found"
 
-        # Step 2: Generate commands from patterns
-        transformer = IdeaToCommandTransformer()
-        commands = transformer.transform_patterns_to_commands(patterns)
+        # Step 4: Test command information retrieval
+        for cmd_name in expected_commands:
+            cmd = handler.get_command(cmd_name)
+            assert cmd is not None, f"Command {cmd_name} should exist"
+            assert cmd.description is not None
+            assert cmd.script_path is not None
+            assert cmd.category in ["optimization", "assistance"]
 
-        # Verify command generation
-        assert len(commands) > 0
-        assert any(cmd["category"] == "setup" for cmd in commands)
+        # Step 5: Test command execution info generation
+        for cmd_name in expected_commands:
+            result = handler.execute_command(cmd_name, "test args")
+            assert result["command"] == cmd_name
+            assert result["execution"] == f"{handler.get_command(cmd_name).script_path} test args"
 
-        # Step 3: Create workflow
-        orchestrator = WorkflowOrchestrator()
+        print("✅ Complete command workflow test successful")
 
-        workflow_def = {
-            "id": "analysis_workflow",
-            "name": "Analysis Workflow",
-            "description": "End-to-end analysis workflow",
-            "variables": {"repo_path": repo_dir},
-            "steps": [
-                {
-                    "id": "analyze",
-                    "name": "Analyze Repository",
-                    "command": "analyze-repository",
-                    "parameters": {"repository_url": repo_dir},
-                    "depends_on": [],
-                    "condition": "success"
-                },
-                {
-                    "id": "generate",
-                    "name": "Generate Commands",
-                    "command": "generate-commands",
-                    "parameters": {"patterns_file": "patterns.json"},
-                    "depends_on": ["analyze"],
-                    "condition": "success"
-                }
-            ]
+    def test_integration_with_real_config(self):
+        """Test integration with realistic configuration"""
+        print("\n🧪 Testing Integration with Real Configuration...")
+
+        # Create realistic OOS configuration
+        config_content = {
+            "debug": True,
+            "workspace_root": "/workspace/projects",
+            "commands_dir": str(self.commands_dir.parent),
+            "optimization": {
+                "enabled": True,
+                "aggressive_mode": False
+            }
         }
 
-        workflow_id = orchestrator.define_workflow(workflow_def)
-        assert workflow_id == "analysis_workflow"
+        config_file = os.path.join(self.temp_dir, "oos_config.json")
+        with open(config_file, 'w') as f:
+            json.dump(config_content, f, indent=2)
 
-        print("✅ Full analysis to command workflow completed successfully")
+        # Create test commands
+        test_cmd_content = """---
+description: Test configuration integration
+script_path: ./bin/test-config.sh
+category: testing
+---
+Tests configuration loading and integration."""
+        (self.commands_dir / "test-config.md").write_text(test_cmd_content)
 
-    def test_learning_system_integration(self):
-        """Test learning system integration with other components"""
-        print("\n🧪 Testing Learning System Integration...")
+        # Initialize integration with config
+        integration = ClaudeCodeIntegration(config_file)
+        integration.command_handler = SimpleCommandHandler(str(self.commands_dir))
 
-        # Initialize learning system
-        learning_system = LearningSystem(db_path=self.db_path, config={"learning_interval_hours": 0})
+        # Verify configuration loaded
+        assert integration.config["debug"] is True
+        assert integration.config["workspace_root"] == "/workspace/projects"
+        assert integration.config["optimization"]["enabled"] is True
 
-        # Simulate usage patterns
-        from src.learning_system import LearningData
+        # Test command functionality with loaded config
+        commands = integration.list_commands()
+        assert len(commands) == 1
+        assert commands[0]["name"] == "test-config"
 
-        base_time = datetime.now()
-        for i in range(3):
-            # Record analysis command usage
-            analysis_data = LearningData(
-                timestamp=base_time + timedelta(seconds=i*10),
-                user_id="test_user",
-                session_id=f"session_{i}",
-                command_name="analyze-repository",
-                parameters={"repository_url": f"test_repo_{i}"},
-                execution_time=2.0,
-                success=True,
-                error_message=None,
-                context={"workspace": "/test/workspace"}
-            )
-            learning_system.record_usage(analysis_data)
+        # Test command execution
+        result = integration.execute_command("test-config", "--verbose")
+        assert result["command"] == "test-config"
+        assert "test-config.sh --verbose" in result["execution"]
 
-            # Record command generation usage
-            generation_data = LearningData(
-                timestamp=base_time + timedelta(seconds=i*10 + 5),
-                user_id="test_user",
-                session_id=f"session_{i}",
-                command_name="generate-commands",
-                parameters={"language": "python"},
-                execution_time=1.5,
-                success=True,
-                error_message=None,
-                context={"workspace": "/test/workspace"}
-            )
-            learning_system.record_usage(generation_data)
+        print("✅ Integration with real configuration test successful")
 
-        # Learn patterns from usage
-        patterns = asyncio.run(learning_system.learn_patterns())
+    def test_error_handling_scenarios(self):
+        """Test realistic error handling scenarios"""
+        print("\n🧪 Testing Error Handling Scenarios...")
 
-        # Verify pattern learning
-        assert len(patterns) > 0
-        assert any(p.pattern_type == "command_sequence" for p in patterns)
+        handler = SimpleCommandHandler(str(self.commands_dir))
 
-        # Generate recommendations
-        recommendations = learning_system.get_recommendations({"user_id": "test_user", "workspace": "/test/workspace"})
+        # Test 1: Non-existent command
+        result = handler.execute_command("non-existent-command")
+        assert "error" in result
+        assert "not found" in result["error"]
 
-        # Verify recommendations
-        assert isinstance(recommendations, list)
+        # Test 2: Get info for non-existent command
+        cmd_info = handler.get_command("non-existent")
+        assert cmd_info is None
 
-        print("✅ Learning system integration completed successfully")
-
-    async def test_claude_integration_workflow(self):
-        """Test Claude Code integration with workflow execution"""
-        print("\n🧪 Testing Claude Integration Workflow...")
-
-        # Initialize Claude integration
+        # Test 3: Integration with non-existent command
         integration = ClaudeCodeIntegration()
+        result = integration.execute_command("non-existent")
+        assert "error" in result
 
-        # Create test context
-        from src.claude_integration import create_execution_context
-        context = create_execution_context("/test/workspace")
+        # Test 4: Invalid configuration file
+        integration = ClaudeCodeIntegration("/nonexistent/config.json")
+        # Should use defaults without crashing
+        assert integration.config["debug"] is False
 
-        # Test repository analysis command
-        with patch.object(integration.repository_analyzer, 'analyze_repository') as mock_analyze:
-            mock_analyze.return_value = {
-                "metadata": {"name": "test-repo", "language": "python"},
-                "patterns": {"architectural": []}
+        print("✅ Error handling scenarios test successful")
+
+    def test_realistic_command_structure(self):
+        """Test with realistic command structures matching actual OOS commands"""
+        print("\n🧪 Testing Realistic Command Structure...")
+
+        # Create commands that match the actual OOS slash command structure
+        commands_config = [
+            {
+                "name": "help-me",
+                "description": "Get AI-optimized processing for any request",
+                "script": "./bin/claude-help-me.sh",
+                "category": "optimization",
+                "content": "Automatic context optimization and intelligent processing"
+            },
+            {
+                "name": "brain-dump",
+                "description": "Transform messy thoughts into clear structure",
+                "script": "./bin/claude-brain-dump.sh",
+                "category": "optimization",
+                "content": "Turns rambling thoughts into organized plans"
+            },
+            {
+                "name": "meta-ai",
+                "description": "Generate prompts for external AI assistance",
+                "script": "./bin/claude-meta-ai.sh",
+                "category": "assistance",
+                "content": "Creates structured prompts for external AI"
+            },
+            {
+                "name": "smart-commit",
+                "description": "Generate AI-powered commit messages",
+                "script": "./bin/claude-smart-commit.sh",
+                "category": "development",
+                "content": "Automated commit message generation"
             }
+        ]
 
-            result = await integration.execute_command("analyze-repository", {
-                "repository_url": "https://github.com/test/repo"
-            }, context)
+        # Create command files
+        for cmd_config in commands_config:
+            content = f"""---
+description: {cmd_config["description"]}
+script_path: {cmd_config["script"]}
+category: {cmd_config["category"]}
+---
 
-            assert result.success is True
-            assert result.output["analysis"]["metadata"]["name"] == "test-repo"
+{cmd_config["content"]}
+"""
+            cmd_file = self.commands_dir / f"{cmd_config['name']}.md"
+            cmd_file.write_text(content)
 
-        # Test command generation command
-        with patch.object(integration.command_generator, 'generate_command_library') as mock_generate:
-            mock_generate.return_value = {
-                "metadata": {"total_commands": 3},
-                "commands": []
-            }
+        # Test loading all commands
+        handler = SimpleCommandHandler(str(self.commands_dir))
+        commands = handler.list_commands()
+        assert len(commands) == len(commands_config)
 
-            result = await integration.execute_command("generate-commands", {
-                "patterns_file": "patterns.json"
-            }, context)
+        # Test command categorization
+        optimization_commands = [cmd for cmd in commands if cmd.category == "optimization"]
+        development_commands = [cmd for cmd in commands if cmd.category == "development"]
+        assistance_commands = [cmd for cmd in commands if cmd.category == "assistance"]
 
-            assert result.success is True
-            assert result.output["library"]["metadata"]["total_commands"] == 3
+        assert len(optimization_commands) == 2
+        assert len(development_commands) == 1
+        assert len(assistance_commands) == 1
 
-        # Test workflow execution
-        with patch.object(integration.workflow_orchestrator, 'execute_workflow') as mock_execute:
-            mock_execute.return_value = {
-                "status": "completed",
-                "workflow_id": "test_workflow"
-            }
+        # Test integration-level functionality
+        integration = ClaudeCodeIntegration()
+        integration.command_handler = handler
 
-            result = await integration.execute_command("execute-workflow", {
-                "workflow_id": "test_workflow"
-            }, context)
+        # Test listing commands through integration
+        integration_commands = integration.list_commands()
+        assert len(integration_commands) == len(commands_config)
 
-            assert result.success is True
-            assert result.output["result"]["status"] == "completed"
+        # Test command execution through integration
+        for cmd_name in ["help-me", "brain-dump", "smart-commit"]:
+            result = integration.execute_command(cmd_name, "--test")
+            assert result["command"] == cmd_name
+            assert "error" not in result
 
-        print("✅ Claude integration workflow completed successfully")
+        print("✅ Realistic command structure test successful")
 
-    def test_error_handling_and_recovery(self):
-        """Test error handling across all components"""
-        print("\n🧪 Testing Error Handling and Recovery...")
+    def test_yaml_vs_non_yaml_parsing(self):
+        """Test both YAML frontmatter and simple description parsing"""
+        print("\n🧪 Testing YAML vs Non-YAML Parsing...")
 
-        # Test repository analyzer error handling
-        with patch('src.repository_analyzer.Github') as mock_github, \
-             patch.dict(os.environ, {'GITHUB_TOKEN': 'fake_token_for_testing'}):
-            mock_github.side_effect = Exception("GitHub error")
-            analyzer = RepositoryAnalyzer()
+        # Command with YAML frontmatter
+        yaml_cmd_content = """---
+description: Command with YAML frontmatter
+script_path: ./bin/yaml-cmd.sh
+category: testing
+---
 
-            # Test with non-existent repository
-            result = analyzer.analyze_repository("/nonexistent/path")
-            assert "error" in result
-            assert result["error"] is not None
+This command has proper YAML frontmatter with metadata.
+"""
+        (self.commands_dir / "yaml-cmd.md").write_text(yaml_cmd_content)
 
-        # Test command generator error handling
-        transformer = IdeaToCommandTransformer()
+        # Command without YAML frontmatter (simple format)
+        simple_cmd_content = """Simple command without YAML
 
-        # Test with invalid patterns
-        result = transformer.transform_patterns_to_commands({})
-        assert isinstance(result, list)
+This is a simple command description without YAML frontmatter.
+It should still parse correctly using fallback logic.
+"""
+        (self.commands_dir / "simple-cmd.md").write_text(simple_cmd_content)
 
-        # Test orchestrator error handling
-        orchestrator = WorkflowOrchestrator()
+        handler = SimpleCommandHandler(str(self.commands_dir))
 
-        # Test with invalid workflow
-        try:
-            orchestrator.define_workflow({"invalid": "workflow"})
-            assert False, "Should have raised an exception"
-        except Exception:
-            pass  # Expected to raise an exception
+        # Test YAML command
+        yaml_cmd = handler.get_command("yaml-cmd")
+        assert yaml_cmd is not None
+        assert yaml_cmd.description == "Command with YAML frontmatter"
+        assert yaml_cmd.script_path == "./bin/yaml-cmd.sh"
+        assert yaml_cmd.category == "testing"
 
-        # Test learning system error handling
-        learning_system = LearningSystem(db_path=self.db_path)
+        # Test simple command
+        simple_cmd = handler.get_command("simple-cmd")
+        assert simple_cmd is not None
+        assert simple_cmd.description == "Simple command without YAML"  # First line
+        assert simple_cmd.script_path == "./bin/claude-simple-cmd.sh"  # Default pattern
+        assert simple_cmd.category == "general"  # Default category
 
-        # Test with invalid data
-        try:
-            learning_system.record_usage(None)
-            assert False, "Should have raised an exception"
-        except Exception:
-            pass  # Expected to raise an exception
+        print("✅ YAML vs non-YAML parsing test successful")
 
-        print("✅ Error handling and recovery completed successfully")
+    def test_performance_with_multiple_commands(self):
+        """Test performance with realistic number of commands"""
+        print("\n🧪 Testing Performance with Multiple Commands...")
 
-    def test_context_isolation_across_components(self):
-        """Test that each component maintains proper context isolation"""
-        print("\n🧪 Testing Context Isolation Across Components...")
+        # Create multiple commands (realistic scenario)
+        num_commands = 10
+        for i in range(num_commands):
+            content = f"""---
+description: Test command {i}
+script_path: ./bin/test-cmd-{i}.sh
+category: testing
+---
 
-        # Create multiple instances of each component
-        analyzer1 = RepositoryAnalyzer()
-        analyzer2 = RepositoryAnalyzer()
+This is test command number {i} for performance testing.
+"""
+            (self.commands_dir / f"test-cmd-{i}.md").write_text(content)
 
-        transformer1 = IdeaToCommandTransformer()
-        transformer2 = IdeaToCommandTransformer()
-
-        orchestrator1 = WorkflowOrchestrator()
-        orchestrator2 = WorkflowOrchestrator()
-
-        learning_system1 = LearningSystem(db_path=os.path.join(self.temp_dir, "learning1.db"))
-        learning_system2 = LearningSystem(db_path=os.path.join(self.temp_dir, "learning2.db"))
-
-        # Verify instances are independent
-        assert analyzer1 is not analyzer2
-        assert transformer1 is not transformer2
-        assert orchestrator1 is not orchestrator2
-        assert learning_system1 is not learning_system2
-
-        # Test that operations on one instance don't affect others
-        # Create test repository
-        repo_dir = os.path.join(self.temp_dir, "isolation_test")
-        os.makedirs(repo_dir, exist_ok=True)
-
-        with open(os.path.join(repo_dir, "test.py"), "w") as f:
-            f.write("print('test')")
-
-        # Analyze with first analyzer (mock GitHub)
-        with patch('src.repository_analyzer.Github'), \
-             patch.dict(os.environ, {'GITHUB_TOKEN': 'fake_token_for_testing'}):
-            patterns1 = analyzer1.analyze_repository(repo_dir)
-
-        # Analyze with second analyzer (mock GitHub)
-        with patch('src.repository_analyzer.Github'), \
-             patch.dict(os.environ, {'GITHUB_TOKEN': 'fake_token_for_testing'}):
-            patterns2 = analyzer2.analyze_repository(repo_dir)
-
-        # Results should be independent but equivalent
-        assert patterns1["metadata"]["name"] == patterns2["metadata"]["name"]
-
-        # Test learning system isolation
-        from src.learning_system import LearningData
-
-        # Record usage in first system
-        learning_data = LearningData(
-            timestamp=datetime.now(),
-            user_id="test_user",
-            session_id="test_session",
-            command_name="test-command",
-            parameters={},
-            execution_time=1.0,
-            success=True,
-            error_message=None,
-            context={}
-        )
-        learning_system1.record_usage(learning_data)
-
-        # First system should have data, second should not
-        stats1 = learning_system1.get_usage_statistics()
-        stats2 = learning_system2.get_usage_statistics()
-
-        assert stats1["total_usage"] > 0
-        assert stats2["total_usage"] == 0
-
-        print("✅ Context isolation across components completed successfully")
-
-    def test_performance_and_scalability(self):
-        """Test performance characteristics under load"""
-        print("\n🧪 Testing Performance and Scalability...")
-
-        # Test repository analysis performance
-        analyzer = RepositoryAnalyzer()
-
-        # Create multiple test repositories
-        repo_dirs = []
-        for i in range(3):
-            repo_dir = os.path.join(self.temp_dir, f"perf_test_{i}")
-            os.makedirs(repo_dir, exist_ok=True)
-
-            # Create sample files
-            with open(os.path.join(repo_dir, "main.py"), "w") as f:
-                f.write(f"# Test repository {i}\nprint('hello')\n")
-
-            with open(os.path.join(repo_dir, "requirements.txt"), "w") as f:
-                f.write("requests==2.31.0\n")
-
-            repo_dirs.append(repo_dir)
-
-        # Analyze all repositories
         import time
+
+        # Test loading performance
         start_time = time.time()
+        handler = SimpleCommandHandler(str(self.commands_dir))
+        load_time = time.time() - start_time
 
-        patterns_list = []
-        for repo_dir in repo_dirs:
-            with patch('src.repository_analyzer.Github'), \
-                 patch.dict(os.environ, {'GITHUB_TOKEN': 'fake_token_for_testing'}):
-                patterns = analyzer.analyze_repository(repo_dir)
-                patterns_list.append(patterns)
-
-        end_time = time.time()
-        analysis_time = end_time - start_time
-
-        # Verify reasonable performance
-        assert analysis_time < 10.0, f"Analysis took {analysis_time}s, expected < 10s"
-        assert len(patterns_list) == 3
-
-        # Test command generation performance
-        transformer = IdeaToCommandTransformer()
-
+        # Test listing performance
         start_time = time.time()
-        commands_list = []
-        for patterns in patterns_list:
-            commands = transformer.transform_patterns_to_commands(patterns)
-            commands_list.append(commands)
+        commands = handler.list_commands()
+        list_time = time.time() - start_time
 
-        end_time = time.time()
-        generation_time = end_time - start_time
+        # Test individual command lookup performance
+        start_time = time.time()
+        for i in range(0, num_commands, 2):  # Test every other command
+            cmd = handler.get_command(f"test-cmd-{i}")
+            assert cmd is not None
+        lookup_time = time.time() - start_time
 
-        # Verify reasonable performance
-        assert generation_time < 5.0, f"Generation took {generation_time}s, expected < 5s"
-        assert len(commands_list) == 3
+        # Verify performance is reasonable
+        assert load_time < 1.0, f"Loading took {load_time}s, expected < 1s"
+        assert list_time < 0.1, f"Listing took {list_time}s, expected < 0.1s"
+        assert lookup_time < 0.1, f"Lookup took {lookup_time}s, expected < 0.1s"
 
-        print(f"✅ Performance test completed: Analysis {analysis_time:.2f}s, Generation {generation_time:.2f}s")
+        # Verify all commands loaded correctly
+        assert len(commands) == num_commands
 
-    def test_data_flow_integrity(self):
-        """Test that data flows correctly between components without corruption"""
-        print("\n🧪 Testing Data Flow Integrity...")
+        print(f"✅ Performance test successful: Load {load_time:.3f}s, List {list_time:.3f}s, Lookup {lookup_time:.3f}s")
 
-        # Create test data with known structure
-        test_patterns = {
-            "metadata": {
-                "name": "integrity_test",
-                "language": "python",
-                "files_count": 5
-            },
-            "file_structure": {
-                "configuration_files": ["requirements.txt", "config.py"],
-                "package_files": ["requirements.txt"],
-                "source_files": ["main.py", "utils.py"]
-            },
-            "patterns": {
-                "architectural": [
-                    {
-                        "type": "mvc_pattern",
-                        "confidence": 0.8,
-                        "files": ["main.py", "utils.py"]
-                    }
-                ]
-            }
-        }
+    def test_filesystem_isolation(self):
+        """Test that different command directories work independently"""
+        print("\n🧪 Testing Filesystem Isolation...")
 
-        # Test data flow through command generator
-        transformer = IdeaToCommandTransformer()
-        commands = transformer.transform_patterns_to_commands(test_patterns)
+        # Create two separate command directories
+        commands_dir1 = Path(self.temp_dir) / "commands1" / ".claude" / "commands"
+        commands_dir2 = Path(self.temp_dir) / "commands2" / ".claude" / "commands"
+        commands_dir1.mkdir(parents=True, exist_ok=True)
+        commands_dir2.mkdir(parents=True, exist_ok=True)
 
-        # Verify data integrity
-        assert len(commands) > 0
+        # Create different commands in each directory
+        (commands_dir1 / "cmd1.md").write_text("""---
+description: Command from dir 1
+script_path: ./bin/cmd1.sh
+category: dir1
+---
+Command 1""")
+        (commands_dir2 / "cmd2.md").write_text("""---
+description: Command from dir 2
+script_path: ./bin/cmd2.sh
+category: dir2
+---
+Command 2""")
 
-        # Check that commands reflect the input patterns
-        setup_commands = [cmd for cmd in commands if cmd.category == "setup"]
-        assert len(setup_commands) > 0
+        # Test handlers are isolated
+        handler1 = SimpleCommandHandler(str(commands_dir1))
+        handler2 = SimpleCommandHandler(str(commands_dir2))
 
-        # Test workflow data flow
-        orchestrator = WorkflowOrchestrator()
+        # Each handler should only see its own commands
+        commands1 = handler1.list_commands()
+        commands2 = handler2.list_commands()
 
-        workflow_def = {
-            "id": "integrity_workflow",
-            "name": "Integrity Test Workflow",
-            "variables": {"test_data": test_patterns},
-            "steps": [
-                {
-                    "id": "process",
-                    "name": "Process Test Data",
-                    "command": "test-command",
-                    "parameters": {"input_data": "${test_data}"},
-                    "depends_on": [],
-                    "condition": "success"
-                }
-            ]
-        }
+        assert len(commands1) == 1
+        assert len(commands2) == 1
+        assert commands1[0].name == "cmd1"
+        assert commands2[0].name == "cmd2"
+        assert commands1[0].category == "dir1"
+        assert commands2[0].category == "dir2"
 
-        workflow_id = orchestrator.define_workflow(workflow_def)
+        # Cross-verification
+        assert handler1.get_command("cmd2") is None
+        assert handler2.get_command("cmd1") is None
 
-        # Verify workflow data integrity
-        workflow = orchestrator.get_workflow_definition(workflow_id)
-        assert workflow is not None
-        assert workflow["variables"]["test_data"]["metadata"]["name"] == "integrity_test"
+        print("✅ Filesystem isolation test successful")
 
-        print("✅ Data flow integrity test completed successfully")
-
-    def run_all_tests(self):
-        """Run all end-to-end tests and provide summary"""
-        print("🚀 End-to-End Integration Testing")
-        print("=" * 60)
-        print("Testing all components working together in realistic scenarios")
-
-        # Regular tests
-        test_functions = [
-            ("Full Analysis to Command Workflow", self.test_full_analysis_to_command_workflow),
-            ("Learning System Integration", self.test_learning_system_integration),
-            ("Error Handling and Recovery", self.test_error_handling_and_recovery),
-            ("Context Isolation Across Components", self.test_context_isolation_across_components),
-            ("Performance and Scalability", self.test_performance_and_scalability),
-            ("Data Flow Integrity", self.test_data_flow_integrity),
-        ]
-
-        # Async tests
-        async_test_functions = [
-            ("Claude Integration Workflow", self.test_claude_integration_workflow),
-        ]
-
-        passed = 0
-        total = len(test_functions) + len(async_test_functions)
-
-        # Run regular tests
-        for test_name, test_func in test_functions:
-            if self.run_test(test_name, test_func):
-                passed += 1
-
-        # Run async tests
-        for test_name, test_func in async_test_functions:
-            if self.run_test(test_name, lambda: asyncio.run(test_func())):
-                passed += 1
-
-        print("\n" + "=" * 60)
-        print(f"End-to-End Test Results: {passed}/{total} passed")
-
-        if passed == total:
-            print("🎉 All end-to-end tests passed! OOS system is working correctly.")
-            print("\n✅ System Integration Verified:")
-            print("  - Repository Analysis → Command Generation → Workflow Execution")
-            print("  - Learning System integration with all components")
-            print("  - Claude Code Integration with full subsystem support")
-            print("  - Error handling and recovery across all components")
-            print("  - Context isolation and data integrity maintained")
-            print("  - Performance within acceptable thresholds")
-        else:
-            print(f"❌ {total - passed} end-to-end tests failed. Review the output above.")
-
-        return passed == total
-
+    
 
 if __name__ == "__main__":
-    test_suite = TestEndToEndIntegration()
-    success = test_suite.run_all_tests()
-    sys.exit(0 if success else 1)
+    import pytest
+    pytest.main([__file__, "-v"])
