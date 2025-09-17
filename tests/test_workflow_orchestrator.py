@@ -27,7 +27,7 @@ from src.orchestrator import (
 class TestWorkflowOrchestrator:
     """Test suite for Workflow Orchestration Engine"""
 
-    def __init__(self):
+    def setup_method(self):
         self.test_results = []
         self.orchestrator = WorkflowOrchestrator()
 

@@ -15,6 +15,7 @@
 # python
 __pycache__/
 *.pyc
+oos-env/
 
 # testing
 .pytest_cache/

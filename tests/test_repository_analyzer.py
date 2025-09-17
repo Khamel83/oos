@@ -22,7 +22,8 @@ from src.repository_analyzer import RepositoryAnalyzer
 class TestRepositoryAnalyzer:
     """Test suite for Repository Analysis Engine with context engineering"""
 
-    def __init__(self):
+    def setup_method(self):
+        """Setup test environment"""
         self.test_results = []
 
     def run_test(self, test_name, test_func):

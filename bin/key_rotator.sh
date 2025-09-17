@@ -89,19 +89,34 @@ validate_key() {
   validation_result+="  \"timestamp\": \"$(date -Iseconds)\",\n"
 
   case "$http_code" in
-    "200")\n      validation_result+="  \"status\": \"valid\",\n"
+    "200")
+      validation_result+="  \"status\": \"valid\",\n"
       validation_result+="  \"message\": \"Key is working\"\n"
-      local rate_limit_remaining\n      rate_limit_remaining=$(grep -i 'x-ratelimit-remaining' < <(curl -sS -I -H "Authorization: Bearer $key" https://openrouter.ai/api/v1/models 2>/dev/null) | cut -d: -f2 | tr -d ' \\r\\n' 2>/dev/null || echo "unknown")
-      if [[ "$rate_limit_remaining" != "unknown" ]]; then\n        validation_result+=",\n  \"rate_limit_remaining\": \"$rate_limit_remaining\"\n"
-      fi\n      ;;\n    "401")\n      validation_result+="  \"status\": \"invalid\",\n"
+      local rate_limit_remaining
+      rate_limit_remaining=$(grep -i 'x-ratelimit-remaining' < <(curl -sS -I -H "Authorization: Bearer $key" https://openrouter.ai/api/v1/models 2>/dev/null) | cut -d: -f2 | tr -d ' \r\n' 2>/dev/null || echo "unknown")
+      if [[ "$rate_limit_remaining" != "unknown" ]]; then
+        validation_result+=",\n  \"rate_limit_remaining\": \"$rate_limit_remaining\"\n"
+      fi
+      ;;
+    "401")
+      validation_result+="  \"status\": \"invalid\",\n"
       validation_result+="  \"message\": \"Invalid or expired key\"\n"
-      ;;\n    "429")\n      validation_result+="  \"status\": \"rate_limited\",\n"
+      ;;
+    "429")
+      validation_result+="  \"status\": \"rate_limited\",\n"
       validation_result+="  \"message\": \"Rate limit exceeded\"\n"
-      local retry_after\n      retry_after=$(grep -i 'retry-after' < <(curl -sS -I -H "Authorization: Bearer $key" https://openrouter.ai/api/v1/models 2>/dev/null) | cut -d: -f2 | tr -d ' \\r\\n' 2>/dev/null || echo "unknown")
-      if [[ "$retry_after" != "unknown" ]]; then\n        validation_result+=",\n  \"retry_after_seconds\": \"$retry_after\"\n"
-      fi\n      ;;\n    *)\n      validation_result+="  \"status\": \"error\",\n"
+      local retry_after
+      retry_after=$(grep -i 'retry-after' < <(curl -sS -I -H "Authorization: Bearer $key" https://openrouter.ai/api/v1/models 2>/dev/null) | cut -d: -f2 | tr -d ' \r\n' 2>/dev/null || echo "unknown")
+      if [[ "$retry_after" != "unknown" ]]; then
+        validation_result+=",\n  \"retry_after_seconds\": \"$retry_after\"\n"
+      fi
+      ;;
+    *)
+      validation_result+="  \"status\": \"error\",\n"
       validation_result+="  \"message\": \"HTTP $http_code or network error\"\n"
-      ;;\n  esac\n
+      ;;
+  esac
+
   validation_result+="}\n"
 
   rm -f "$response_file"

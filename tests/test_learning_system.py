@@ -34,13 +34,12 @@ except ImportError as e:
 class TestLearningSystem:
     """Test suite for Learning & Improvement System"""
 
-    def __init__(self):
+    def setup_method(self):
+        """Setup test environment"""
         self.test_results = []
         self.temp_dir = None
         self.db_path = None
 
-    def setup_method(self):
-        """Setup test environment"""
         if not LEARNING_SYSTEM_AVAILABLE:
             self.skip_all_tests()
             return
