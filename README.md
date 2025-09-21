@@ -12,11 +12,14 @@
 
 ## 🚀 Quick Start
 
-**For Claude Code Users**: Read [CLAUDE_CODE_INTEGRATION.md](CLAUDE_CODE_INTEGRATION.md) for automatic integration.
+### **For Claude Code Users (Recommended)**
+Just say: *"integrate OOS"* in any Claude Code project and it will set up automatically!
 
-**For Manual Setup**: Read [QUICK_START.md](QUICK_START.md) for the 30-second setup.
+**Manual Instructions**: See [SETUP.md](SETUP.md)
 
-**Need deployment help?** Check [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
+### **For Advanced Users**
+- [QUICK_START.md](QUICK_START.md) - 30-second setup
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Detailed instructions
 
 ## 🎯 What is OOS?
 
@@ -267,24 +270,22 @@ cd oos
 
 ## 🤖 Claude Code Integration
 
-**Automatic OOS setup with Claude Code - just ask!**
-
-When you're using Claude Code and want to add OOS to your project, simply say:
-
-```
-"Help me integrate OOS for development assistance"
-```
+**Just say "integrate OOS" in any Claude Code project!**
 
 Claude Code will automatically:
-1. **Understand you want development help** (not product features)
-2. **Confirm the integration approach**
-3. **Set up OOS as development middleware**
-4. **Configure token optimization and analysis tools**
-5. **Provide development commands and scripts**
+1. **Set up OOS development tools** (oos-dev-tools.js)
+2. **Add package.json scripts** for development commands
+3. **Configure token optimization** in your API routes
+4. **Provide you with OOS development commands**
+
+**Example commands after setup:**
+- `npm run oos:analyze <file>` - Code complexity analysis
+- `npm run oos:optimize` - Performance optimization tips
+- `npm run oos:commit` - Smart commit messages
 
 **No manual setup required!** 🚀
 
-For details, see [CLAUDE_CODE_INTEGRATION.md](CLAUDE_CODE_INTEGRATION.md).
+*See [SETUP.md](SETUP.md) for the simple 3-step process.*
 
 ---
 
