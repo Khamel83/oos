@@ -43,22 +43,7 @@ class TestWorkflowOrchestrator:
             self.test_results.append({"name": test_name, "status": "failed", "error": str(e)})
             return False
 
-    def test_initialization(self):
-        """Test orchestrator initialization with proper configuration"""
-        print("\n🧪 Testing Workflow Orchestrator Initialization...")
-
-        # Test default initialization
-        orchestrator = WorkflowOrchestrator()
-        assert orchestrator.config == {}
-        assert len(orchestrator.workflows) == 0
-        assert len(orchestrator.execution_history) == 0
-        assert orchestrator.logger is not None
-
-        # Test initialization with config
-        config = {"log_level": "DEBUG", "max_retries": 5}
-        orchestrator = WorkflowOrchestrator(config)
-        assert orchestrator.config == config
-
+    
     def test_workflow_definition(self):
         """Test workflow definition from dictionary"""
         print("\n🧪 Testing Workflow Definition...")

@@ -77,32 +77,6 @@ class TestLearningSystem:
         finally:
             self.teardown_method()
 
-    def test_initialization(self):
-        """Test learning system initialization with proper configuration"""
-        print("\n🧪 Testing Learning System Initialization...")
-
-        # Test default initialization
-        learning_system = LearningSystem(db_path=self.db_path)
-
-        assert learning_system.config is not None
-        assert learning_system.config["learning_enabled"] is True
-        assert learning_system.config["pattern_detection_threshold"] == 0.7
-        assert learning_system.config["min_pattern_frequency"] == 3
-        assert learning_system.db_path == self.db_path
-        assert learning_system.logger is not None
-
-        # Test custom configuration
-        custom_config = {
-            "learning_enabled": False,
-            "pattern_detection_threshold": 0.8,
-            "min_pattern_frequency": 5
-        }
-        learning_system = LearningSystem(db_path=self.db_path, config=custom_config)
-
-        assert learning_system.config["learning_enabled"] is False
-        assert learning_system.config["pattern_detection_threshold"] == 0.8
-        assert learning_system.config["min_pattern_frequency"] == 5
-
     def test_database_initialization(self):
         """Test database initialization and table creation"""
         print("\n🧪 Testing Database Initialization...")

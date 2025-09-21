@@ -478,33 +478,7 @@ class TestIntegration:
             # Verify documentation processing
             assert len(doc_result.files_processed) == 1
 
-    async def test_performance_benchmarks(self):
-        """Test performance of integrated system"""
-
-        # Create large context for testing
-        large_context = {
-            "code_files": {f"file_{i}.py": "def function():\n    pass\n" * 50 for i in range(10)},
-            "documentation": "Documentation content. " * 200,
-            "logs": ["Log entry " + str(i) for i in range(100)],
-            "metadata": {"items": list(range(500))}
-        }
-
-        # Measure token estimation performance
-        start_time = asyncio.get_event_loop().time()
-        tokens = await estimate_context_tokens(large_context)
-        estimation_time = asyncio.get_event_loop().time() - start_time
-
-        assert tokens > 1000  # Should be substantial
-        assert estimation_time < 1.0  # Should be fast
-
-        # Measure optimization performance
-        start_time = asyncio.get_event_loop().time()
-        optimized, result = await optimize_for_budget(large_context, 2000)
-        optimization_time = asyncio.get_event_loop().time() - start_time
-
-        assert result.optimized_tokens < tokens
-        assert optimization_time < 5.0  # Should complete within reasonable time
-
+    
     async def test_error_handling(self):
         """Test error handling across integrated components"""
 

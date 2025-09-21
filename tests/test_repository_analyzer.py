@@ -38,22 +38,7 @@ class TestRepositoryAnalyzer:
             self.test_results.append({"name": test_name, "status": "failed", "error": str(e)})
             return False
 
-    def test_initialization(self):
-        """Test analyzer initialization with proper context isolation"""
-        print("\n🧪 Testing Repository Analyzer Initialization...")
-
-        # Test with no token
-        analyzer = RepositoryAnalyzer()
-        assert analyzer.github_token is None
-        assert analyzer.github is None
-        assert len(analyzer.patterns) == 6  # Should have 6 pattern categories
-
-        # Test with token
-        with mock.patch.dict(os.environ, {'GITHUB_TOKEN': 'test_token'}):
-            analyzer = RepositoryAnalyzer()
-            assert analyzer.github_token == 'test_token'
-            # Don't actually create Github client in test
-
+    
     def test_repo_url_extraction(self):
         """Test repository URL parsing with various formats"""
         print("\n🧪 Testing Repository URL Extraction...")

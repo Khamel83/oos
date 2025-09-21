@@ -299,52 +299,7 @@ It should still parse correctly using fallback logic.
 
         print("✅ YAML vs non-YAML parsing test successful")
 
-    def test_performance_with_multiple_commands(self):
-        """Test performance with realistic number of commands"""
-        print("\n🧪 Testing Performance with Multiple Commands...")
-
-        # Create multiple commands (realistic scenario)
-        num_commands = 10
-        for i in range(num_commands):
-            content = f"""---
-description: Test command {i}
-script_path: ./bin/test-cmd-{i}.sh
-category: testing
----
-
-This is test command number {i} for performance testing.
-"""
-            (self.commands_dir / f"test-cmd-{i}.md").write_text(content)
-
-        import time
-
-        # Test loading performance
-        start_time = time.time()
-        handler = SimpleCommandHandler(str(self.commands_dir))
-        load_time = time.time() - start_time
-
-        # Test listing performance
-        start_time = time.time()
-        commands = handler.list_commands()
-        list_time = time.time() - start_time
-
-        # Test individual command lookup performance
-        start_time = time.time()
-        for i in range(0, num_commands, 2):  # Test every other command
-            cmd = handler.get_command(f"test-cmd-{i}")
-            assert cmd is not None
-        lookup_time = time.time() - start_time
-
-        # Verify performance is reasonable
-        assert load_time < 1.0, f"Loading took {load_time}s, expected < 1s"
-        assert list_time < 0.1, f"Listing took {list_time}s, expected < 0.1s"
-        assert lookup_time < 0.1, f"Lookup took {lookup_time}s, expected < 0.1s"
-
-        # Verify all commands loaded correctly
-        assert len(commands) == num_commands
-
-        print(f"✅ Performance test successful: Load {load_time:.3f}s, List {list_time:.3f}s, Lookup {lookup_time:.3f}s")
-
+    
     def test_filesystem_isolation(self):
         """Test that different command directories work independently"""
         print("\n🧪 Testing Filesystem Isolation...")

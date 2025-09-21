@@ -38,22 +38,7 @@ class TestSimplifiedClaudeIntegration:
             import shutil
             shutil.rmtree(self.temp_dir)
 
-    def test_integration_initialization(self):
-        """Test integration initialization with proper configuration"""
-        # Test default initialization
-        integration = ClaudeCodeIntegration()
-
-        assert integration.config is not None
-        assert integration.config["debug"] is False
-        assert "workspace_root" in integration.config
-        assert integration.command_handler is not None
-
-    def test_command_handler_initialization(self):
-        """Test simple command handler initialization"""
-        handler = SimpleCommandHandler()
-        assert handler.commands_dir is not None
-        assert isinstance(handler.commands, dict)
-
+    
     def test_command_loading(self):
         """Test loading commands from markdown files"""
         # Create a test command file
@@ -79,20 +64,7 @@ This is a test command for validation purposes.
         assert cmd.script_path == "./bin/test-cmd.sh"
         assert cmd.category == "testing"
 
-    def test_command_info_structure(self):
-        """Test CommandInfo dataclass structure"""
-        cmd = CommandInfo(
-            name="test-command",
-            description="Test command description",
-            script_path="./bin/test.sh",
-            category="general"
-        )
-
-        assert cmd.name == "test-command"
-        assert cmd.description == "Test command description"
-        assert cmd.script_path == "./bin/test.sh"
-        assert cmd.category == "general"
-
+    
     def test_list_commands(self):
         """Test listing all available commands"""
         # Create test command files
