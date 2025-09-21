@@ -12,7 +12,9 @@
 
 ## 🚀 Quick Start
 
-**Want to jump right in?** Read [QUICK_START.md](QUICK_START.md) for the 30-second setup.
+**For Claude Code Users**: Read [CLAUDE_CODE_INTEGRATION.md](CLAUDE_CODE_INTEGRATION.md) for automatic integration.
+
+**For Manual Setup**: Read [QUICK_START.md](QUICK_START.md) for the 30-second setup.
 
 **Need deployment help?** Check [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
 
@@ -260,6 +262,29 @@ cd oos
 - 🛡️ **File Safety**: Never overwrites existing files without explicit consent
 - ⚡ **One Command Setup**: Complete development environment in minutes
 - 🤖 **AI-Ready**: Claude, Gemini, and Qwen integration included
+
+---
+
+## 🤖 Claude Code Integration
+
+**Automatic OOS setup with Claude Code - just ask!**
+
+When you're using Claude Code and want to add OOS to your project, simply say:
+
+```
+"Help me integrate OOS for development assistance"
+```
+
+Claude Code will automatically:
+1. **Understand you want development help** (not product features)
+2. **Confirm the integration approach**
+3. **Set up OOS as development middleware**
+4. **Configure token optimization and analysis tools**
+5. **Provide development commands and scripts**
+
+**No manual setup required!** 🚀
+
+For details, see [CLAUDE_CODE_INTEGRATION.md](CLAUDE_CODE_INTEGRATION.md).
 
 ---
 
