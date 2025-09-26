@@ -224,3 +224,27 @@ The context engineering system is now part of Claude's intelligence when working
 No terminals. No commands. Just better, smarter conversations with optimized token usage and structured workflows.
 
 🎉 **It's that simple!**
+
+## 🐚 Shell Scripting & POSIX Constraints
+
+When generating shell scripts in this codebase, Claude automatically applies portable POSIX constraints:
+
+**Auto-Applied Rules:**
+- Uses `#!/usr/bin/env sh` (portable shebang)
+- Avoids bash/zsh-specific features
+- Assumes GNU tools on macOS via Homebrew setup
+- Uses portable helper functions from `scripts/posix/portable.sh`
+- Generates scripts that pass `shellcheck -s sh` and `shfmt -ln posix`
+
+**Setup your environment:**
+```bash
+# Bootstrap POSIX tools (run once)
+make posix-bootstrap
+```
+
+**Generated scripts will work on:**
+- macOS (with GNU coreutils via Homebrew)
+- Linux (Ubuntu/Debian/Raspberry Pi)
+- BSD systems (with appropriate GNU tool packages)
+
+See [docs/PORTABLE_SHELL.md](docs/PORTABLE_SHELL.md) for details on portable shell scripting in OOS.

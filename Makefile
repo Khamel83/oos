@@ -1,7 +1,7 @@
 # OOS (Organized Operational Setup) Makefile
 # Provides convenient commands for development, testing, and deployment
 
-.PHONY: help install uninstall start stop restart status test test-watchdog clean lint format
+.PHONY: help install uninstall start stop restart status test test-watchdog clean lint format posix-bootstrap lint-sh format-sh test-posix
 
 # Default target
 help:
@@ -25,6 +25,12 @@ help:
 	@echo "  lint              Run code linting"
 	@echo "  format            Format code"
 	@echo "  clean             Clean temporary files"
+	@echo ""
+	@echo "POSIX Shell:"
+	@echo "  posix-bootstrap   Setup portable shell environment"
+	@echo "  lint-sh           Lint shell scripts with ShellCheck"
+	@echo "  format-sh         Format shell scripts with shfmt"
+	@echo "  test-posix        Test portable shell template"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  validate          Validate all configurations"
@@ -185,3 +191,11 @@ quick-test:
 
 check: validate quick-test
 	@echo "✓ Quick check completed"
+
+# POSIX shell targets
+posix-bootstrap: ; bin/oos-posix-bootstrap
+lint-sh: ; shellcheck -s sh $(shell git ls-files '*.sh') || true
+format-sh: ; shfmt -ln posix -w .
+test-posix:
+	/bin/sh templates/sh/template.sh -n CI
+	zsh -y templates/sh/template.sh -n CI || true

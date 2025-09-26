@@ -305,4 +305,18 @@ async def main():
 
 
 if __name__ == "__main__":
+    # Run POSIX shell check if available
+    import subprocess
+    import os
+    posix_check = os.path.join(os.path.dirname(__file__), "oos-doctor-posix-check")
+    if os.path.exists(posix_check) and os.access(posix_check, os.X_OK):
+        try:
+            result = subprocess.run([posix_check], capture_output=True, text=True)
+            if result.returncode == 0:
+                print(result.stdout.strip())
+            else:
+                print(f"POSIX check warnings:\n{result.stderr.strip()}")
+        except Exception:
+            pass  # Silently ignore if the check fails
+
     asyncio.run(main())

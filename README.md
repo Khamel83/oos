@@ -210,6 +210,27 @@ cp .githooks/pre-commit .git/hooks/
 chmod +x .git/hooks/pre-commit
 ```
 
+### Portable POSIX Shell
+OOS enforces portable POSIX shell scripting across macOS and Linux:
+
+```bash
+# Setup your environment (installs GNU tools on macOS)
+make posix-bootstrap
+
+# Check your POSIX environment
+./bin/oos-doctor-posix-check
+
+# Lint and format shell scripts
+make lint-sh format-sh
+```
+
+- **Cross-platform compatibility** between macOS (BSD) and Linux (GNU)
+- **Automatic tool installation** for GNU coreutils on macOS
+- **ShellCheck + shfmt integration** for code quality
+- **Portable helper functions** in `scripts/posix/portable.sh`
+
+See [docs/PORTABLE_SHELL.md](docs/PORTABLE_SHELL.md) for details.
+
 ## 📈 Performance Metrics
 
 - **Token Reduction**: 24.8% average, up to 60% with aggressive optimization
