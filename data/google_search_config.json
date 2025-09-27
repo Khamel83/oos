@@ -6,8 +6,8 @@
     "backoff_factor": 2.0
   },
   "rate_limit": {
-    "max_requests_per_day": 10,
-    "burst_allowance": 2
+    "max_requests_per_day": 0,
+    "burst_allowance": 0
   },
   "circuit_breaker": {
     "failure_threshold": 5,
