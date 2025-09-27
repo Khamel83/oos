@@ -304,8 +304,8 @@ class GoogleSearchFallback:
                 "backoff_factor": 2.0
             },
             "rate_limit": {
-                "max_requests_per_day": 8000,
-                "burst_allowance": 5
+                "max_requests_per_day": 10,  # SAFETY: Maximum 10 queries per day ($0.05)
+                "burst_allowance": 2
             },
             "circuit_breaker": {
                 "failure_threshold": 5,
