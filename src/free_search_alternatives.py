@@ -6,6 +6,7 @@ Free Search Alternatives for OOS
 
 import requests
 import json
+import os
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 
@@ -30,12 +31,13 @@ class FreeSearchEngine:
     async def search(self, query: str, max_results: int = 10) -> List[SearchResult]:
         """Search using free alternatives in priority order"""
 
-        # Try each free search engine until we get results
+        # Try each search engine in priority order
         search_methods = [
-            self._search_duckduckgo_instant,
-            self._search_wikipedia,
-            self._search_github,
-            self._search_stackoverflow,
+            self._search_duckduckgo_instant,    # Free, unlimited
+            self._search_wikipedia,             # Free, unlimited
+            self._search_github,                # Free, 5K/hour
+            self._search_stackoverflow,         # Free, 10K/day
+            self._search_perplexity,            # $5/month credits from Pro
         ]
 
         all_results = []
@@ -148,6 +150,76 @@ class FreeSearchEngine:
             ))
 
         return results
+
+    async def _search_perplexity(self, query: str, limit: int) -> List[SearchResult]:
+        """Perplexity Sonar API - $5/month free credits from Pro subscription"""
+        api_key = os.getenv('PERPLEXITY_API_KEY')
+        if not api_key:
+            return []
+
+        url = "https://api.perplexity.ai/chat/completions"
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        }
+
+        data = {
+            'model': 'sonar-small-online',  # Cheapest web-search model
+            'messages': [
+                {
+                    'role': 'user',
+                    'content': f'Search for: {query}. Provide {limit} relevant results with titles, URLs, and brief descriptions.'
+                }
+            ],
+            'max_tokens': 500,
+            'temperature': 0.1
+        }
+
+        try:
+            response = self.session.post(url, headers=headers, json=data, timeout=15)
+
+            if response.status_code == 200:
+                result = response.json()
+                content = result['choices'][0]['message']['content']
+
+                # Parse the AI response into structured results
+                # This is a simple parser - could be improved
+                results = []
+                lines = content.split('\n')
+                current_result = {}
+
+                for line in lines:
+                    line = line.strip()
+                    if line.startswith(('1.', '2.', '3.', '4.', '5.')):
+                        if current_result:
+                            results.append(SearchResult(
+                                title=current_result.get('title', 'Perplexity Result'),
+                                url=current_result.get('url', ''),
+                                snippet=current_result.get('snippet', ''),
+                                source='Perplexity'
+                            ))
+                        current_result = {'title': line, 'url': '', 'snippet': ''}
+                    elif 'http' in line:
+                        current_result['url'] = line
+                    elif line and not line.startswith(('http', '#')):
+                        current_result['snippet'] = line
+
+                # Add the last result
+                if current_result:
+                    results.append(SearchResult(
+                        title=current_result.get('title', 'Perplexity Result'),
+                        url=current_result.get('url', ''),
+                        snippet=current_result.get('snippet', ''),
+                        source='Perplexity'
+                    ))
+
+                return results[:limit]
+
+        except Exception as e:
+            print(f"Perplexity API error: {e}")
+            return []
+
+        return []
 
     async def _search_stackoverflow(self, query: str, limit: int) -> List[SearchResult]:
         """Stack Overflow API - 10000 requests/day FREE"""

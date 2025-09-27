@@ -143,6 +143,86 @@ def setup_google_integration() -> bool:
 
     return True
 
+
+def setup_perplexity_api() -> bool:
+    """Setup Perplexity API for enhanced search (optional)"""
+    print_step("Optional", 7, "Setup Perplexity API for enhanced search")
+    print_info("If you have Perplexity Pro, you get $5/month free API credits!")
+    print_info("Benefits:")
+    print_info("  🔍 High-quality web search with citations")
+    print_info("  🆓 $5/month in credits (refreshes monthly)")
+    print_info("  🧠 AI-powered search for complex queries")
+    print_info("  📚 Perfect for research and fact-checking")
+    print_info("")
+
+    setup_perplexity = input(f"{Colors.WHITE}{Colors.BOLD}Setup Perplexity API? (Y/n): {Colors.END}").strip().lower()
+
+    if setup_perplexity in ['n', 'no']:
+        print_info("You can setup Perplexity API later if you get Pro subscription")
+        print_info("OOS will use free search alternatives (DuckDuckGo, Wikipedia, etc.)")
+        return False
+
+    print_info("To get your Perplexity API key:")
+    print_info("1. Go to: https://www.perplexity.ai/settings/api")
+    print_info("2. Click '+ Create Key'")
+    print_info("3. Name it: 'OOS-Search-API'")
+    print_info("4. Copy the key (starts with 'pplx-')")
+    print_info("")
+
+    while True:
+        api_key = input(f"{Colors.WHITE}{Colors.BOLD}Enter your Perplexity API key (or 'skip'): {Colors.END}").strip()
+
+        if api_key.lower() == 'skip':
+            print_info("Skipping Perplexity setup - you can add it later")
+            return False
+
+        if not api_key.startswith('pplx-'):
+            print_error("Perplexity API keys start with 'pplx-'. Please check your key.")
+            continue
+
+        # Test the API key
+        print_info("Testing Perplexity API key...")
+
+        try:
+            import requests
+            response = requests.post(
+                "https://api.perplexity.ai/chat/completions",
+                headers={
+                    'Authorization': f'Bearer {api_key}',
+                    'Content-Type': 'application/json'
+                },
+                json={
+                    'model': 'sonar-small-online',
+                    'messages': [{'role': 'user', 'content': 'Test'}],
+                    'max_tokens': 10
+                },
+                timeout=10
+            )
+
+            if response.status_code == 200:
+                print_success("✅ Perplexity API key is working!")
+
+                # Add to environment
+                env_path = Path('.env')
+                with open(env_path, 'a') as f:
+                    f.write(f"\nPERPLEXITY_API_KEY={api_key}\n")
+
+                print_info("API key saved to .env file")
+                print_info("You can now use enhanced search with your Pro credits!")
+                return True
+            else:
+                print_error(f"API key test failed: {response.status_code}")
+                retry = input("Try again? (Y/n): ").strip().lower()
+                if retry in ['n', 'no']:
+                    return False
+
+        except Exception as e:
+            print_error(f"Failed to test API key: {e}")
+            retry = input("Try again? (Y/n): ").strip().lower()
+            if retry in ['n', 'no']:
+                return False
+
+
 def check_python_version() -> bool:
     """Check if Python version is compatible"""
     if sys.version_info < (3, 8):
@@ -396,8 +476,9 @@ def main():
 
     # Optional Google integration
     google_enabled = setup_google_integration()
+    perplexity_enabled = setup_perplexity_api()
 
-    print_step(7, 7, "Setup complete!")
+    print_step(8, 8, "Setup complete!")
     create_first_project_guide(oos_dir, google_enabled)
 
     print_success("\n🎉 OOS setup complete!")
