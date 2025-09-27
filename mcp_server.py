@@ -29,6 +29,10 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 from clarification_workflow import get_clarification_workflow, ClarificationResponse
 from token_optimization import optimize_for_budget, estimate_context_tokens
 from auto_documentation import get_auto_documentation_system
+from capability_router import route_request
+from knowledge_resolver import resolve_knowledge, result_to_dict
+from actions_gateway import list_available_tools, execute_action, tool_info_to_dict, action_result_to_dict
+from renderers import render_knowledge, render_tools, render_action_result
 
 
 class OOSContextEngineeringServer:
@@ -164,6 +168,43 @@ class OOSContextEngineeringServer:
                         },
                         "required": ["enabled"]
                     }
+                ),
+                Tool(
+                    name="oos_capabilities",
+                    description="Get capability information about services and tools with current documentation",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "text": {"type": "string", "description": "Natural language query about capabilities"},
+                            "show_json": {"type": "boolean", "description": "Include JSON output", "default": false}
+                        },
+                        "required": ["text"]
+                    }
+                ),
+                Tool(
+                    name="oos_actions_list",
+                    description="List available actions/tools, optionally filtered by domain",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "text_or_domain": {"type": "string", "description": "Domain name or natural language query"},
+                            "show_json": {"type": "boolean", "description": "Include JSON output", "default": false}
+                        },
+                        "required": []
+                    }
+                ),
+                Tool(
+                    name="oos_actions_invoke",
+                    description="Execute a specific action with parameters",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "tool_id": {"type": "string", "description": "ID of the tool to execute"},
+                            "params": {"type": "object", "description": "Parameters for the tool"},
+                            "show_json": {"type": "boolean", "description": "Include JSON output", "default": false}
+                        },
+                        "required": ["tool_id", "params"]
+                    }
                 )
             ]
 
@@ -204,6 +245,25 @@ class OOSContextEngineeringServer:
 
                 elif name == "toggle_auto_optimize":
                     return await self._toggle_auto_optimize(arguments["enabled"])
+
+                elif name == "oos_capabilities":
+                    return await self._oos_capabilities(
+                        arguments["text"],
+                        arguments.get("show_json", False)
+                    )
+
+                elif name == "oos_actions_list":
+                    return await self._oos_actions_list(
+                        arguments.get("text_or_domain", ""),
+                        arguments.get("show_json", False)
+                    )
+
+                elif name == "oos_actions_invoke":
+                    return await self._oos_actions_invoke(
+                        arguments["tool_id"],
+                        arguments["params"],
+                        arguments.get("show_json", False)
+                    )
 
                 else:
                     return CallToolResult(
@@ -603,6 +663,76 @@ Copy this entire prompt to ChatGPT, Claude, or any other AI to get structured he
         return CallToolResult(
             content=[TextContent(type="text", text=response)]
         )
+
+    async def _oos_capabilities(self, text: str, show_json: bool = False) -> CallToolResult:
+        """Get capability information about services and tools"""
+
+        try:
+            # Route the request
+            routing_result = route_request(text)
+
+            # Resolve knowledge
+            knowledge_result = await resolve_knowledge(text, routing_result.domain)
+            knowledge_result.domain = routing_result.domain
+
+            # Render the result
+            output = render_knowledge(knowledge_result, show_json=show_json)
+
+            return CallToolResult(
+                content=[TextContent(type="text", text=output)]
+            )
+
+        except Exception as e:
+            self.logger.error(f"Error in oos_capabilities: {e}")
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"Error resolving capabilities: {str(e)}")]
+            )
+
+    async def _oos_actions_list(self, text_or_domain: str = "", show_json: bool = False) -> CallToolResult:
+        """List available actions/tools"""
+
+        try:
+            # If text_or_domain is provided, try to route it
+            domain = None
+            if text_or_domain:
+                routing_result = route_request(text_or_domain)
+                domain = routing_result.domain
+
+            # List available tools
+            tools = await list_available_tools(domain)
+
+            # Render the result
+            output = render_tools(tools, domain, show_json=show_json)
+
+            return CallToolResult(
+                content=[TextContent(type="text", text=output)]
+            )
+
+        except Exception as e:
+            self.logger.error(f"Error in oos_actions_list: {e}")
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"Error listing actions: {str(e)}")]
+            )
+
+    async def _oos_actions_invoke(self, tool_id: str, params: dict, show_json: bool = False) -> CallToolResult:
+        """Execute a specific action with parameters"""
+
+        try:
+            # Execute the action
+            result = await execute_action(tool_id, params)
+
+            # Render the result
+            output = render_action_result(result, show_json=show_json)
+
+            return CallToolResult(
+                content=[TextContent(type="text", text=output)]
+            )
+
+        except Exception as e:
+            self.logger.error(f"Error in oos_actions_invoke: {e}")
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"Error executing action: {str(e)}")]
+            )
 
 
 async def main():

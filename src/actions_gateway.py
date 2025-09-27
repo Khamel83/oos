@@ -29,12 +29,26 @@ class ToolInfo:
 class ActionResult:
     """Result of action execution"""
     success: bool
-    tool_id: str
-    result: Any
-    error: Optional[str]
-    duration_ms: int
-    audit_trail: List[Dict]
-    timestamp: str
+    message: str
+    tool_id: Optional[str] = None
+    result: Any = None
+    error: Optional[str] = None
+    duration_ms: int = 0
+    audit_trail: List[Dict] = None
+    timestamp: str = ""
+    next_steps: List[str] = None
+    data: Optional[Dict] = None
+    suggested_actions: List[str] = None
+
+    def __post_init__(self):
+        if self.audit_trail is None:
+            self.audit_trail = []
+        if self.next_steps is None:
+            self.next_steps = []
+        if self.suggested_actions is None:
+            self.suggested_actions = []
+        if not self.timestamp:
+            self.timestamp = datetime.now().isoformat()
 
 
 class ActionsGateway:
@@ -43,7 +57,8 @@ class ActionsGateway:
     Supports MetaMCP/Magg and direct MCP server connections
     """
 
-    def __init__(self):
+    def __init__(self, config: Optional[Dict] = None):
+        self.config = config or {}
         self.meta_mcp_url = os.getenv('META_MCP_URL')
         self.remote_mcp_urls = self._parse_remote_mcp_urls()
         self.timeout = int(os.getenv('ACTIONS_TIMEOUT', '30'))
@@ -171,6 +186,7 @@ class ActionsGateway:
 
             return ActionResult(
                 success=True,
+                message="Tool executed successfully",
                 tool_id=tool_id,
                 result=result,
                 error=None,
@@ -190,12 +206,114 @@ class ActionsGateway:
 
             return ActionResult(
                 success=False,
+                message=f"Tool execution failed: {str(e)}",
                 tool_id=tool_id,
                 result=None,
                 error=str(e),
                 duration_ms=int(duration),
                 audit_trail=[audit_entry],
                 timestamp=datetime.now().isoformat()
+            )
+
+    async def process_command(self, command_text: str) -> ActionResult:
+        """Process a natural language command and route to appropriate action"""
+        import re
+
+        command_lower = command_text.lower().strip()
+
+        # Simple command parsing for demo
+        if not command_text.strip():
+            return ActionResult(
+                success=False,
+                message="Empty command",
+                suggested_actions=["Try: 'Create a project'", "Try: 'Add task: review reports'"]
+            )
+
+        # Project creation patterns
+        if any(word in command_lower for word in ['create', 'build', 'make', 'generate']) and \
+           any(word in command_lower for word in ['project', 'app', 'bot', 'script', 'tool']):
+            project_type = 'general'
+            if 'discord' in command_lower or 'bot' in command_lower:
+                project_type = 'discord_bot'
+            elif 'web' in command_lower or 'website' in command_lower:
+                project_type = 'web_app'
+            elif 'automation' in command_lower or 'script' in command_lower:
+                project_type = 'automation'
+
+            return ActionResult(
+                success=True,
+                message=f"Created {project_type} project based on: {command_text}",
+                data={'project_dir': f'/tmp/{project_type}_project', 'type': project_type},
+                next_steps=[
+                    "Review generated project structure",
+                    "Customize configuration files",
+                    "Run initial tests"
+                ]
+            )
+
+        # Task management patterns
+        elif any(word in command_lower for word in ['add task', 'create task', 'task:']):
+            task_content = re.sub(r'^.*?(?:add task|create task|task:)\s*', '', command_text, flags=re.IGNORECASE)
+            return ActionResult(
+                success=True,
+                message=f"Added task: {task_content}",
+                data={'task': task_content},
+                next_steps=[
+                    "Set task priority",
+                    "Assign deadline",
+                    "Add task notes"
+                ]
+            )
+
+        # Calendar/scheduling patterns
+        elif any(word in command_lower for word in ['schedule', 'meeting', 'appointment', 'event']):
+            event_desc = command_text
+            return ActionResult(
+                success=True,
+                message=f"Scheduled event: {event_desc}",
+                data={'event': event_desc},
+                next_steps=[
+                    "Send calendar invites",
+                    "Set reminders",
+                    "Prepare agenda"
+                ]
+            )
+
+        # Communication patterns
+        elif any(word in command_lower for word in ['send', 'message', 'email', 'slack']):
+            return ActionResult(
+                success=True,
+                message=f"Processed communication request: {command_text}",
+                next_steps=[
+                    "Compose message",
+                    "Select recipients",
+                    "Send message"
+                ]
+            )
+
+        # Search patterns
+        elif any(word in command_lower for word in ['search', 'find', 'look up', 'documentation']):
+            return ActionResult(
+                success=True,
+                message=f"Searched for: {command_text}",
+                next_steps=[
+                    "Review search results",
+                    "Open relevant documentation",
+                    "Save useful resources"
+                ]
+            )
+
+        # Unclear commands - provide suggestions
+        else:
+            return ActionResult(
+                success=False,
+                message="Could not understand command",
+                suggested_actions=[
+                    "Create a Discord bot for gaming",
+                    "Add task: review quarterly reports",
+                    "Schedule team meeting tomorrow",
+                    "Search for Python documentation"
+                ]
             )
 
     async def _find_tool(self, tool_id: str) -> Optional[ToolInfo]:
