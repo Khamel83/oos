@@ -129,6 +129,8 @@ class OOSCommandProcessor:
 
         elif command.startswith('sheets'):
             return await self.handle_sheets_command(command)
+        elif command.startswith('search'):
+            return await self.handle_search_command(command)
 
         else:
             # Use capability router to understand the request
@@ -225,6 +227,7 @@ class OOSCommandProcessor:
 
 {Colors.WHITE}{Colors.BOLD}Common Commands:{Colors.END}
 {Colors.GREEN}  oos create <type>{Colors.WHITE}     • Create a new project
+{Colors.GREEN}  oos search "query"{Colors.WHITE}    • Search the web (free + Pro credits)
 {Colors.GREEN}  oos help me <question>{Colors.WHITE} • Get help with anything
 {Colors.GREEN}  oos run{Colors.WHITE}               • Run your current project
 {Colors.GREEN}  oos show <thing>{Colors.WHITE}      • Show information about your project
@@ -499,6 +502,66 @@ Type: oos help me <your question>
             print_info("  oos sheets open <name> - Open project in browser")
             print_info("  oos sheets sync     - Sync with cloud")
             return 0
+
+    async def handle_search_command(self, command: str) -> int:
+        """Handle search commands with automatic free + paid search integration"""
+        query = command.replace('search', '').strip().strip('"').strip("'")
+
+        if not query:
+            print_step("OOS Search", "Search the web with smart cost controls")
+            print_info("Usage:")
+            print_info('  oos search "python tutorials"')
+            print_info('  oos search "latest AI research 2025"')
+            print_info('')
+            print_info("Search sources (in priority order):")
+            print_info("  1. 🆓 DuckDuckGo - Free, unlimited")
+            print_info("  2. 🆓 Wikipedia - Free, unlimited")
+            print_info("  3. 🆓 GitHub - Free, 5K/hour")
+            print_info("  4. 🆓 Stack Overflow - Free, 10K/day")
+            print_info("  5. 💡 Perplexity - Your $5/month Pro credits (asks permission)")
+            print_info('')
+            print_info("💰 Expected costs: $0.00 for most searches")
+            return 0
+
+        print_step("OOS Search", f'Searching for: "{query}"')
+
+        try:
+            from free_search_alternatives import search_free
+            results = await search_free(query, max_results=8)
+
+            if results:
+                print_success(f"Found {len(results)} results")
+                print_info("")
+
+                for i, result in enumerate(results, 1):
+                    source_color = Colors.CYAN if result.source == 'Perplexity' else Colors.GREEN
+                    print(f"{Colors.BOLD}{i}.{Colors.END} {Colors.WHITE}{result.title}{Colors.END}")
+                    print(f"   {source_color}[{result.source}]{Colors.END} {result.snippet[:100]}...")
+                    if result.url:
+                        print(f"   🔗 {Colors.BLUE}{result.url}{Colors.END}")
+                    print()
+
+                # Show cost summary if Perplexity was used
+                perplexity_used = any(r.source == 'Perplexity' for r in results)
+                if perplexity_used:
+                    from perplexity_usage_manager import usage_manager
+                    summary = usage_manager.get_usage_summary()
+                    print_info(f"💰 Monthly Perplexity usage: ${summary['total_cost']:.2f} / ${summary['monthly_limit']:.2f} ({summary['usage_percent']:.1f}%)")
+                else:
+                    print_info("💰 Search cost: $0.00 (used free sources)")
+
+            else:
+                print_warning("No results found")
+                print_info("Try:")
+                print_info("  • Different search terms")
+                print_info("  • More specific keywords")
+                print_info("  • Broader topic search")
+
+        except Exception as e:
+            print_error(f"Search failed: {e}")
+            return 1
+
+        return 0
 
     def show_project_info(self):
         """Show current project information"""
