@@ -425,6 +425,81 @@ setup_environment() {
   return 0
 }
 
+# Setup Archon integration
+setup_archon_integration() {
+  progress 3.5 12 "Setting up Archon MCP integration..."
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    log "Would setup Archon integration and create project"
+    return 0
+  fi
+
+  # Check if Archon project ID is already in .env
+  if grep -q "ARCHON_PROJECT_ID=" .env; then
+    verbose "Archon project ID already configured"
+    return 0
+  fi
+
+  verbose "Adding Archon configuration to .env..."
+
+  # Add Archon configuration to .env
+  cat >> .env <<EOF
+
+# Archon MCP Integration
+ARCHON_PROJECT_ID=
+ARCHON_URL=http://100.103.45.61:8051/mcp
+EOF
+
+  verbose "Creating Archon project creation helper script..."
+
+  # Create helper script for Archon project creation
+  cat > bin/create_archon_project.sh <<'ARCHON_SCRIPT'
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Create Archon project and update .env with project ID
+# Usage: ./bin/create_archon_project.sh [PROJECT_TITLE] [PROJECT_DESCRIPTION]
+
+PROJECT_TITLE="${1:-$(basename "$(pwd)")}"
+PROJECT_DESCRIPTION="${2:-OOS-enhanced project with Archon integration}"
+GITHUB_REPO="${GITHUB_REPO:-}"
+
+echo "Creating Archon project: $PROJECT_TITLE"
+echo "Description: $PROJECT_DESCRIPTION"
+
+# Note: This script provides instructions for manual project creation
+# since it requires Claude Code with Archon MCP integration
+
+cat <<EOF
+
+To complete Archon integration:
+
+1. Open Claude Code with Archon MCP enabled
+2. Run this command in Claude Code:
+
+mcp__archon__create_project({
+    title: "$PROJECT_TITLE",
+    description: "$PROJECT_DESCRIPTION",
+    github_repo: "$GITHUB_REPO"
+})
+
+3. Copy the returned project_id to your .env file:
+
+   ARCHON_PROJECT_ID=<project_id_from_step_2>
+
+4. Restart your OOS workflows to use Archon task management
+
+EOF
+
+echo "Archon project creation guide generated."
+ARCHON_SCRIPT
+
+  chmod +x bin/create_archon_project.sh
+
+  success "Archon integration setup completed"
+  return 0
+}
+
 # Create utility scripts
 create_utility_scripts() {
   progress 4 12 "Creating utility scripts..."
@@ -1225,6 +1300,7 @@ main() {
   install_python_dependencies
   validate_onepassword
   setup_environment
+  setup_archon_integration
   create_utility_scripts
   create_runners
   create_documentation
@@ -1258,6 +1334,7 @@ main() {
   echo -e "${CYAN}Useful Commands:${NC}"
   echo "  bin/select_or_key.sh            # Select working API key"
   echo "  bin/rotate_or_key.sh            # Rotate to next API key"
+  echo "  bin/create_archon_project.sh    # Create Archon project for task management"
   echo
   echo -e "${PURPLE}💡 Quick Learning Capture:${NC}"
   echo "  echo 'insight' | bin/development_guide.sh update  # Add learnings instantly"
