@@ -54,6 +54,11 @@
       "name": "command",
       "description": "Execute OOS command system commands (capabilities, actions, act, consultant)",
       "script": "bin/claude-command.sh"
+    },
+    {
+      "name": "oos-update",
+      "description": "Smart OOS update with auto-integration - handles update/upgrade/creation from single prompt",
+      "script": "bin/claude-oos-update.sh"
     }
   ]
 }

@@ -1,32 +1,40 @@
-# Auto-Efficiency Constraint
+# MANDATORY Auto-Efficiency Constraint
 
-## Automatic Pattern Recognition
+## IMMEDIATE PATTERN RECOGNITION - NO EXCEPTIONS
 
-When user mentions updating OOS or repository syncing, **immediately** apply learned efficiency patterns without discovery:
+When user mentions ANY of these phrases, **IMMEDIATELY** run `/oos-update` without any discovery:
 
-### For "update oos" requests:
-```bash
-# Don't do discovery - just execute:
-if [ -d "oos" ]; then
-  cd oos && git pull origin master && ./bin/integrate_to_parent.sh
-else
-  git clone https://github.com/Khamel83/oos.git && cd oos && ./bin/integrate_to_parent.sh
-fi
+**Trigger Phrases:**
+- "update oos"
+- "update our oos"
+- "sync oos"
+- "get latest oos"
+- "update from github"
+- "pull latest changes"
+
+## MANDATORY RESPONSE PATTERN:
+
+```
+User: "update oos from github"
+Assistant: I'll use the efficient OOS update pattern to avoid the discovery waste from previous flows.
+
+[RUNS /oos-update IMMEDIATELY]
 ```
 
-### Never Do Manual Discovery:
-- ❌ Multiple `git remote -v` checks
-- ❌ `ls -la | grep oos` exploration
-- ❌ Ask user to clarify obvious requests
-- ❌ Manual backup creation
+## FORBIDDEN ACTIONS:
+- ❌ ANY `git remote -v` checks
+- ❌ ANY `ls -la` exploration
+- ❌ ANY directory navigation discovery
+- ❌ Asking user to clarify obvious requests
+- ❌ Manual step-by-step process
 
-### Always Auto-Execute:
-- ✅ Use intelligent context detection
-- ✅ Run integration automatically
-- ✅ Make commands available immediately
-- ✅ Single verification at end
+## REQUIRED ACTIONS:
+- ✅ **IMMEDIATELY** run `/oos-update` slash command
+- ✅ Let the script handle ALL context detection
+- ✅ Let the script handle ALL integration
+- ✅ Tell user exactly what to do after completion
 
-### Learning Application:
-This constraint ensures OOS learns from its own inefficiencies and prevents repeating the atlas update flow waste of 15+ commands.
+## LEARNING ENFORCEMENT:
+This constraint PREVENTS repeating the 15+ command inefficiency from atlas update flow. The assistant MUST apply this learning automatically.
 
-**Key Rule:** User should never need to trigger anything manually. The assistant should just work intelligently.
+**CRITICAL:** If assistant starts doing discovery commands instead of `/oos-update`, it has FAILED to apply the learning.
