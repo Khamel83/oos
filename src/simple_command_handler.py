@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from commands.capabilities_command import CapabilitiesCommand
 from commands.actions_command import ActionsCommand
+from commands.consultant_command import ConsultantCommand, register_consultant_command
 from renderers import render_help
 
 
@@ -38,9 +39,16 @@ class SimpleCommandHandler:
         self.commands_dir = Path(commands_dir or ".claude/commands")
         self.commands = self._load_commands()
 
+        # Initialize custom commands dict
+        self.custom_commands = {}
+
         # Initialize capability commands
         self.capabilities_cmd = CapabilitiesCommand()
         self.actions_cmd = ActionsCommand()
+
+        # Initialize and register consultant command
+        self.consultant_cmd = ConsultantCommand()
+        register_consultant_command(self)
 
     def _load_commands(self) -> Dict[str, CommandInfo]:
         """Load command definitions from markdown files"""
@@ -54,6 +62,10 @@ class SimpleCommandHandler:
             commands[cmd_name] = self._parse_command_file(cmd_file)
 
         return commands
+
+    def register_command(self, name: str, handler_func):
+        """Register a custom command handler"""
+        self.custom_commands[name] = handler_func
 
     def _parse_command_file(self, cmd_file: Path) -> CommandInfo:
         """Parse a command markdown file"""
@@ -105,6 +117,8 @@ class SimpleCommandHandler:
             return await self._execute_actions(args)
         elif name == "act":
             return await self._execute_act(args)
+        elif name == "consultant":
+            return await self._execute_consultant(args)
         elif name == "capability-help":
             return {"output": render_help()}
 
@@ -150,6 +164,16 @@ class SimpleCommandHandler:
             return {"output": result}
         except Exception as e:
             return {"error": f"Error executing act command: {str(e)}"}
+
+    async def _execute_consultant(self, args: str) -> Dict[str, Any]:
+        """Execute consultant command"""
+        try:
+            # Parse args
+            arg_list = args.split() if args else []
+            result = await self.consultant_cmd.handle_command(arg_list)
+            return {"output": result}
+        except Exception as e:
+            return {"error": f"Error executing consultant command: {str(e)}"}
 
 
 # For backward compatibility
