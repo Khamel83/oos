@@ -33,10 +33,26 @@ if [ "$PROJECT_NAME" = "oos" ] && [ -d "$PARENT_DIR/.git" ]; then
     PARENT_CLAUDE_DIR="$PARENT_DIR/.claude"
     mkdir -p "$PARENT_CLAUDE_DIR/commands"
 
-    # Copy OOS slash commands
+    # Merge OOS slash commands intelligently
     if [ -f "$OOS_ROOT/.claude/slash_commands.json" ]; then
-        echo "  → Copying slash_commands.json"
-        cp "$OOS_ROOT/.claude/slash_commands.json" "$PARENT_CLAUDE_DIR/"
+        echo "  → Merging slash commands with existing ones"
+
+        # Check if parent already has slash commands
+        if [ -f "$PARENT_CLAUDE_DIR/slash_commands.json" ]; then
+            # Add /consultant command if not already present
+            if ! grep -q '"name": "consultant"' "$PARENT_CLAUDE_DIR/slash_commands.json"; then
+                echo "  → Adding /consultant command"
+                # Insert consultant command before the closing bracket
+                sed -i '/^  ]$/i\    },\
+    {\
+      "name": "consultant",\
+      "description": "Strategic AI consultant for project analysis and recommendations",\
+      "script": "bin/claude-consultant.sh"' "$PARENT_CLAUDE_DIR/slash_commands.json"
+            fi
+        else
+            # No existing file, copy OOS version
+            cp "$OOS_ROOT/.claude/slash_commands.json" "$PARENT_CLAUDE_DIR/"
+        fi
 
         # Create symlink for compatibility
         if [ ! -L "$PARENT_CLAUDE_DIR/slash-commands.json" ]; then
