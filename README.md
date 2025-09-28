@@ -25,6 +25,7 @@ OOS is a universal productivity system that adds powerful search, automation, an
 - **🤖 Enhanced AI Integration**: 14 smart slash commands for Claude Code
 - **📦 Universal Install**: One command works with any project type
 - **🛡️ Built-in Safety**: Cost controls and usage monitoring
+- **🎓 Self-Referential Learning**: OOS learns from usage patterns to prevent repeated inefficiencies
 
 ## 🚀 Quick Start
 
@@ -104,6 +105,27 @@ OOS automatically detects and integrates with:
 # Use wake word from anywhere
 echo "hey oos implement user authentication with OAuth" > ~/.oos/wake.txt
 ```
+
+### 🎓 Self-Referential Learning Tools
+
+OOS now includes tools to prevent "learning the same lessons over and over":
+
+```bash
+# Review development wisdom before coding
+./bin/development_guide.sh
+
+# Capture inefficient patterns for future improvement
+./bin/archon_learning.sh capture-atlas
+
+# Smart repository updates with auto-integration
+./bin/archon_learning.sh smart-update oos
+```
+
+**Key Learning Integration:**
+- Pre-development learning enforcement
+- Automatic pattern detection from user flows
+- Integration scripts for complex project structures
+- Archon-based knowledge persistence
 
 ### 📋 Enhanced Claude Code Integration
 - **4 New Slash Commands**: /archon-status, /archon-task-start, /archon-research, /archon-complete
