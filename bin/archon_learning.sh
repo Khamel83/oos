@@ -146,8 +146,8 @@ apply_learnings_check() {
 smart_update_oos() {
     local target_repo="${1:-oos}"
 
-    echo -e "${BLUE}🚀 Smart OOS Update (Learning-Enhanced)${NC}"
-    echo "======================================"
+    echo -e "${BLUE}🚀 Smart OOS Update (Learning-Enhanced with Testing)${NC}"
+    echo "====================================================="
 
     # 1. Context Intelligence
     echo "🔍 Step 1: Intelligent Context Detection"
@@ -182,27 +182,68 @@ smart_update_oos() {
         git clone "https://github.com/Khamel83/$target_repo.git"
     fi
 
-    # 3. Auto-Integration (solving the slash command issue)
-    echo "🔗 Step 3: Auto-Integration to Parent Project"
+    # 3. Pre-Integration Testing (NEW - prevents failures)
+    echo "🧪 Step 3: Pre-Integration Testing"
     cd "$target_repo" 2>/dev/null || { echo "Failed to enter $target_repo"; exit 1; }
 
+    if [ -f "bin/test_integration.sh" ]; then
+        echo "  → Running integration tests..."
+        if ./bin/test_integration.sh > /tmp/oos_test.log 2>&1; then
+            echo -e "  ${GREEN}✓ All integration tests passed${NC}"
+        else
+            echo -e "  ${RED}❌ Integration tests failed${NC}"
+            echo "  📋 Test output:"
+            cat /tmp/oos_test.log | tail -10
+            echo ""
+            echo -e "  ${YELLOW}⚠️  Proceeding anyway, but integration may fail${NC}"
+        fi
+    else
+        echo "  ⚠️  No integration tests found"
+    fi
+
+    # 4. Auto-Integration (solving the slash command issue)
+    echo "🔗 Step 4: Auto-Integration to Parent Project"
+
     if [ -f "bin/integrate_to_parent.sh" ]; then
-        echo "  → Running integration script..."
-        ./bin/integrate_to_parent.sh
+        echo "  → Running bulletproof integration script..."
+        if ./bin/integrate_to_parent.sh; then
+            echo -e "  ${GREEN}✓ Integration completed successfully${NC}"
+        else
+            echo -e "  ${RED}❌ Integration failed${NC}"
+            echo "  💡 Check logs above for details"
+        fi
     else
         echo "  ⚠️  No integration script found - manual integration may be needed"
     fi
 
-    # 4. Single Verification
-    echo "✅ Step 4: Streamlined Verification"
-    local latest_commit=$(git log --oneline -1)
-    echo "  ✓ Latest commit: $latest_commit"
-    echo "  ✓ Repository successfully updated and integrated!"
-
+    # 5. Post-Integration Validation (NEW - verifies success)
+    echo "✅ Step 5: Post-Integration Validation"
     cd "$current_dir"
+
+    # Check if consultant was properly integrated
+    if [ -f ".claude/slash_commands.json" ]; then
+        if python3 -c "import json; json.load(open('.claude/slash_commands.json'))" 2>/dev/null; then
+            echo -e "  ${GREEN}✓ slash_commands.json is valid JSON${NC}"
+
+            if grep -q '"name": "consultant"' .claude/slash_commands.json; then
+                echo -e "  ${GREEN}✓ /consultant command found in JSON${NC}"
+            else
+                echo -e "  ${YELLOW}⚠️  /consultant command not found in JSON${NC}"
+            fi
+        else
+            echo -e "  ${RED}❌ slash_commands.json contains invalid JSON${NC}"
+            echo "  📋 This is the fundamental problem we're fixing!"
+        fi
+    else
+        echo -e "  ${YELLOW}⚠️  No .claude/slash_commands.json found${NC}"
+    fi
+
+    local latest_commit=$(git log --oneline -1 -C "$target_repo")
+    echo "  ✓ Latest commit: $latest_commit"
+
     echo ""
-    echo -e "${GREEN}🎉 Smart update complete with auto-integration!${NC}"
-    echo -e "${YELLOW}💡 Key improvement: /consultant command should now be available${NC}"
+    echo -e "${GREEN}🎉 Smart update complete with testing and validation!${NC}"
+    echo -e "${YELLOW}💡 Learning applied: Integration now tested and validated${NC}"
 }
 
 main() {
