@@ -21,6 +21,7 @@ class Colors:
     WHITE = '\033[97m'
     BOLD = '\033[1m'
     END = '\033[0m'
+    INFO = '\033[96m'  # Same as CYAN for info messages
 
 
 class CapabilityRenderer:

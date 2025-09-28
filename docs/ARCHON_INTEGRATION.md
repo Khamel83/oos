@@ -1,6 +1,23 @@
-# Archon Integration Guide - Project Separation & Best Practices
+# Archon Integration Guide - Complete Task Management & Documentation
 
-This guide explains how to properly integrate OOS with Archon MCP for project management while ensuring complete project separation and isolation.
+This guide covers the complete Archon MCP integration with OOS, including automatic setup, task management workflows, and production-ready usage patterns.
+
+## 🚀 Quick Start (TL;DR)
+
+```bash
+# 1. Bootstrap automatically integrates Archon
+./scripts/bootstrap_enhanced.sh
+
+# 2. Create your project in Claude Code
+# Use the mcp__archon__create_project function
+
+# 3. Update .env with project ID
+echo "ARCHON_PROJECT_ID=your-project-id" >> .env
+
+# 4. Start using task management
+./oos task list
+/archon-status  # In Claude Code
+```
 
 ## 🎯 Overview
 
@@ -37,18 +54,22 @@ Archon Server
 Each project maintains its own `.env` file with unique identifiers:
 
 ```bash
-# Project Alpha - Authentication Service
-ARCHON_PROJECT_ID=550e8400-e29b-41d4-a716-446655440000
-ARCHON_URL=http://your-archon-server:8051/mcp
-PROJECT_NAME=auth-service
-PROJECT_TYPE=api
-
-# Project Beta - E-commerce Frontend
-ARCHON_PROJECT_ID=7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456
-ARCHON_URL=http://your-archon-server:8051/mcp
-PROJECT_NAME=ecommerce-web
-PROJECT_TYPE=web-app
+# Each project's .env contains:
+ARCHON_PROJECT_ID=<unique-project-id-from-archon>
+ARCHON_URL=<your-archon-server-url>
+PROJECT_NAME=<project-name>
+PROJECT_TYPE=<project-type>
 ```
+
+## ✅ Current Implementation Status
+
+**OOS v1.0+ includes full Archon integration:**
+- ✅ Automatic MCP server registration
+- ✅ Project creation helpers
+- ✅ Task management via Claude Code MCP tools
+- ✅ Environment configuration
+- 🟡 CLI task management (in development)
+- 🟡 Archon-aware slash commands (in development)
 
 ## 🚀 Automatic Integration (Default)
 
@@ -110,7 +131,7 @@ ARCHON_URL=http://your-archon-server:8051/mcp" >> .env
 ```javascript
 // Authentication Feature Tasks
 mcp__archon__create_task({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     title: "Design JWT token architecture",
     description: `Design JWT token structure with:
 - Access token (15 min expiry)
@@ -130,7 +151,7 @@ mcp__archon__create_task({
 })
 
 mcp__archon__create_task({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     title: "Implement user login endpoint",
     description: `Create POST /auth/login endpoint:
 - Email/password validation
@@ -151,7 +172,7 @@ mcp__archon__create_task({
 
 // Database Feature Tasks
 mcp__archon__create_task({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     title: "Create user database schema",
     description: `PostgreSQL schema design:
 - users table (id, email, password_hash, created_at, updated_at)
@@ -165,7 +186,7 @@ mcp__archon__create_task({
 
 // OAuth Integration Tasks
 mcp__archon__create_task({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     title: "Implement Google OAuth2 provider",
     description: `OAuth2 integration with PKCE:
 - Authorization URL generation
@@ -183,7 +204,7 @@ mcp__archon__create_task({
 ```javascript
 // Get project-specific tasks
 mcp__archon__list_tasks({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     filter_by: "status",
     filter_value: "todo"
 })
@@ -214,7 +235,7 @@ mcp__archon__update_task({
 ```javascript
 // Technical Specification
 mcp__archon__create_document({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     title: "Authentication API Specification v1.0",
     document_type: "spec",
     content: {
@@ -273,7 +294,7 @@ mcp__archon__create_document({
 
 // Architecture Design Document
 mcp__archon__create_document({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     title: "Authentication System Architecture",
     document_type: "design",
     content: {
@@ -316,7 +337,7 @@ mcp__archon__create_document({
 
 // Implementation Guide
 mcp__archon__create_document({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     title: "Development Setup Guide",
     document_type: "guide",
     content: {
@@ -357,7 +378,7 @@ mcp__archon__create_document({
 ```javascript
 // Create version snapshots for important milestones
 mcp__archon__create_version({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     field_name: "docs",
     content: [
         // Current state of all documents
@@ -368,7 +389,7 @@ mcp__archon__create_version({
 
 // Version project features
 mcp__archon__create_version({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     field_name: "features",
     content: {
         authentication: {
@@ -399,12 +420,12 @@ mcp__archon__create_version({
 # Each project has isolated environment
 # Project Alpha
 cat /home/ubuntu/dev/auth-service/.env
-ARCHON_PROJECT_ID=550e8400-e29b-41d4-a716-446655440000
+ARCHON_PROJECT_ID=$ARCHON_PROJECT_ID
 PROJECT_SECRETS_PREFIX=AUTH_SERVICE_
 
 # Project Beta
 cat /home/ubuntu/dev/ecommerce-web/.env
-ARCHON_PROJECT_ID=7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456
+ARCHON_PROJECT_ID=$ARCHON_PROJECT_ID_B
 PROJECT_SECRETS_PREFIX=ECOMMERCE_WEB_
 
 # No cross-project access possible
@@ -417,13 +438,13 @@ PROJECT_SECRETS_PREFIX=ECOMMERCE_WEB_
 # Project Alpha - should only see its own data
 cd /home/ubuntu/dev/auth-service
 # In Claude Code:
-# mcp__archon__list_tasks(project_id="550e8400-e29b-41d4-a716-446655440000")
+# mcp__archon__list_tasks(project_id="$ARCHON_PROJECT_ID")
 # Result: Only auth-service tasks
 
 # Project Beta - completely isolated
 cd /home/ubuntu/dev/ecommerce-web
 # In Claude Code:
-# mcp__archon__list_tasks(project_id="7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456")
+# mcp__archon__list_tasks(project_id="$ARCHON_PROJECT_ID_B")
 # Result: Only ecommerce-web tasks
 ```
 
@@ -437,6 +458,77 @@ cd /home/ubuntu/dev/ecommerce-web
 tail -f security_audit.log | grep "PROJECT_ID=550e8400"
 ```
 
+## 🖥️ OOS CLI Integration (v1.1+)
+
+### Task Management Commands
+
+```bash
+# List project tasks
+./oos task list
+./oos task list --status todo
+./oos task list --feature authentication
+
+# Start working on a task
+./oos task start <task-id>
+
+# Complete a task
+./oos task complete <task-id>
+
+# Create new task
+./oos task create "Implement OAuth" "Add Google OAuth2 integration"
+
+# Project status
+./oos project status
+```
+
+### Capability Layer Integration
+
+```bash
+# Search capabilities
+./oos capabilities
+./oos capabilities "api documentation"
+
+# Execute actions
+./oos act "search for JWT best practices"
+./oos act "list available API endpoints"
+```
+
+## 🤖 Claude Code Integration
+
+### Current MCP Tools Available
+
+```javascript
+// Project Management
+mcp__archon__create_project({title, description, github_repo})
+mcp__archon__list_projects()
+mcp__archon__get_project(project_id)
+mcp__archon__update_project(project_id, {...updates})
+
+// Task Management
+mcp__archon__create_task({project_id, title, description, ...})
+mcp__archon__list_tasks({project_id, filter_by, filter_value})
+mcp__archon__get_task(task_id)
+mcp__archon__update_task(task_id, {status, ...})
+
+// Knowledge & Research
+mcp__archon__perform_rag_query({query, source_domain, match_count})
+mcp__archon__search_code_examples({query, match_count})
+
+// Documentation
+mcp__archon__create_document({project_id, title, document_type, content})
+mcp__archon__list_documents(project_id)
+mcp__archon__get_document(project_id, doc_id)
+```
+
+### Planned Slash Commands (v1.1)
+
+```bash
+/archon-status        # Show current project and tasks
+/archon-task-start    # Create and start new task
+/archon-research      # Search Archon knowledge base
+/archon-complete      # Mark current work complete
+```
+
 ## 🔄 Workflow Integration
 
 ### Development Workflow with Archon
@@ -448,7 +540,7 @@ tail -f security_audit.log | grep "PROJECT_ID=550e8400"
 
 # In Claude Code - review project tasks:
 # mcp__archon__list_tasks(
-#     project_id="550e8400-e29b-41d4-a716-446655440000",
+#     project_id="$ARCHON_PROJECT_ID",
 #     filter_by="status",
 #     filter_value="doing"
 # )
@@ -486,7 +578,7 @@ tail -f security_audit.log | grep "PROJECT_ID=550e8400"
 
 # 2. Create review documentation
 # mcp__archon__create_document(
-#     project_id="550e8400-e29b-41d4-a716-446655440000",
+#     project_id="$ARCHON_PROJECT_ID",
 #     title="JWT Implementation Review",
 #     document_type="note",
 #     content={
@@ -510,7 +602,7 @@ tail -f security_audit.log | grep "PROJECT_ID=550e8400"
 
 // In Project Beta - reference auth service
 mcp__archon__create_task({
-    project_id: "7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456",
+    project_id: "$ARCHON_PROJECT_ID_B",
     title: "Integrate with authentication service",
     description: "Connect frontend to auth-service API endpoints",
     sources: [
@@ -532,7 +624,7 @@ mcp__archon__create_task({
 
 # Project Alpha exposes API documentation
 mcp__archon__create_document({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     title: "Public API Documentation",
     document_type: "api",
     content: {
@@ -564,7 +656,7 @@ tail -f health_monitor.log | grep "PROJECT=ecommerce-web"
 ```javascript
 // Track project-specific performance metrics
 mcp__archon__update_project({
-    project_id: "550e8400-e29b-41d4-a716-446655440000",
+    project_id: "$ARCHON_PROJECT_ID",
     data: {
         performance_metrics: {
             api_response_time: "120ms avg",

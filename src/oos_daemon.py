@@ -144,9 +144,45 @@ class OOSDaemon:
 
     async def monitor_terminal(self):
         """Monitor terminal input for OOS activation"""
-        # This is a simplified version
-        # In production, would integrate with system audio input
-        pass
+        # Check for terminal commands that start with wake phrases
+        wake_phrases = ["hey oos", "oos", "hey OOS", "OOS"]
+
+        # Monitor for environment variable or signal file
+        wake_file = self.config_dir / 'wake_signal.txt'
+        if wake_file.exists():
+            try:
+                content = wake_file.read_text().strip()
+                if content:
+                    # Check if it starts with wake phrase
+                    content_lower = content.lower()
+                    activated = any(content_lower.startswith(phrase.lower()) for phrase in wake_phrases)
+
+                    if activated:
+                        # Remove wake phrase and process the idea
+                        for phrase in wake_phrases:
+                            if content_lower.startswith(phrase.lower()):
+                                clean_content = content[len(phrase):].strip()
+                                break
+
+                        if clean_content:
+                            print(f"{Colors.CYAN}🎧 Wake word detected: Processing '{clean_content}'{Colors.END}")
+
+                            idea = Idea(
+                                id=str(uuid.uuid4()),
+                                content=clean_content,
+                                source="terminal_wake",
+                                user_id="user",
+                                timestamp=datetime.now().isoformat(),
+                                priority="high"  # Wake word activation gets higher priority
+                            )
+
+                            await self.add_idea(idea)
+
+                    # Clear the wake signal file
+                    wake_file.write_text("")
+
+            except Exception as e:
+                print(f"{Colors.RED}Error processing wake signal: {e}{Colors.END}")
 
     async def monitor_input_file(self):
         """Monitor input file for demo purposes"""

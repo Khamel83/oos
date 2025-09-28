@@ -10,6 +10,9 @@ import json
 import argparse
 from pathlib import Path
 from typing import List, Optional, Dict, Any
+import asyncio
+import httpx
+from datetime import datetime
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -74,11 +77,107 @@ def load_config() -> Dict[str, Any]:
     with open(config_path, 'r') as f:
         return json.load(f)
 
+def load_env_config() -> Dict[str, str]:
+    """Load environment configuration from .env file"""
+    env_config = {}
+    env_path = Path('.env')
+    if env_path.exists():
+        with open(env_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    env_config[key.strip()] = value.strip()
+    return env_config
+
+class ArchonIntegration:
+    """Helper class for Archon MCP integration"""
+
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.env_config = load_env_config()
+        self.archon_url = self.env_config.get('ARCHON_URL', 'http://localhost:8051/mcp')
+        self.project_id = self.env_config.get('ARCHON_PROJECT_ID')
+
+    def is_available(self) -> bool:
+        """Check if Archon integration is available"""
+        return bool(self.project_id and self.archon_url)
+
+    async def call_mcp(self, method: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Make MCP call to Archon server"""
+        if not self.is_available():
+            raise Exception("Archon integration not configured. Set ARCHON_PROJECT_ID and ARCHON_URL in .env")
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    self.archon_url,
+                    json={
+                        "jsonrpc": "2.0",
+                        "method": method,
+                        "params": params,
+                        "id": 1
+                    }
+                )
+                response.raise_for_status()
+                data = response.json()
+
+                if "error" in data:
+                    raise Exception(f"Archon error: {data['error']['message']}")
+
+                return data.get("result", {})
+
+        except httpx.RequestError as e:
+            raise Exception(f"Failed to connect to Archon server: {e}")
+
+    async def list_tasks(self, status: Optional[str] = None, feature: Optional[str] = None) -> List[Dict[str, Any]]:
+        """List tasks for current project"""
+        params = {"project_id": self.project_id}
+        if status:
+            params["filter_by"] = "status"
+            params["filter_value"] = status
+
+        result = await self.call_mcp("list_tasks", params)
+        tasks = result.get("tasks", [])
+
+        if feature:
+            tasks = [t for t in tasks if t.get("feature") == feature]
+
+        return tasks
+
+    async def get_task(self, task_id: str) -> Dict[str, Any]:
+        """Get task details"""
+        result = await self.call_mcp("get_task", {"task_id": task_id})
+        return result.get("task", {})
+
+    async def update_task(self, task_id: str, **updates) -> Dict[str, Any]:
+        """Update task"""
+        params = {"task_id": task_id, **updates}
+        result = await self.call_mcp("update_task", params)
+        return result.get("task", {})
+
+    async def create_task(self, title: str, description: str, **kwargs) -> Dict[str, Any]:
+        """Create new task"""
+        params = {
+            "project_id": self.project_id,
+            "title": title,
+            "description": description,
+            **kwargs
+        }
+        result = await self.call_mcp("create_task", params)
+        return result.get("task", {})
+
+    async def get_project(self) -> Dict[str, Any]:
+        """Get current project details"""
+        result = await self.call_mcp("get_project", {"project_id": self.project_id})
+        return result.get("project", {})
+
 class OOSCommandProcessor:
     """Process natural language commands"""
 
     def __init__(self, config: Dict[str, Any]):
         self.config = config
+        self.archon = ArchonIntegration(config)
 
     async def process_command(self, args: List[str]) -> int:
         """Process a natural language command"""
@@ -127,10 +226,22 @@ class OOSCommandProcessor:
         elif command.startswith('explain'):
             return await self.handle_explain(command)
 
+        elif command.startswith('task'):
+            return await self.handle_task_command(command)
+
+        elif command.startswith('project'):
+            return await self.handle_project_command(command)
+
         elif command.startswith('sheets'):
             return await self.handle_sheets_command(command)
         elif command.startswith('search'):
             return await self.handle_search_command(command)
+
+        elif command.startswith('daemon'):
+            return await self.handle_daemon_command(command)
+
+        elif command.startswith('hey oos') or command.startswith('wake'):
+            return await self.handle_wake_command(command)
 
         else:
             # Use capability router to understand the request
@@ -232,6 +343,17 @@ class OOSCommandProcessor:
 {Colors.GREEN}  oos run{Colors.WHITE}               • Run your current project
 {Colors.GREEN}  oos show <thing>{Colors.WHITE}      • Show information about your project
 {Colors.GREEN}  oos deploy{Colors.WHITE}            • Deploy your project to the web
+
+{Colors.WHITE}{Colors.BOLD}🎯 Task Management (Archon):{Colors.END}
+{Colors.GREEN}  oos task list{Colors.WHITE}         • List all tasks
+{Colors.GREEN}  oos task create 'Title' 'Desc'{Colors.WHITE} • Create new task
+{Colors.GREEN}  oos task start <id>{Colors.WHITE}   • Start working on task
+{Colors.GREEN}  oos project status{Colors.WHITE}    • Show project overview
+
+{Colors.WHITE}{Colors.BOLD}🤖 Persistent Assistant:{Colors.END}
+{Colors.GREEN}  oos daemon start{Colors.WHITE}      • Start background assistant
+{Colors.GREEN}  oos hey oos <idea>{Colors.WHITE}    • Send idea to assistant
+{Colors.GREEN}  oos wake <request>{Colors.WHITE}    • Wake word activation
 
 {Colors.WHITE}{Colors.BOLD}🌐 Google Sheets (Universal Access):{Colors.END}
 {Colors.GREEN}  oos sheets setup{Colors.WHITE}       • Setup Google integration
@@ -562,6 +684,452 @@ Type: oos help me <your question>
             return 1
 
         return 0
+
+    async def handle_task_command(self, command: str) -> int:
+        """Handle task management commands"""
+        parts = command.split()
+        if len(parts) < 2:
+            self.show_task_help()
+            return 0
+
+        subcommand = parts[1]
+
+        if not self.archon.is_available():
+            print_error("Archon integration not configured")
+            print_info("To set up Archon integration:")
+            print_info("1. Add ARCHON_PROJECT_ID=<your-project-id> to .env")
+            print_info("2. Add ARCHON_URL=<your-archon-server-url> to .env")
+            return 1
+
+        try:
+            if subcommand == 'list':
+                return await self.handle_task_list(parts[2:] if len(parts) > 2 else [])
+            elif subcommand == 'start':
+                return await self.handle_task_start(parts[2:] if len(parts) > 2 else [])
+            elif subcommand == 'complete':
+                return await self.handle_task_complete(parts[2:] if len(parts) > 2 else [])
+            elif subcommand == 'create':
+                return await self.handle_task_create(parts[2:] if len(parts) > 2 else [])
+            elif subcommand == 'show':
+                return await self.handle_task_show(parts[2:] if len(parts) > 2 else [])
+            else:
+                print_error(f"Unknown task command: {subcommand}")
+                self.show_task_help()
+                return 1
+
+        except Exception as e:
+            print_error(f"Task command failed: {e}")
+            return 1
+
+    async def handle_project_command(self, command: str) -> int:
+        """Handle project management commands"""
+        parts = command.split()
+        if len(parts) < 2:
+            self.show_project_help()
+            return 0
+
+        subcommand = parts[1]
+
+        if not self.archon.is_available():
+            print_error("Archon integration not configured")
+            print_info("Add ARCHON_PROJECT_ID and ARCHON_URL to your .env file")
+            return 1
+
+        try:
+            if subcommand == 'status':
+                return await self.handle_project_status()
+            elif subcommand == 'info':
+                return await self.handle_project_info()
+            else:
+                print_error(f"Unknown project command: {subcommand}")
+                self.show_project_help()
+                return 1
+
+        except Exception as e:
+            print_error(f"Project command failed: {e}")
+            return 1
+
+    async def handle_task_list(self, args: List[str]) -> int:
+        """Handle task list command"""
+        print_step("Task List", "Your project tasks")
+
+        # Parse optional filters
+        status_filter = None
+        feature_filter = None
+
+        i = 0
+        while i < len(args):
+            if args[i] == '--status' and i + 1 < len(args):
+                status_filter = args[i + 1]
+                i += 2
+            elif args[i] == '--feature' and i + 1 < len(args):
+                feature_filter = args[i + 1]
+                i += 2
+            else:
+                i += 1
+
+        tasks = await self.archon.list_tasks(status=status_filter, feature=feature_filter)
+
+        if not tasks:
+            filter_desc = ""
+            if status_filter:
+                filter_desc += f" with status '{status_filter}'"
+            if feature_filter:
+                filter_desc += f" in feature '{feature_filter}'"
+            print_info(f"No tasks found{filter_desc}")
+            print_info("Create a task: ./oos task create 'Task Title' 'Description'")
+            return 0
+
+        # Group tasks by status
+        status_groups = {}
+        for task in tasks:
+            status = task.get('status', 'unknown')
+            if status not in status_groups:
+                status_groups[status] = []
+            status_groups[status].append(task)
+
+        # Display tasks by status
+        status_colors = {
+            'todo': Colors.YELLOW,
+            'doing': Colors.BLUE,
+            'review': Colors.CYAN,
+            'done': Colors.GREEN
+        }
+
+        for status, task_list in status_groups.items():
+            status_color = status_colors.get(status, Colors.WHITE)
+            print(f"\n{status_color}{Colors.BOLD}{status.upper()} ({len(task_list)}){Colors.END}")
+
+            for task in task_list:
+                task_id = task['id'][:8]  # Short ID
+                title = task['title']
+                feature = task.get('feature', '')
+                assignee = task.get('assignee', 'Unassigned')
+
+                feature_text = f"[{feature}] " if feature else ""
+                print(f"  {Colors.WHITE}{task_id}{Colors.END} {feature_text}{title}")
+                print(f"    👤 {assignee}")
+
+        print_info(f"\nTotal: {len(tasks)} tasks")
+        return 0
+
+    async def handle_task_start(self, args: List[str]) -> int:
+        """Handle task start command"""
+        if not args:
+            print_error("Please provide a task ID")
+            print_info("Usage: ./oos task start <task-id>")
+            return 1
+
+        task_id = args[0]
+        print_step("Starting Task", f"Marking task as 'doing': {task_id}")
+
+        # Get full task ID if short ID provided
+        if len(task_id) == 8:
+            tasks = await self.archon.list_tasks()
+            full_task = next((t for t in tasks if t['id'].startswith(task_id)), None)
+            if not full_task:
+                print_error(f"Task not found: {task_id}")
+                return 1
+            task_id = full_task['id']
+
+        task = await self.archon.update_task(task_id, status="doing")
+        print_success(f"Started task: {task['title']}")
+        print_info(f"Status: {task['status']}")
+        return 0
+
+    async def handle_task_complete(self, args: List[str]) -> int:
+        """Handle task complete command"""
+        if not args:
+            print_error("Please provide a task ID")
+            print_info("Usage: ./oos task complete <task-id>")
+            return 1
+
+        task_id = args[0]
+        print_step("Completing Task", f"Marking task as 'done': {task_id}")
+
+        # Get full task ID if short ID provided
+        if len(task_id) == 8:
+            tasks = await self.archon.list_tasks()
+            full_task = next((t for t in tasks if t['id'].startswith(task_id)), None)
+            if not full_task:
+                print_error(f"Task not found: {task_id}")
+                return 1
+            task_id = full_task['id']
+
+        task = await self.archon.update_task(task_id, status="done")
+        print_success(f"Completed task: {task['title']}")
+        print_info(f"Status: {task['status']}")
+        return 0
+
+    async def handle_task_create(self, args: List[str]) -> int:
+        """Handle task create command"""
+        if len(args) < 2:
+            print_error("Please provide title and description")
+            print_info("Usage: ./oos task create 'Title' 'Description'")
+            return 1
+
+        title = args[0]
+        description = args[1]
+        feature = args[2] if len(args) > 2 else None
+
+        print_step("Creating Task", f"New task: {title}")
+
+        kwargs = {}
+        if feature:
+            kwargs['feature'] = feature
+
+        task = await self.archon.create_task(title, description, **kwargs)
+        print_success(f"Created task: {task['title']}")
+        print_info(f"Task ID: {task['id'][:8]}")
+        print_info(f"Status: {task['status']}")
+        return 0
+
+    async def handle_task_show(self, args: List[str]) -> int:
+        """Handle task show command"""
+        if not args:
+            print_error("Please provide a task ID")
+            print_info("Usage: ./oos task show <task-id>")
+            return 1
+
+        task_id = args[0]
+
+        # Get full task ID if short ID provided
+        if len(task_id) == 8:
+            tasks = await self.archon.list_tasks()
+            full_task = next((t for t in tasks if t['id'].startswith(task_id)), None)
+            if not full_task:
+                print_error(f"Task not found: {task_id}")
+                return 1
+            task_id = full_task['id']
+
+        task = await self.archon.get_task(task_id)
+        if not task:
+            print_error(f"Task not found: {task_id}")
+            return 1
+
+        print_step("Task Details", task['title'])
+        print_info(f"ID: {task['id']}")
+        print_info(f"Status: {task['status']}")
+        print_info(f"Assignee: {task.get('assignee', 'Unassigned')}")
+        print_info(f"Feature: {task.get('feature', 'None')}")
+        print_info(f"Created: {task['created_at'][:10]}")
+        print_info(f"Updated: {task['updated_at'][:10]}")
+
+        if task.get('description'):
+            print(f"\n{Colors.WHITE}{Colors.BOLD}Description:{Colors.END}")
+            print(f"{task['description']}")
+
+        return 0
+
+    async def handle_project_status(self) -> int:
+        """Handle project status command"""
+        print_step("Project Status", "Checking your project")
+
+        project = await self.archon.get_project()
+        tasks = await self.archon.list_tasks()
+
+        print_info(f"Project: {project.get('title', 'Unknown')}")
+        print_info(f"Description: {project.get('description', 'No description')}")
+
+        # Task summary
+        status_counts = {}
+        for task in tasks:
+            status = task.get('status', 'unknown')
+            status_counts[status] = status_counts.get(status, 0) + 1
+
+        print(f"\n{Colors.WHITE}{Colors.BOLD}Task Summary:{Colors.END}")
+        for status, count in status_counts.items():
+            color = {
+                'todo': Colors.YELLOW,
+                'doing': Colors.BLUE,
+                'review': Colors.CYAN,
+                'done': Colors.GREEN
+            }.get(status, Colors.WHITE)
+            print(f"  {color}{status.upper()}: {count}{Colors.END}")
+
+        total_tasks = len(tasks)
+        completed = status_counts.get('done', 0)
+        if total_tasks > 0:
+            progress = (completed / total_tasks) * 100
+            print_info(f"Progress: {progress:.1f}% ({completed}/{total_tasks} tasks completed)")
+        else:
+            print_info("No tasks yet")
+
+        return 0
+
+    async def handle_project_info(self) -> int:
+        """Handle project info command"""
+        print_step("Project Information", "Your project details")
+
+        project = await self.archon.get_project()
+
+        print_info(f"Title: {project.get('title', 'Unknown')}")
+        print_info(f"Description: {project.get('description', 'No description')}")
+        print_info(f"Created: {project.get('created_at', 'Unknown')[:10]}")
+        print_info(f"Updated: {project.get('updated_at', 'Unknown')[:10]}")
+
+        if project.get('github_repo'):
+            print_info(f"GitHub: {project['github_repo']}")
+
+        print_info(f"Project ID: {self.archon.project_id}")
+        print_info(f"Archon URL: {self.archon.archon_url}")
+
+        return 0
+
+    def show_task_help(self):
+        """Show task command help"""
+        help_text = f"""
+{Colors.WHITE}{Colors.BOLD}Task Management Commands:{Colors.END}
+
+{Colors.GREEN}  ./oos task list{Colors.WHITE}                    List all tasks
+{Colors.GREEN}  ./oos task list --status todo{Colors.WHITE}      List tasks by status
+{Colors.GREEN}  ./oos task list --feature auth{Colors.WHITE}     List tasks by feature
+{Colors.GREEN}  ./oos task start <task-id>{Colors.WHITE}         Start working on task
+{Colors.GREEN}  ./oos task complete <task-id>{Colors.WHITE}      Mark task as complete
+{Colors.GREEN}  ./oos task create 'Title' 'Desc'{Colors.WHITE}   Create new task
+{Colors.GREEN}  ./oos task show <task-id>{Colors.WHITE}          Show task details
+
+{Colors.WHITE}{Colors.BOLD}Examples:{Colors.END}
+{Colors.YELLOW}  ./oos task list --status doing{Colors.WHITE}
+{Colors.YELLOW}  ./oos task create 'Add OAuth' 'Implement Google OAuth2'{Colors.WHITE}
+{Colors.YELLOW}  ./oos task start 1a2b3c4d{Colors.WHITE}
+{Colors.YELLOW}  ./oos task complete 1a2b3c4d{Colors.WHITE}
+"""
+        print(help_text)
+
+    async def handle_daemon_command(self, command: str) -> int:
+        """Handle daemon management commands"""
+        parts = command.split()
+        if len(parts) < 2:
+            self.show_daemon_help()
+            return 0
+
+        subcommand = parts[1]
+        print_step("OOS Daemon", f"Managing persistent assistant: {subcommand}")
+
+        if subcommand == 'start':
+            print_info("Starting OOS persistent assistant...")
+            # Use the daemon launcher
+            import subprocess
+            try:
+                result = subprocess.run([
+                    sys.executable,
+                    str(Path(__file__).parent.parent / "bin" / "oos-daemon"),
+                    "start"
+                ], check=False)
+                return result.returncode
+            except Exception as e:
+                print_error(f"Failed to start daemon: {e}")
+                return 1
+
+        elif subcommand == 'stop':
+            print_info("Stopping OOS persistent assistant...")
+            import subprocess
+            try:
+                result = subprocess.run([
+                    sys.executable,
+                    str(Path(__file__).parent.parent / "bin" / "oos-daemon"),
+                    "stop"
+                ], check=False)
+                return result.returncode
+            except Exception as e:
+                print_error(f"Failed to stop daemon: {e}")
+                return 1
+
+        elif subcommand == 'status':
+            print_info("Checking OOS persistent assistant status...")
+            import subprocess
+            try:
+                result = subprocess.run([
+                    sys.executable,
+                    str(Path(__file__).parent.parent / "bin" / "oos-daemon"),
+                    "status"
+                ], check=False)
+                return result.returncode
+            except Exception as e:
+                print_error(f"Failed to check daemon status: {e}")
+                return 1
+
+        else:
+            print_error(f"Unknown daemon command: {subcommand}")
+            self.show_daemon_help()
+            return 1
+
+    async def handle_wake_command(self, command: str) -> int:
+        """Handle wake word activation"""
+        # Extract the actual request after wake phrase
+        if command.startswith('hey oos'):
+            content = command[7:].strip()
+        elif command.startswith('wake'):
+            content = command[4:].strip()
+        else:
+            content = command
+
+        if not content:
+            print_info("🎧 OOS listening... What would you like me to help with?")
+            return 0
+
+        print_step("Wake Word Activated", f"Processing: {content}")
+
+        # Check if daemon is running
+        config_dir = Path.home() / '.oos'
+        wake_file = config_dir / 'wake_signal.txt'
+        daemon_pid = config_dir / 'daemon.pid'
+
+        if daemon_pid.exists():
+            # Daemon is running, send wake signal
+            try:
+                with open(wake_file, 'w') as f:
+                    f.write(f"hey oos {content}")
+                print_success(f"💡 Idea sent to persistent assistant: {content}")
+                print_info("💤 Your idea will be processed in the background")
+                return 0
+            except Exception as e:
+                print_error(f"Failed to send to daemon: {e}")
+                print_info("Processing directly instead...")
+
+        # Daemon not running, process directly
+        print_info("🤖 Processing your request directly...")
+        return await self.handle_natural_command(content)
+
+    def show_daemon_help(self):
+        """Show daemon command help"""
+        help_text = f"""
+{Colors.WHITE}{Colors.BOLD}OOS Persistent Assistant Commands:{Colors.END}
+
+{Colors.GREEN}  ./oos daemon start{Colors.WHITE}                Start persistent assistant
+{Colors.GREEN}  ./oos daemon stop{Colors.WHITE}                 Stop persistent assistant
+{Colors.GREEN}  ./oos daemon status{Colors.WHITE}               Check assistant status
+
+{Colors.WHITE}{Colors.BOLD}Wake Word Activation:{Colors.END}
+{Colors.GREEN}  ./oos hey oos create a chatbot{Colors.WHITE}    Send idea to assistant
+{Colors.GREEN}  ./oos wake help me with auth{Colors.WHITE}      Wake word alternative
+
+{Colors.WHITE}{Colors.BOLD}Examples:{Colors.END}
+{Colors.YELLOW}  ./oos daemon start{Colors.WHITE}
+{Colors.YELLOW}  ./oos hey oos build me a web scraper{Colors.WHITE}
+{Colors.YELLOW}  ./oos wake help me deploy to AWS{Colors.WHITE}
+
+{Colors.WHITE}{Colors.BOLD}Background Processing:{Colors.END}
+{Colors.CYAN}  • Ideas are processed continuously{Colors.WHITE}
+{Colors.CYAN}  • Results are saved and can be retrieved{Colors.WHITE}
+{Colors.CYAN}  • Multiple ideas can be processed simultaneously{Colors.WHITE}
+"""
+        print(help_text)
+
+    def show_project_help(self):
+        """Show project command help"""
+        help_text = f"""
+{Colors.WHITE}{Colors.BOLD}Project Management Commands:{Colors.END}
+
+{Colors.GREEN}  ./oos project status{Colors.WHITE}              Show project overview
+{Colors.GREEN}  ./oos project info{Colors.WHITE}                Show project details
+
+{Colors.WHITE}{Colors.BOLD}Examples:{Colors.END}
+{Colors.YELLOW}  ./oos project status{Colors.WHITE}
+{Colors.YELLOW}  ./oos project info{Colors.WHITE}
+"""
+        print(help_text)
 
     def show_project_info(self):
         """Show current project information"""

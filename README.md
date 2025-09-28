@@ -2,22 +2,27 @@
 
 **One command installs everything. Zero cost to run. Works with any project.**
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Khamel83/oos/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/Khamel83/oos/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Install](https://img.shields.io/badge/install-curl%20%7C%20bash-orange.svg)](#installation)
-[![Context Engineering](https://img.shields.io/badge/Context%20Engineering-Ready-brightgreen)](docs/context_engineering_completion_summary.md)
-[![Slash Commands](https://img.shields.io/badge/Slash%20Commands-10%20Available-blue)](.claude/commands/)
+[![Archon Integration](https://img.shields.io/badge/Archon%20MCP-Integrated-brightgreen)](docs/ARCHON_INTEGRATION.md)
+[![Persistent Assistant](https://img.shields.io/badge/AI%20Assistant-Always%20On-purple)](bin/oos-daemon)
+[![Slash Commands](https://img.shields.io/badge/Slash%20Commands-14%20Available-blue)](.claude/commands/)
 [![Token Optimization](https://img.shields.io/badge/Token%20Reduction-40--60%25-orange)](src/token_optimization.py)
 
 ## 🎯 What is OOS?
 
 OOS is a universal productivity system that adds powerful search, automation, and AI capabilities to any project. Think of it as your personal operating system layer that works everywhere.
 
+**NEW in v1.1.0**: Persistent AI assistant with Archon MCP integration for intelligent task management and wake word activation.
+
 ### ⚡ Key Features
 
-- **🔍 Universal Search**: 4 free search engines + optional Perplexity Pro
+- **🧠 Persistent AI Assistant**: Always-on background assistant with "Hey OOS" wake word activation
+- **📋 Intelligent Task Management**: Archon MCP integration for AI-driven project management
+- **🔍 Universal Search**: 4 free search engines + optional Perplexity Pro + knowledge base search
 - **💰 Cost Optimizer**: Replace expensive APIs with free alternatives
-- **🤖 AI Integration**: Smart slash commands for Claude Code
+- **🤖 Enhanced AI Integration**: 14 smart slash commands for Claude Code
 - **📦 Universal Install**: One command works with any project type
 - **🛡️ Built-in Safety**: Cost controls and usage monitoring
 
@@ -34,10 +39,21 @@ curl -sSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bas
 ./oos search "python tutorials"
 ./oos search "docker best practices"
 
-# In Claude Code - use slash commands
-/smart-commit     # Generate commit messages
-/optimize         # Reduce context tokens
-/help-me          # Smart assistance
+# Start persistent assistant
+./bin/oos-daemon start
+
+# Wake word activation
+echo "hey oos implement user authentication" > ~/.oos/wake.txt
+
+# Task management
+./oos task list
+./oos task create "Add OAuth integration" "Implement Google OAuth with PKCE"
+
+# In Claude Code - use enhanced slash commands
+/archon-status      # View project status and tasks
+/archon-research    # Search knowledge base
+/smart-commit       # Generate commit messages
+/optimize           # Reduce context tokens
 ```
 
 ## 💰 Cost Benefits
@@ -71,6 +87,34 @@ OOS automatically detects and integrates with:
 - **Smart workflows**: Turn rambling thoughts into structured plans
 - **Self-documentation**: Automated commit messages and consistency checks
 - **Learning system**: Remember lessons learned to avoid repeating mistakes
+
+## 🚀 NEW: Persistent AI Assistant (v1.1.0)
+
+### 🧠 Archon MCP Integration
+- **Intelligent Task Management**: Full integration with Archon MCP server for AI-driven project coordination
+- **Knowledge Base Search**: Access shared knowledge across all your projects
+- **Natural Language Tasks**: Create and manage tasks using conversational commands
+- **Cross-Project Intelligence**: Leverage learnings from one project in another
+
+### 🎤 Wake Word Activation
+```bash
+# Start the persistent assistant
+./bin/oos-daemon start
+
+# Use wake word from anywhere
+echo "hey oos implement user authentication with OAuth" > ~/.oos/wake.txt
+```
+
+### 📋 Enhanced Claude Code Integration
+- **4 New Slash Commands**: /archon-status, /archon-task-start, /archon-research, /archon-complete
+- **Task-Driven Development**: Never code without clear task context
+- **Real-time Sync**: Changes in Claude Code update Archon tasks automatically
+- **Research Assistant**: Instant access to relevant code examples and documentation
+
+### 🛠️ Developer Tools
+- **oos-op**: 1Password session management (7-30 day sessions or permanent service accounts)
+- **oos-doctor**: Enhanced health monitoring with Archon connectivity checks
+- **Enhanced Bootstrap**: Archon-first workflow setup with better error handling
 
 ## ✨ Core Features
 

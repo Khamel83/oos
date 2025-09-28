@@ -14,6 +14,9 @@ PATH_ABS="${2:-/home/ubuntu/dev/oos}"
 ORG="${ORG:-Khamel83}"         # GitHub user/org
 VIS="${VIS:-public}"           # public|private
 
+# Archon MCP Configuration
+ARCHON_URL="${ARCHON_URL:-http://localhost:8051/mcp}"  # Default to localhost
+
 # 1Password location for the multiline .env
 OP_VAULT="${OP_VAULT:-Personal}"
 OP_ITEM="${OP_ITEM:-bootstrap-env}"
@@ -221,7 +224,9 @@ check_dependency() {
         warn "1Password CLI found but not signed in"
         if [[ "$DRY_RUN" == "false" ]]; then
           log "Please sign in to 1Password..."
-          eval "$(op signin)" || {
+          log "Tip: Use 'op signin --session=7d' for a 7-day session"
+          log "Or set OP_SERVICE_ACCOUNT_TOKEN for permanent access"
+          eval "$(op signin --session=7d)" || {
             error "Failed to sign in to 1Password"
             return 1
           }
@@ -366,7 +371,11 @@ validate_onepassword() {
   verbose "Checking 1Password authentication..."
   if [[ "$DRY_RUN" == "false" ]]; then
     if ! op whoami >/dev/null 2>&1; then
-      error "1Password CLI not authenticated. Please run 'op signin'"
+      error "1Password CLI not authenticated."
+      echo "Solutions:"
+      echo "  • For 7-day session: op signin --session=7d"
+      echo "  • For permanent access: export OP_SERVICE_ACCOUNT_TOKEN=your-token"
+      echo "  • Quick signin: op signin"
       return 1
     fi
 
@@ -447,7 +456,7 @@ setup_archon_integration() {
 
 # Archon MCP Integration
 ARCHON_PROJECT_ID=
-ARCHON_URL=http://100.103.45.61:8051/mcp
+ARCHON_URL=$ARCHON_URL
 EOF
 
   verbose "Creating Archon project creation helper script..."
@@ -458,14 +467,26 @@ EOF
 set -euo pipefail
 
 # Create Archon project and update .env with project ID
-# Usage: ./bin/create_archon_project.sh [PROJECT_TITLE] [PROJECT_DESCRIPTION]
+# Usage: ./bin/create_archon_project.sh [PROJECT_TITLE] [PROJECT_DESCRIPTION] [GITHUB_REPO]
 
 PROJECT_TITLE="${1:-$(basename "$(pwd)")}"
 PROJECT_DESCRIPTION="${2:-OOS-enhanced project with Archon integration}"
-GITHUB_REPO="${GITHUB_REPO:-}"
+GITHUB_REPO="${3:-}"
+
+# Auto-detect GitHub repo if not provided and we're in a git directory
+if [[ -z "$GITHUB_REPO" ]] && [[ -d .git ]]; then
+  GITHUB_REPO=$(git remote get-url origin 2>/dev/null || echo "")
+  # Convert SSH URLs to HTTPS format
+  if [[ "$GITHUB_REPO" =~ ^git@github\.com: ]]; then
+    GITHUB_REPO="https://github.com/${GITHUB_REPO#git@github.com:}"
+  fi
+  # Remove .git suffix if present
+  GITHUB_REPO="${GITHUB_REPO%.git}"
+fi
 
 echo "Creating Archon project: $PROJECT_TITLE"
 echo "Description: $PROJECT_DESCRIPTION"
+[[ -n "$GITHUB_REPO" ]] && echo "GitHub Repository: $GITHUB_REPO"
 
 # Note: This script provides instructions for manual project creation
 # since it requires Claude Code with Archon MCP integration
@@ -479,8 +500,8 @@ To complete Archon integration:
 
 mcp__archon__create_project({
     title: "$PROJECT_TITLE",
-    description: "$PROJECT_DESCRIPTION",
-    github_repo: "$GITHUB_REPO"
+    description: "$PROJECT_DESCRIPTION"$(if [[ -n "$GITHUB_REPO" ]]; then echo ",
+    github_repo: \"$GITHUB_REPO\""; fi)
 })
 
 3. Copy the returned project_id to your .env file:
@@ -488,6 +509,11 @@ mcp__archon__create_project({
    ARCHON_PROJECT_ID=<project_id_from_step_2>
 
 4. Restart your OOS workflows to use Archon task management
+
+Automatic GitHub Detection:
+- If you're in a git repository, GitHub URL is auto-detected
+- Supports both SSH and HTTPS remote URLs
+- Manually specify with: $0 "Title" "Description" "https://github.com/user/repo"
 
 EOF
 

@@ -9,8 +9,10 @@ Interactive tool for maintaining code quality, documentation, and consistency.
 import sys
 import asyncio
 import json
+import os
 from pathlib import Path
 from typing import List, Dict, Any
+import httpx
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -23,6 +25,90 @@ class OOSDoctor:
 
     def __init__(self):
         self.system = get_auto_documentation_system()
+        self.load_env_config()
+
+    def load_env_config(self):
+        """Load environment configuration from .env file"""
+        self.env_config = {}
+        env_path = Path('.env')
+        if env_path.exists():
+            with open(env_path, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        self.env_config[key.strip()] = value.strip()
+
+    async def check_archon_connectivity(self):
+        """Check Archon MCP server connectivity"""
+        print("🔗 Checking Archon MCP connectivity...")
+
+        archon_url = self.env_config.get('ARCHON_URL')
+        project_id = self.env_config.get('ARCHON_PROJECT_ID')
+
+        if not archon_url:
+            print("  ❌ ARCHON_URL not configured in .env")
+            return False
+
+        if not project_id:
+            print("  ⚠️  ARCHON_PROJECT_ID not configured in .env")
+            print("     Run: ./bin/create_archon_project.sh")
+
+        try:
+            print(f"  📡 Testing connection to {archon_url}")
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                # Test basic MCP endpoint
+                response = await client.post(
+                    archon_url,
+                    json={
+                        "jsonrpc": "2.0",
+                        "method": "ping",
+                        "params": {},
+                        "id": 1
+                    }
+                )
+
+                if response.status_code == 200:
+                    print("  ✅ Archon server is reachable")
+
+                    # Test project access if project_id is configured
+                    if project_id:
+                        project_response = await client.post(
+                            archon_url,
+                            json={
+                                "jsonrpc": "2.0",
+                                "method": "get_project",
+                                "params": {"project_id": project_id},
+                                "id": 2
+                            }
+                        )
+
+                        if project_response.status_code == 200:
+                            data = project_response.json()
+                            if "result" in data and "project" in data["result"]:
+                                project_title = data["result"]["project"].get("title", "Unknown")
+                                print(f"  ✅ Project access verified: {project_title}")
+                            else:
+                                print("  ❌ Project not found or access denied")
+                                return False
+                        else:
+                            print("  ❌ Cannot access project")
+                            return False
+
+                    return True
+                else:
+                    print(f"  ❌ Server responded with status {response.status_code}")
+                    return False
+
+        except httpx.TimeoutException:
+            print("  ❌ Connection timeout - server may be down")
+            return False
+        except httpx.RequestError as e:
+            print(f"  ❌ Connection failed: {e}")
+            return False
+        except Exception as e:
+            print(f"  ❌ Unexpected error: {e}")
+            return False
 
     async def run_interactive(self):
         """Run interactive doctor session"""
@@ -48,12 +134,13 @@ class OOSDoctor:
         print("  3. Fix all auto-fixable issues")
         print("  4. Setup auto-documentation system")
         print("  5. Check specific files")
+        print("  6. Test Archon MCP connectivity")
 
         while True:
-            choice = input("\nChoose option (1-5): ").strip()
-            if choice in ['1', '2', '3', '4', '5']:
+            choice = input("\nChoose option (1-6): ").strip()
+            if choice in ['1', '2', '3', '4', '5', '6']:
                 break
-            print("❌ Please enter 1-5")
+            print("❌ Please enter 1-6")
 
         if choice == '1':
             await self._quick_health_check(python_files)
@@ -65,6 +152,8 @@ class OOSDoctor:
             await self._setup_system()
         elif choice == '5':
             await self._check_specific_files()
+        elif choice == '6':
+            await self.check_archon_connectivity()
 
     async def _quick_health_check(self, files: List[Path]):
         """Quick consistency health check"""
