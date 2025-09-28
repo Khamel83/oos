@@ -121,12 +121,20 @@ echo -e "${YELLOW}Installing scripts...${NC}"
 cp "$OOS_SOURCE/bin/"claude-*.sh bin/ 2>/dev/null || true
 chmod +x bin/*.sh 2>/dev/null || true
 
-# Python modules (if Python project or existing setup)
-if [[ " ${FEATURES[*]} " =~ " Python " ]] || [[ " ${FEATURES[*]} " =~ " Claude Code " ]]; then
-    echo -e "${YELLOW}Installing Python modules...${NC}"
+# Python modules (always install core search functionality)
+echo -e "${YELLOW}Installing Python modules...${NC}"
 
-    # Essential modules
-    for module in oos_cli.py free_search_alternatives.py perplexity_usage_manager.py simple_command_handler.py capability_router.py knowledge_resolver.py renderers.py; do
+# Essential modules for search functionality (always install)
+for module in free_search_alternatives.py perplexity_usage_manager.py; do
+    cp "$OOS_SOURCE/src/$module" src/ 2>/dev/null || true
+done
+
+# Full Python modules (if Python project or Claude Code)
+if [[ " ${FEATURES[*]} " =~ " Python " ]] || [[ " ${FEATURES[*]} " =~ " Claude Code " ]]; then
+    echo -e "${YELLOW}Installing full Python suite...${NC}"
+
+    # Additional modules
+    for module in oos_cli.py simple_command_handler.py capability_router.py knowledge_resolver.py renderers.py; do
         cp "$OOS_SOURCE/src/$module" src/ 2>/dev/null || true
     done
 
