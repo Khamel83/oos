@@ -39,55 +39,68 @@ Each project maintains its own `.env` file with unique identifiers:
 ```bash
 # Project Alpha - Authentication Service
 ARCHON_PROJECT_ID=550e8400-e29b-41d4-a716-446655440000
-ARCHON_URL=http://localhost:8051/mcp
+ARCHON_URL=http://your-archon-server:8051/mcp
 PROJECT_NAME=auth-service
 PROJECT_TYPE=api
 
 # Project Beta - E-commerce Frontend
 ARCHON_PROJECT_ID=7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456
-ARCHON_URL=http://localhost:8051/mcp
+ARCHON_URL=http://your-archon-server:8051/mcp
 PROJECT_NAME=ecommerce-web
 PROJECT_TYPE=web-app
 ```
 
-## 🚀 Step-by-Step Integration
+## 🚀 Automatic Integration (Default)
 
-### 1. Initial Project Setup
+### 1. Archon Integration is Now Automatic
 
-#### Create New Project in Archon
-```javascript
-// In Claude Code with Archon MCP
-mcp__archon__create_project({
-    title: "Authentication Service",
-    description: "JWT-based authentication API with OAuth2 integration for multi-tenant SaaS platform",
-    github_repo: "https://github.com/myorg/auth-service"
-})
+**As of OOS v1.0+, Archon integration happens automatically during bootstrap.**
 
-// Response includes:
-// {
-//   "success": true,
-//   "project_id": "550e8400-e29b-41d4-a716-446655440000",
-//   "message": "Project created successfully"
-// }
+#### Quick Setup for New Projects
+```bash
+# Navigate to your project directory
+cd /home/ubuntu/dev/my-project
+
+# Initialize OOS (Archon integration happens automatically)
+eval "$(op signin)"
+/path/to/oos/scripts/bootstrap_enhanced.sh
+
+# The bootstrap script automatically:
+# - Adds ARCHON_PROJECT_ID= to .env
+# - Adds ARCHON_URL=http://your-archon-server:8051/mcp to .env
+# - Creates bin/create_archon_project.sh helper script
+# - Registers Archon MCP server with Claude Code
 ```
 
-#### Configure OOS Environment
+#### Complete Archon Project Creation
 ```bash
-# Navigate to project directory
-cd /home/ubuntu/dev/auth-service
+# Use the generated helper script (auto-detects GitHub repo)
+./bin/create_archon_project.sh "My Project Title" "Project description"
 
-# Initialize OOS
-eval "$(op signin)"
-../oos/scripts/bootstrap_enhanced.sh
+# Follow the instructions to create the project in Claude Code:
+# mcp__archon__create_project({
+#     title: "My Project Title",
+#     description: "Project description",
+#     github_repo: "https://github.com/username/my-project" // auto-detected
+# })
 
-# Add Archon project ID to environment
-echo "ARCHON_PROJECT_ID=550e8400-e29b-41d4-a716-446655440000" >> .env
+# Update .env with the returned project_id
+echo "ARCHON_PROJECT_ID=<returned-project-id>" >> .env
+```
 
-# Verify Archon connectivity
-./bin/diagnose.sh --check-archon
+### 2. Manual Integration (For Existing Projects)
 
-# Start monitoring
-./bin/health_monitor.sh daemon
+If you have an existing project that needs Archon integration:
+
+```bash
+# Re-run bootstrap to add Archon integration
+/path/to/oos/scripts/bootstrap_enhanced.sh --force
+
+# Or manually add to existing .env:
+echo "
+# Archon MCP Integration
+ARCHON_PROJECT_ID=
+ARCHON_URL=http://your-archon-server:8051/mcp" >> .env
 ```
 
 ### 2. Task Management Integration

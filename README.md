@@ -136,7 +136,7 @@ Transform brief requests into detailed, structured prompts that get better respo
 - **Auto Documentation** ([src/auto_documentation.py](src/auto_documentation.py)) - Smart git integration and consistency
 - **Simple Command Handler** ([src/simple_command_handler.py](src/simple_command_handler.py)) - Clean slash command management
 - **MCP Server** ([mcp_server.py](mcp_server.py)) - Claude Code integration layer
-- **Learning System** ([bin/archon_learning.sh](bin/archon_learning.sh)) - Lesson tracking and anti-pattern detection
+- **Archon Integration** ([docs/ARCHON_INTEGRATION.md](docs/ARCHON_INTEGRATION.md)) - Project and task management with MCP
 
 ### 📉 Code Simplification
 
@@ -225,8 +225,8 @@ OOS includes a self-referential learning system:
 # Before developing, learn from past lessons
 ./bin/development_guide.sh
 
-# Track new lessons in Archon
-./bin/archon_learning.sh
+# Create Archon project for task management
+./bin/create_archon_project.sh
 ```
 
 This prevents repeating architecture mistakes, testing issues, and UX decisions.
@@ -282,7 +282,7 @@ See [docs/PORTABLE_SHELL.md](docs/PORTABLE_SHELL.md) for details.
 
 **✅ Context Engineering Implementation: COMPLETE**
 
-All 8 Archon tasks completed successfully. The system is production-ready and provides:
+The system is production-ready and provides:
 - 10 slash commands for Claude Code integration
 - Automatic context optimization with 40-60% token reduction
 - Meta-clarification system for external AI assistance
@@ -507,7 +507,7 @@ cc-zai              # Start directly on Z.AI GLM-4.5
 
 ```bash
 # Add once, reuse everywhere
-claude mcp add-json archon '{"type":"sse","url":"https://archon.example.com:8051/mcp"}'
+claude mcp add-json archon '{"type":"sse","url":"http://your-archon-server:8051/mcp"}'
 claude mcp get archon
 
 # Works in both cc-pro and cc-sona/cc-zai sessions
@@ -548,28 +548,32 @@ KIMI_API_KEY=
 
 **Security:** Bifrost binds to `127.0.0.1` (localhost-only). If you must expose it on OCI, open an NSG ingress + host firewall, but localhost is safer.
 
-### Z.AI Integration Status
+### Archon Integration Status
 
-**✅ READY FOR EXECUTION**
+**✅ INTEGRATED BY DEFAULT**
 
-Complete demonstration project created in Archon (`ba97acbf-4a87-48b6-831f-5866fe9fb8d6`) with 6-phase execution plan:
+Archon MCP is now automatically integrated with every OOS installation:
 
-- **Phase 0:** Repository selection + 1Password setup verification
-- **Phase 1:** Environment verification (Bifrost, launchers, MCP)
-- **Phase 2:** Rapid project setup demo (< 5 minutes target)
-- **Phase 3:** Claude Code Pro baseline establishment
-- **Phase 4:** Z.AI overflow demonstration (> 70% capability target)
-- **Phase 5:** Complete workflow validation
+- **Automatic Setup:** Bootstrap script adds Archon configuration to all new projects
+- **GitHub Integration:** Auto-detects repository URLs and links them to Archon projects
+- **Project Management:** Complete task tracking and documentation system
+- **MCP Integration:** Seamless Claude Code integration with your Archon server
 
-**Target Deliverable:** *"We're ready to use OOS and super clear on what to do when Claude tokens run out or we want to crank through tons of code"*
+**What You Get:**
+- ✅ ARCHON_PROJECT_ID and ARCHON_URL automatically added to .env
+- ✅ `bin/create_archon_project.sh` helper script created
+- ✅ Archon MCP server registered with Claude Code
+- ✅ GitHub repository auto-detection and linking
 
-**Prerequisites Completed:**
-- ✅ Z.AI API key added to 1Password bootstrap-env item
-- ✅ Bifrost gateway integration ready
-- ✅ cc-launchers.sh functions prepared
-- ✅ Complete execution plan in Archon project management
+**Configuration:**
+Update the ARCHON_URL in your .env file to point to your Archon server instance.
 
-**Estimated Execution Time:** ~2 hours total
+**Usage:**
+```bash
+# After OOS bootstrap, create your Archon project
+./bin/create_archon_project.sh "My Project" "Project description"
+# Follow the generated instructions to complete setup in Claude Code
+```
 
 ---
 
