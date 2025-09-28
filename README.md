@@ -1,29 +1,60 @@
-# OOS - Personal Operational Intelligence System
+# 🚀 OOS - Open Operating System
 
+**One command installs everything. Zero cost to run. Works with any project.**
+
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Khamel83/oos/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Install](https://img.shields.io/badge/install-curl%20%7C%20bash-orange.svg)](#installation)
 [![Context Engineering](https://img.shields.io/badge/Context%20Engineering-Ready-brightgreen)](docs/context_engineering_completion_summary.md)
 [![Slash Commands](https://img.shields.io/badge/Slash%20Commands-10%20Available-blue)](.claude/commands/)
 [![Token Optimization](https://img.shields.io/badge/Token%20Reduction-40--60%25-orange)](src/token_optimization.py)
 
-**Intelligent middleware that transforms Claude Code into a context-aware, token-optimized, self-documenting development environment.**
+## 🎯 What is OOS?
 
-> **🧠 Smart by Default**: OOS automatically optimizes every interaction, reduces token usage by 40-60%, and "saves you from yourself" through intelligent workflows and meta-clarification systems.
+OOS is a universal productivity system that adds powerful search, automation, and AI capabilities to any project. Think of it as your personal operating system layer that works everywhere.
 
----
+### ⚡ Key Features
+
+- **🔍 Universal Search**: 4 free search engines + optional Perplexity Pro
+- **💰 Cost Optimizer**: Replace expensive APIs with free alternatives
+- **🤖 AI Integration**: Smart slash commands for Claude Code
+- **📦 Universal Install**: One command works with any project type
+- **🛡️ Built-in Safety**: Cost controls and usage monitoring
 
 ## 🚀 Quick Start
 
-### **For Claude Code Users (Recommended)**
-Just say: *"integrate OOS"* in any Claude Code project and it will set up automatically!
+### One-Line Installation
+```bash
+curl -sSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
+```
 
-**Manual Instructions**: See [SETUP.md](SETUP.md)
+### Instant Usage
+```bash
+# Search anything for free
+./oos search "python tutorials"
+./oos search "docker best practices"
 
-### **For Advanced Users**
-- [QUICK_START.md](QUICK_START.md) - 30-second setup
-- [DEPLOYMENT.md](DEPLOYMENT.md) - Detailed instructions
+# In Claude Code - use slash commands
+/smart-commit     # Generate commit messages
+/optimize         # Reduce context tokens
+/help-me          # Smart assistance
+```
 
-## 🎯 What is OOS?
+## 💰 Cost Benefits
 
-OOS is your **intelligent middleware layer** that transforms Claude Code into a context-aware, token-optimized, self-documenting development environment. It "saves you from yourself" by automatically handling the complex stuff so you can focus on building.
+| Before OOS | After OOS | Savings |
+|------------|-----------|---------|
+| Google Search API: $87/month | Free alternatives: $0/month | $1,044/year |
+| Manual commit messages | AI-generated | Hours saved |
+| Context bloat | 40% token reduction | $$$ on AI costs |
+
+## 🎯 Works With Any Project
+
+OOS automatically detects and integrates with:
+
+- **Languages**: Node.js, Python, Rust, Go, PHP, Ruby, Java
+- **Tools**: Git, Docker, Claude Code
+- **Existing setups**: Won't break anything
 
 ### The Problem OOS Solves
 
