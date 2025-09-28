@@ -11,10 +11,16 @@ NC='\033[0m'
 
 echo -e "${BLUE}🧠 Generating smart commit message...${NC}"
 
-# Check if there are staged changes
-if ! git diff --cached --quiet; then
+# Check if we're in a git repository
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo -e "${RED}Not in a git repository. Please run from a git repository.${NC}"
+    exit 1
+fi
+
+# Check if there are staged changes (compatible with older git versions)
+if git diff --name-only --cached 2>/dev/null | grep -q .; then
     echo -e "${GREEN}Found staged changes. Analyzing...${NC}"
-elif ! git diff --quiet; then
+elif git diff --name-only 2>/dev/null | grep -q .; then
     echo -e "${YELLOW}Found unstaged changes. Staging them first...${NC}"
     git add .
 else
@@ -22,10 +28,10 @@ else
     exit 1
 fi
 
-# Get git diff for analysis
+# Get git diff for analysis (compatible approach)
 echo -e "${BLUE}📊 Analyzing changes...${NC}"
-DIFF_OUTPUT=$(git diff --cached --stat)
-DETAILED_DIFF=$(git diff --cached --name-only)
+DIFF_OUTPUT=$(git diff --stat --cached 2>/dev/null || git diff --stat)
+DETAILED_DIFF=$(git diff --name-only --cached 2>/dev/null || git diff --name-only)
 
 echo "Files changed:"
 echo "$DETAILED_DIFF" | sed 's/^/  • /'
