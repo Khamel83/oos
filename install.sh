@@ -27,16 +27,20 @@ ${NC}"
 
 echo -e "${BLUE}📦 Downloading OOS...${NC}"
 
-# In production, download from GitHub
-# For now, use local development version
-OOS_SOURCE="/home/ubuntu/dev/oos"
+# Download from GitHub
+OOS_SOURCE="$TEMP_DIR/oos"
 
-if [[ ! -d "$OOS_SOURCE" ]]; then
+if [[ ! -d "/home/ubuntu/dev/oos" ]]; then
     echo -e "${YELLOW}📥 Downloading from GitHub...${NC}"
-    # git clone https://github.com/your-org/oos.git "$TEMP_DIR/oos"
-    # OOS_SOURCE="$TEMP_DIR/oos"
-    echo -e "${RED}❌ OOS source not found. This is a development version.${NC}"
-    exit 1
+    git clone https://github.com/Khamel83/oos.git "$OOS_SOURCE"
+    if [[ ! -d "$OOS_SOURCE" ]]; then
+        echo -e "${RED}❌ Failed to download OOS from GitHub${NC}"
+        exit 1
+    fi
+else
+    # Use local development version if available
+    echo -e "${YELLOW}📥 Using local development version...${NC}"
+    OOS_SOURCE="/home/ubuntu/dev/oos"
 fi
 
 echo -e "${BLUE}🔍 Analyzing project: $TARGET_DIR${NC}"
