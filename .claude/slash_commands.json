@@ -49,6 +49,11 @@
       "name": "brain-dump",
       "description": "Smart processing of rambling input - automatically clarifies and optimizes",
       "script": "bin/claude-brain-dump.sh"
+    },
+    {
+      "name": "command",
+      "description": "Execute OOS command system commands (capabilities, actions, act, consultant)",
+      "script": "bin/claude-command.sh"
     }
   ]
 }

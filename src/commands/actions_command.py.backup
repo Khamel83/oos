@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from capability_router import route_request
 from actions_gateway import list_available_tools, execute_action, ActionResult
-from renderers import render_tools, CapabilityRenderer
+from renderers import render_tools, render_action_result
 
 
 class ActionsCommand:
@@ -87,7 +87,7 @@ class ActionsCommand:
             result = await execute_action(tool_id, params)
 
             # Render the result
-            renderer = CapabilityRenderer(); return renderer.render_action_result(result, show_json=show_json)
+            return render_action_result(result, show_json=show_json)
 
         except Exception as e:
             return f"Error executing action: {str(e)}"
