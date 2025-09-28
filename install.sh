@@ -116,8 +116,14 @@ MONTHLY_COST_LIMIT=30.00
 EOF
 fi
 
-# Universal OOS command
-cat > oos << 'EOF'
+# Universal OOS command (handle name conflicts)
+OOS_COMMAND="oos"
+if [[ -d "oos" ]]; then
+    OOS_COMMAND="oos-cli"
+    echo -e "${YELLOW}⚠️  Found existing 'oos' directory. Creating command as 'oos-cli'${NC}"
+fi
+
+cat > "$OOS_COMMAND" << 'EOF'
 #!/usr/bin/env python3
 """Universal OOS command - works in any project"""
 import sys
@@ -206,14 +212,14 @@ if __name__ == "__main__":
     main()
 EOF
 
-chmod +x oos
+chmod +x "$OOS_COMMAND"
 
 # Success summary
 echo -e "${GREEN}✅ OOS installed successfully!${NC}"
 echo ""
 echo -e "${CYAN}🎯 What you can do now:${NC}"
-echo "   ./oos search \"python tutorials\""
-echo "   ./oos help"
+echo "   ./$OOS_COMMAND search \"python tutorials\""
+echo "   ./$OOS_COMMAND help"
 echo ""
 
 if [[ " ${FEATURES[*]} " =~ " Claude Code " ]]; then
@@ -226,7 +232,7 @@ fi
 
 echo -e "${BLUE}⚙️  Next steps:${NC}"
 echo "1. Add your Perplexity API key to .env (optional, for Pro search)"
-echo "2. Try: ./oos search \"your favorite topic\""
+echo "2. Try: ./$OOS_COMMAND search \"your favorite topic\""
 echo ""
 echo -e "${GREEN}🎉 OOS is ready to use in your project!${NC}"
 

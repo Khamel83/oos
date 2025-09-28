@@ -150,9 +150,15 @@ else
     echo "   Found existing .env file - keeping it"
 fi
 
-# 7. Create OOS command wrapper
+# 7. Create OOS command wrapper (handle conflicts)
 echo -e "${YELLOW}Creating OOS command...${NC}"
-cat > "$TARGET_DIR/oos" << 'EOF'
+OOS_COMMAND="oos"
+if [[ -d "$TARGET_DIR/oos" ]]; then
+    OOS_COMMAND="oos-cli"
+    echo -e "${YELLOW}⚠️  Found existing 'oos' directory. Creating command as 'oos-cli'${NC}"
+fi
+
+cat > "$TARGET_DIR/$OOS_COMMAND" << 'EOF'
 #!/usr/bin/env python3
 """
 OOS Command Line Interface
@@ -202,7 +208,7 @@ except ImportError:
         sys.exit(1)
 EOF
 
-chmod +x "$TARGET_DIR/oos"
+chmod +x "$TARGET_DIR/$OOS_COMMAND"
 
 # 8. Create smart test script
 echo -e "${YELLOW}Creating test script...${NC}"
@@ -347,7 +353,7 @@ echo "   cd $TARGET_DIR"
 echo "   python3 test_oos_integration.py"
 echo ""
 echo -e "${BLUE}🚀 Start using OOS:${NC}"
-echo "   ./oos search \"your query\""
+echo "   ./$OOS_COMMAND search \"your query\""
 echo "   /smart-commit (in Claude Code)"
 echo ""
 echo -e "${BLUE}📖 Read the guide:${NC}"
