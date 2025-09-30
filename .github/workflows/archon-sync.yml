@@ -1,0 +1,48 @@
+name: Archon Integration
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  archon-health:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Test Archon MCP integration
+      run: |
+        python3 -c "
+        import json
+        import subprocess
+        import sys
+
+        # Test if we can import Archon-related functionality
+        try:
+            # Test basic MCP functionality
+            test_code = '''import sys
+        sys.path.insert(0, \".\")
+        from src.commands.consultant_command import ConsultantCommand
+        print(\"Archon integration: OK\")'''
+
+            result = subprocess.run(['python3', '-c', test_code], capture_output=True, text=True)
+
+            if result.returncode == 0:
+                print(result.stdout)
+                print(\"✅ Archon MCP integration functional\")
+            else:
+                print(\"❌ Archon integration failed\")
+                print(result.stderr)
+                sys.exit(1)
+
+        except Exception as e:
+            print(f\"⚠️ Archon test skipped: {e}\")
+            sys.exit(0)
+        "

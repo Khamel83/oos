@@ -21,11 +21,22 @@ if [ "$(basename "$(pwd)")" = "oos" ] && [ -d "$PARENT_DIR/.git" ]; then
     # Copy scripts out of OOS to parent
     mkdir -p "../bin"
     cp bin/claude-*.sh ../bin/ 2>/dev/null || true
+    cp bin/oos-v1.2.sh ../bin/ 2>/dev/null || true
+    cp bin/task_runner.sh ../bin/ 2>/dev/null || true
+    cp bin/simple_*.sh ../bin/ 2>/dev/null || true
 
     # Make scripts executable
-    chmod +x ../bin/claude-*.sh 2>/dev/null || true
+    chmod +x ../bin/claude-*.sh ../bin/ 2>/dev/null || true
+    chmod +x ../bin/oos-v1.2.sh ../bin/ 2>/dev/null || true
+    chmod +x ../bin/task_runner.sh ../bin/ 2>/dev/null || true
+    chmod +x ../bin/simple_*.sh ../bin/ 2>/dev/null || true
+
+    # Copy v1.2 task definitions
+    mkdir -p "../.oos"
+    cp .oos/tasks.json ../.oos/ 2>/dev/null || true
 
     echo "✅ Done! /consultant should work after Claude Code restart"
+    echo "🚀 OOS v1.2 features now available: ./bin/oos-v1.2.sh"
 
 else
     echo "ℹ️  Not in OOS subdirectory - nothing to copy out"

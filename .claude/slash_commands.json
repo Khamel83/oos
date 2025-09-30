@@ -59,6 +59,16 @@
       "name": "oos-update",
       "description": "Smart OOS update with auto-integration - handles update/upgrade/creation from single prompt",
       "script": "bin/claude-oos-update.sh"
+    },
+    {
+      "name": "test-consultant",
+      "description": "Test consultant command",
+      "script": "bin/claude-consultant.sh"
+    },
+    {
+      "name": "oos",
+      "description": "OOS command system - use: /oos consultant, /oos capabilities, /oos actions",
+      "script": "bin/claude-oos.sh"
     }
   ]
 }

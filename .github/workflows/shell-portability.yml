@@ -1,8 +1,10 @@
-name: Shell portability
-on:
-  pull_request: {}
-  push:
-    branches: [ master, main ]
+# name: Shell portability - DISABLED
+# Use streamlined-ci.yml instead
+
+# on:
+#   pull_request: {}
+#   push:
+#     branches: [ master, main ]
 jobs:
   lint:
     runs-on: ubuntu-latest

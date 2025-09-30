@@ -1,10 +1,11 @@
-name: OOS Optimized CI/CD
+# name: OOS Optimized CI/CD - DISABLED
+# Use streamlined-ci.yml instead
 
-on:
-  push:
-    branches: [ main, master, develop ]
-  pull_request:
-    branches: [ main, master ]
+# on:
+#   push:
+#     branches: [ main, master, develop ]
+#   pull_request:
+#     branches: [ main, master ]
 
 env:
   FORCE_COLOR: true

@@ -11,7 +11,7 @@ from pathlib import Path
 import logging
 from datetime import datetime
 
-from src.strategic_consultant import StrategicConsultant
+from strategic_consultant import StrategicConsultant
 from config_loader import load_config
 
 logger = logging.getLogger(__name__)

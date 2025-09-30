@@ -184,18 +184,31 @@ def execute_command(name: str, args: str = "") -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
-    # Test the command handler
-    async def test_handler():
+    # Main command execution
+    import sys
+
+    async def main():
+        # Get command name and args
+        if len(sys.argv) < 2:
+            print("Usage: python simple_command_handler.py <command> [args...]")
+            print("Available commands: capabilities, actions, act, consultant, capability-help")
+            return
+
+        command_name = sys.argv[1]
+        command_args = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
+
+        # Execute command
         handler = SimpleCommandHandler()
+        result = await handler.execute_command(command_name, command_args)
 
-        print("Built-in capability commands:")
-        print("  /capabilities <query> - Get capability information")
-        print("  /actions [domain] - List available actions")
-        print("  /act <tool> <params> - Execute specific action")
-        print("  /capability-help - Show help for capability commands")
+        if "error" in result:
+            print(f"Error: {result['error']}")
+        elif "output" in result:
+            print(result['output'])
+        elif "command" in result:
+            # For traditional commands, show execution info
+            print(f"Command: {result['command']}")
+            print(f"Description: {result['description']}")
+            print(f"Execute: {result['execution']}")
 
-        print("\nTraditional commands:")
-        for cmd in handler.list_commands():
-            print(f"  /{cmd.name}: {cmd.description}")
-
-    asyncio.run(test_handler())
+    asyncio.run(main())
