@@ -2,9 +2,10 @@
 
 **One command installs everything. Zero cost to run. Works with any project.**
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/Khamel83/oos/releases)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/Khamel83/oos/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Install](https://img.shields.io/badge/install-curl%20%7C%20bash-orange.svg)](#installation)
+[![Agent-OS Compatible](https://img.shields.io/badge/Agent--OS-Compatible-brightgreen)](docs/AGENT_OS_INTEGRATION.md)
 [![Archon Integration](https://img.shields.io/badge/Archon%20MCP-Integrated-brightgreen)](docs/ARCHON_INTEGRATION.md)
 [![Persistent Assistant](https://img.shields.io/badge/AI%20Assistant-Always%20On-purple)](bin/oos-daemon)
 [![Slash Commands](https://img.shields.io/badge/Slash%20Commands-14%20Available-blue)](.claude/commands/)
@@ -14,14 +15,16 @@
 
 OOS is a universal productivity system that adds powerful search, automation, and AI capabilities to any project. Think of it as your personal operating system layer that works everywhere.
 
-**NEW in v1.1.0**: Persistent AI assistant with Archon MCP integration for intelligent task management and wake word activation.
+**NEW in v1.2.0**: Agent-OS compatibility with spec-first markdown workflows, SQLite source of truth, and human-in-the-loop automation.
 
 ### ⚡ Key Features
 
+- **🤖 Agent-OS Compatible**: Spec-first development with markdown workflows that agents can read and follow
+- **🗄️ SQLite Source of Truth**: Single-writer, many-reader database with Google Sheets human interface
 - **🧠 Persistent AI Assistant**: Always-on background assistant with "Hey OOS" wake word activation
 - **📋 Intelligent Task Management**: Archon MCP integration for AI-driven project management
 - **🔍 Universal Search**: 4 free search engines + optional Perplexity Pro + knowledge base search
-- **💰 Cost Optimizer**: Replace expensive APIs with free alternatives
+- **💰 Cost Optimizer**: Replace expensive APIs with free alternatives - runs on OCI free tier
 - **🤖 Enhanced AI Integration**: 14 smart slash commands for Claude Code
 - **📦 Universal Install**: One command works with any project type
 - **🛡️ Built-in Safety**: Cost controls and usage monitoring
@@ -36,6 +39,14 @@ curl -sSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bas
 
 ### Instant Usage
 ```bash
+# Agent-OS integrated project setup
+./bin/bootstrap-with-agent-os.sh my-project
+cd my-project
+./bin/init-full-system.sh
+
+# Health check
+python3 bin/agent-os-health.py --verbose
+
 # Search anything for free
 ./oos search "python tutorials"
 ./oos search "docker best practices"
@@ -89,7 +100,67 @@ OOS automatically detects and integrates with:
 - **Self-documentation**: Automated commit messages and consistency checks
 - **Learning system**: Remember lessons learned to avoid repeating mistakes
 
-## 🚀 NEW: Persistent AI Assistant (v1.1.0)
+## 🤖 NEW: Agent-OS Integration (v1.2.0)
+
+### 📋 Spec-First Development
+
+OOS now includes complete Agent-OS compatibility for spec-driven workflows:
+
+- **Markdown Specifications**: Agents read `.agent-os/` specs to understand how to work
+- **SQLite Source of Truth**: Single database with WAL mode for concurrent access
+- **Google Sheets Human Interface**: Approval workflows and monitoring without custom UI
+- **Automated Sync**: Bidirectional data flow between SQLite and Sheets
+- **Health Monitoring**: Comprehensive system health checks and alerting
+
+### 🏗️ Minimal v1 Architecture
+
+Perfect for OCI free tier deployment:
+
+```bash
+# Single VM setup (always free)
+./bin/bootstrap-with-agent-os.sh my-project
+cd my-project
+
+# Initialize complete system
+./bin/init-full-system.sh
+
+# Check everything is working
+python3 bin/agent-os-health.py --verbose
+```
+
+**What You Get**:
+- ✅ SQLite database with optimized configuration
+- ✅ Datasette read-only interface (SSH tunnel)
+- ✅ sqlite-web maintenance interface (SSH tunnel)
+- ✅ Google Sheets integration templates
+- ✅ systemd timer templates for automation
+- ✅ Backup scripts with OCI integration
+- ✅ Comprehensive health monitoring
+
+### 📖 Agent Specifications
+
+Every project gets standardized agent specifications:
+
+- **`.agent-os/AGENT.md`**: How agents should work in this project
+- **`.agent-os/PREFERRED_STACK.md`**: Technology choices and configurations
+- **`.agent-os/MIRROR_CONTRACT.md`**: Google Sheets ↔ SQLite sync rules
+- **`.agent-os/RUNBOOK.md`**: Operational procedures and troubleshooting
+
+### 🌐 Global Learning System
+
+Cross-project knowledge sharing:
+
+```bash
+# Set up global configuration
+./bin/setup-agent-os.sh --global
+
+# Global learning patterns in ~/.agent-os/
+GLOBAL_RULES.md        # Universal agent guidelines
+STACK_PREFERENCES.md   # Default technology choices
+LEARNING_PATTERNS.md   # Cross-project lessons learned
+```
+
+## 🚀 Persistent AI Assistant (v1.1.0)
 
 ### 🧠 Archon MCP Integration
 - **Intelligent Task Management**: Full integration with Archon MCP server for AI-driven project coordination

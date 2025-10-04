@@ -26,6 +26,9 @@ show_critical_reminders() {
   echo
 
   echo -e "${YELLOW}📋 PRE-DEVELOPMENT CHECKLIST:${NC}"
+  echo "   □ Run dev-gate.sh (mandatory environment check)"
+  echo "   □ Verify uv environment is synced (uv sync)"
+  echo "   □ Check 1Password CLI is authenticated (op whoami)"
   echo "   □ Read docs/TESTING_PHILOSOPHY.md recent learnings section"
   echo "   □ Check docs/SYSTEM_OVERVIEW.md for architecture understanding"
   echo "   □ Ask: 'Will users understand this change?'"

@@ -1,5 +1,30 @@
 {
   "auto_detection_patterns": {
+    "development_command_attempt": {
+      "triggers": [
+        "run python",
+        "execute python",
+        "python script",
+        "run test",
+        "execute test",
+        "pytest",
+        "run uv",
+        "uv sync",
+        "uv run",
+        "install package",
+        "pip install",
+        "run development",
+        "start coding",
+        "begin development"
+      ],
+      "auto_response": {
+        "type": "development_gate_check",
+        "script": "bin/claude-require-gate.sh development",
+        "block_on_failure": true,
+        "suggestion": "Run /dev-gate pass to validate your development environment first",
+        "explanation": "Development commands require environment validation for consistency and reliability"
+      }
+    },
     "repository_update": {
       "triggers": [
         "update oos",

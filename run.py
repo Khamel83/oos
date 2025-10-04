@@ -12,6 +12,37 @@ import shutil
 from lib.health_check import run_health_check, Colors
 
 
+def run_development_gate():
+    """Run mandatory development environment gate"""
+    script_dir = Path(__file__).parent
+    dev_gate_script = script_dir / "bin" / "dev-gate.sh"
+
+    if not dev_gate_script.exists():
+        print(f"{Colors.YELLOW}⚠️  Development gate script not found at {dev_gate_script}{Colors.END}")
+        return True  # Don't block if script missing (for now)
+
+    print(f"{Colors.BLUE}🚪 Running mandatory development environment checks...{Colors.END}")
+
+    try:
+        result = subprocess.run([str(dev_gate_script)], capture_output=True, text=True)
+
+        if result.returncode == 0:
+            print(f"{Colors.GREEN}✅ Development environment ready!{Colors.END}")
+            return True
+        else:
+            print(f"{Colors.RED}❌ Development gate failed!{Colors.END}")
+            if result.stdout:
+                print(result.stdout)
+            if result.stderr:
+                print(result.stderr)
+            print(f"\n{Colors.YELLOW}Fix the issues above before continuing.{Colors.END}")
+            return False
+
+    except Exception as e:
+        print(f"{Colors.RED}❌ Failed to run development gate: {e}{Colors.END}")
+        return False
+
+
 
 def print_header():
     print(f"\n{Colors.BOLD}🚀 OOS - Organized Operational Setup{Colors.END}")
@@ -376,6 +407,16 @@ def main():
             sys.exit(1)
 
     print_header()
+
+    # Run mandatory development environment gate
+    # Skip gate for special commands that don't need development setup
+    skip_gate_commands = ['--integrate', 'health', '--help', '-h']
+    skip_gate = len(sys.argv) > 1 and sys.argv[1] in skip_gate_commands
+
+    if not skip_gate:
+        if not run_development_gate():
+            print(f"\n{Colors.RED}🚫 Development environment not ready. Cannot continue.{Colors.END}")
+            sys.exit(1)
 
     context = detect_context()
 

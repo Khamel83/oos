@@ -27,3 +27,4 @@ CODE_MANIFEST.md
 .bootstrap_history.log
 .bootstrap_stats.txt
 .bootstrap_feedback.log
+.dev-gate-passed
