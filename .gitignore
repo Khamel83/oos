@@ -28,3 +28,8 @@ CODE_MANIFEST.md
 .bootstrap_stats.txt
 .bootstrap_feedback.log
 .dev-gate-passed
+
+# OOS (Open Operating System)
+modules/
+compositions/
+bin/oos-*.sh

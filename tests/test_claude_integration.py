@@ -38,7 +38,7 @@ class TestSimplifiedClaudeIntegration:
             import shutil
             shutil.rmtree(self.temp_dir)
 
-    
+
     def test_command_loading(self):
         """Test loading commands from markdown files"""
         # Create a test command file
@@ -64,7 +64,7 @@ This is a test command for validation purposes.
         assert cmd.script_path == "./bin/test-cmd.sh"
         assert cmd.category == "testing"
 
-    
+
     def test_list_commands(self):
         """Test listing all available commands"""
         # Create test command files

@@ -37,7 +37,7 @@ class TestSimplifiedEndToEndIntegration:
             import shutil
             shutil.rmtree(self.temp_dir)
 
-  
+
     def test_complete_command_workflow(self):
         """Test complete workflow from command definition to execution"""
         print("\n🧪 Testing Complete Command Workflow...")
@@ -299,7 +299,7 @@ It should still parse correctly using fallback logic.
 
         print("✅ YAML vs non-YAML parsing test successful")
 
-    
+
     def test_filesystem_isolation(self):
         """Test that different command directories work independently"""
         print("\n🧪 Testing Filesystem Isolation...")
@@ -345,7 +345,7 @@ Command 2""")
 
         print("✅ Filesystem isolation test successful")
 
-    
+
 
 if __name__ == "__main__":
     import pytest

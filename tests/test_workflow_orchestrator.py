@@ -43,7 +43,7 @@ class TestWorkflowOrchestrator:
             self.test_results.append({"name": test_name, "status": "failed", "error": str(e)})
             return False
 
-    
+
     def test_workflow_definition(self):
         """Test workflow definition from dictionary"""
         print("\n🧪 Testing Workflow Definition...")

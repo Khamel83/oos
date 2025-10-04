@@ -38,7 +38,7 @@ class TestRepositoryAnalyzer:
             self.test_results.append({"name": test_name, "status": "failed", "error": str(e)})
             return False
 
-    
+
     def test_repo_url_extraction(self):
         """Test repository URL parsing with various formats"""
         print("\n🧪 Testing Repository URL Extraction...")

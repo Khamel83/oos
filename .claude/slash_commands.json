@@ -1,84 +1,9 @@
 {
   "commands": [
     {
-      "name": "help-me",
-      "description": "Smart context engineering help - automatically optimizes your request and guides you through clarification",
-      "script": "bin/claude-help-me.sh"
-    },
-    {
-      "name": "clarify",
-      "description": "Start clarification workflow to refine vague requests",
-      "script": "bin/claude-clarify.sh"
-    },
-    {
-      "name": "meta-ai",
-      "description": "Generate prompt for external AI assistance with current questions",
-      "script": "bin/claude-meta-ai.sh"
-    },
-    {
-      "name": "optimize",
-      "description": "Optimize current context for token efficiency",
-      "script": "bin/claude-optimize.sh"
-    },
-    {
-      "name": "smart-commit",
-      "description": "Generate intelligent commit message for current changes",
-      "script": "bin/claude-smart-commit.sh"
-    },
-    {
-      "name": "doc-check",
-      "description": "Check documentation completeness and code consistency",
-      "script": "bin/claude-doc-check.sh"
-    },
-    {
-      "name": "auto-fix",
-      "description": "Automatically fix code consistency issues",
-      "script": "bin/claude-auto-fix.sh"
-    },
-    {
-      "name": "context-stats",
-      "description": "Show current context size and optimization stats",
-      "script": "bin/claude-context-stats.sh"
-    },
-    {
-      "name": "workflow",
-      "description": "Start structured workflow for complex tasks",
-      "script": "bin/claude-workflow.sh"
-    },
-    {
-      "name": "brain-dump",
-      "description": "Smart processing of rambling input - automatically clarifies and optimizes",
-      "script": "bin/claude-brain-dump.sh"
-    },
-    {
-      "name": "command",
-      "description": "Execute OOS command system commands (capabilities, actions, act, consultant)",
-      "script": "bin/claude-command.sh"
-    },
-    {
-      "name": "oos-update",
-      "description": "Smart OOS update with auto-integration - handles update/upgrade/creation from single prompt",
-      "script": "bin/claude-oos-update.sh"
-    },
-    {
-      "name": "test-consultant",
-      "description": "Test consultant command",
-      "script": "bin/claude-consultant.sh"
-    },
-    {
-      "name": "oos",
-      "description": "OOS command system - use: /oos consultant, /oos capabilities, /oos actions",
-      "script": "bin/claude-oos.sh"
-    },
-    {
       "name": "modules",
       "description": "🧩 Unix Philosophy: run/compose focused modules (security, python, git)",
       "script": "bin/oos-module-runner.sh"
-    },
-    {
-      "name": "compose",
-      "description": "🏗️ Module composition: combine modules into workflows",
-      "script": "compositions/start-coding.sh"
     },
     {
       "name": "dev-setup",
@@ -94,6 +19,16 @@
       "name": "create-project",
       "description": "🏗️ Create new project from template (python-project, node-project, etc)",
       "script": "bin/oos-template-manager.sh"
+    },
+    {
+      "name": "update-oos",
+      "description": "🌐 Update OOS subfolder operating system from GitHub - RESTART Claude Code after this!",
+      "script": "bin/oos-update-from-github.sh"
+    },
+    {
+      "name": "start-coding",
+      "description": "🚀 Complete development session setup",
+      "script": "bin/claude-start-coding.sh"
     }
   ]
 }

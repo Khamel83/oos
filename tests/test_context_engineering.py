@@ -478,7 +478,7 @@ class TestIntegration:
             # Verify documentation processing
             assert len(doc_result.files_processed) == 1
 
-    
+
     async def test_error_handling(self):
         """Test error handling across integrated components"""
 
