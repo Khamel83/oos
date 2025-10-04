@@ -3,14 +3,14 @@
 ## 🚀 Quick Access
 
 ### For New Users
-1. [README_OPTIMIZED.md](README_OPTIMIZED.md) - **Start here** - Complete overview and usage
-2. [QUICK_START.md](QUICK_START.md) - Fast setup guide
-3. [Installation](README_OPTIMIZED.md#installation) - One-command installation
+1. [README.md](README.md) - **Start here** - Complete overview and usage
+2. [USER_READY_SETUP.md](USER_READY_SETUP.md) - **Immediate usage guide** - What works right now
+3. [Installation](README.md#installation) - One-command installation
 
 ### For Developers
-1. [Daily Usage Pattern](README_OPTIMIZED.md#-daily-usage-pattern) - How to use OOS every day
-2. [Available Commands](README_OPTIMIZED.md#-available-commands) - All slash commands and modules
-3. [Troubleshooting](README_OPTIMIZED.md#-troubleshooting) - Common issues and solutions
+1. [Daily Usage Pattern](README.md#-daily-usage-pattern-human-context) - How to use OOS every day
+2. [Available Commands](README.md#-command-interface-human--ai) - All slash commands and modules
+3. [Troubleshooting](README.md#-troubleshooting-dual-audience) - Common issues and solutions
 
 ### For AI/Machines
 1. [AI Comprehensive Guide](docs/AI_COMPREHENSIVE_GUIDE.md) - Complete technical specifications
@@ -20,11 +20,12 @@
 ## 📋 Documentation by Audience
 
 ### 👥 Human-Readable Documentation
-- **README_OPTIMIZED.md** - Main documentation (clear, comprehensive)
-- **QUICK_START.md** - Fast setup instructions
-- **CHANGELOG.md** - Version history and changes
-- **CONTRIBUTING.md** - Development contribution guidelines
-- **LICENSE** - MIT license details
+- **[README.md](README.md)** - Main documentation (clear, comprehensive)
+- **[USER_READY_SETUP.md](USER_READY_SETUP.md)** - Immediate usage guide
+- **[HUMAN_AI_DEVELOPMENT_ETHOS.md](HUMAN_AI_DEVELOPMENT_ETHOS.md)** - Development partnership philosophy
+- **[README_HUMAN_AI.md](README_HUMAN_AI.md)** - Comprehensive dual-audience overview
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development contribution guidelines
+- **[LICENSE](LICENSE)** - MIT license details
 
 ### 🤖 AI/Machine-Readable Documentation
 - **docs/AI_COMPREHENSIVE_GUIDE.md** - Complete technical specifications
