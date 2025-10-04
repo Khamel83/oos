@@ -33,6 +33,15 @@ echo -e "${BLUE}📋 Installing slash commands...${NC}"
 if [[ -f "$OOS_ROOT/.claude/project_commands.json" ]]; then
     cp "$OOS_ROOT/.claude/project_commands.json" .claude/slash_commands.json
     echo -e "${GREEN}✅ Slash commands installed${NC}"
+elif [[ -f "$OOS_ROOT/.claude/slash_commands.json" ]]; then
+    # Fallback for GitHub standalone execution - download working commands
+    echo "• Downloading working slash commands from GitHub..."
+    if curl -s https://raw.githubusercontent.com/Khamel83/oos/master/.claude/project_commands.json > .claude/slash_commands.json; then
+        echo -e "${GREEN}✅ Slash commands downloaded${NC}"
+    else
+        echo -e "${RED}❌ Failed to download slash commands${NC}"
+        exit 1
+    fi
 else
     echo -e "${RED}❌ No working slash commands found in OOS${NC}"
     exit 1
@@ -58,7 +67,14 @@ for script in "${essential_scripts[@]}"; do
         chmod +x "bin/$script"
         echo "  ✅ $script"
     else
-        echo -e "  ${YELLOW}⚠️  $script not found${NC}"
+        # Download from GitHub if not available locally
+        echo "  📥 Downloading $script from GitHub..."
+        if curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/bin/$script" > "bin/$script"; then
+            chmod +x "bin/$script"
+            echo "  ✅ $script (downloaded)"
+        else
+            echo -e "  ${YELLOW}⚠️  $script not found${NC}"
+        fi
     fi
 done
 
@@ -68,7 +84,13 @@ if [[ -d "$OOS_ROOT/modules" ]]; then
     cp -r "$OOS_ROOT/modules" .
     echo -e "${GREEN}✅ Module system installed${NC}"
 else
-    echo -e "${YELLOW}⚠️  Module system not found${NC}"
+    # Download modules from GitHub
+    echo "  📥 Downloading modules from GitHub..."
+    if curl -s https://raw.githubusercontent.com/Khamel83/oos/master/modules.tar.gz | tar -xz 2>/dev/null; then
+        echo -e "${GREEN}✅ Module system downloaded${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Module system not found${NC}"
+    fi
 fi
 
 # Step 5: Copy compositions
@@ -77,7 +99,13 @@ if [[ -d "$OOS_ROOT/compositions" ]]; then
     cp -r "$OOS_ROOT/compositions" .
     echo -e "${GREEN}✅ Compositions installed${NC}"
 else
-    echo -e "${YELLOW}⚠️  Compositions not found${NC}"
+    # Download compositions from GitHub
+    echo "  📥 Downloading compositions from GitHub..."
+    if curl -s https://raw.githubusercontent.com/Khamel83/oos/master/compositions.tar.gz | tar -xz 2>/dev/null; then
+        echo -e "${GREEN}✅ Compositions downloaded${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Compositions not found${NC}"
+    fi
 fi
 
 # Step 6: Create .gitignore entries (don't commit OOS internals)
