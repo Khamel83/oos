@@ -35,11 +35,12 @@ done
 
 # Download key modules
 echo "🧩 Installing modules..."
-mkdir -p modules/{security,testing,python}
+mkdir -p modules/{security,testing,python,git,ai}
 
 # Security
 curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/security/scan_secrets.sh" > "modules/security/scan_secrets.sh"
 curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/security/check_permissions.sh" > "modules/security/check_permissions.sh"
+curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/security/check_1password.sh" > "modules/security/check_1password.sh"
 chmod +x modules/security/*.sh
 
 # Testing
@@ -50,6 +51,14 @@ chmod +x modules/testing/*.sh
 # Python
 curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/python/check_uv.sh" > "modules/python/check_uv.sh"
 chmod +x modules/python/*.sh
+
+# Git
+curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/git/check_status.sh" > "modules/git/check_status.sh"
+chmod +x modules/git/*.sh
+
+# AI
+curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/ai/generate_commit.sh" > "modules/ai/generate_commit.sh"
+chmod +x modules/ai/*.sh
 
 # Download compositions
 echo "🏗️ Installing compositions..."
