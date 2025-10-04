@@ -71,44 +71,29 @@
       "script": "bin/claude-oos.sh"
     },
     {
-      "name": "dev-gate",
-      "description": "🚪 Mandatory development environment gate - ensures proper setup before coding",
-      "script": "bin/claude-dev-gate.sh"
+      "name": "modules",
+      "description": "🧩 Unix Philosophy: run/compose focused modules (security, python, git)",
+      "script": "bin/oos-module-runner.sh"
     },
     {
-      "name": "env-check",
-      "description": "Quick development environment status check",
-      "script": "bin/claude-dev-gate.sh status"
+      "name": "compose",
+      "description": "🏗️ Module composition: combine modules into workflows",
+      "script": "compositions/start-coding.sh"
     },
     {
-      "name": "dev-python",
-      "description": "🐍 Run Python with mandatory environment validation",
-      "script": "bin/claude-dev-python.sh"
+      "name": "dev-setup",
+      "description": "🚀 Complete development environment validation (security + python + git)",
+      "script": "compositions/full-dev-setup.sh"
     },
     {
-      "name": "dev-test",
-      "description": "🧪 Run tests with mandatory environment validation",
-      "script": "bin/claude-dev-test.sh"
+      "name": "pre-commit",
+      "description": "🔍 Pre-commit validation: security scan + lint + tests + AI commit message",
+      "script": "compositions/pre-commit.sh"
     },
     {
-      "name": "dev-uv",
-      "description": "📦 Run uv commands with mandatory environment validation",
-      "script": "bin/claude-dev-uv.sh"
-    },
-    {
-      "name": "start",
-      "description": "🚀 One-command setup: validate environment and get ready to code",
-      "script": "bin/claude-start-coding.sh"
-    },
-    {
-      "name": "start-coding",
-      "description": "🚀 One-command setup: validate environment and get ready to code",
-      "script": "bin/claude-start-coding.sh"
-    },
-    {
-      "name": "update-oos",
-      "description": "🔄 Update existing project with latest OOS development gate system",
-      "script": "bin/claude-update-oos.sh"
+      "name": "create-project",
+      "description": "🏗️ Create new project from template (python-project, node-project, etc)",
+      "script": "bin/oos-template-manager.sh"
     }
   ]
 }

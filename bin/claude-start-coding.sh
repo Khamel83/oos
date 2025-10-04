@@ -20,6 +20,14 @@ NC='\033[0m'
 echo -e "${BOLD}${CYAN}🚀 Starting Development Session${NC}"
 echo "==============================="
 
+# Step 0: ALWAYS update OOS from GitHub first (ensures slash commands are current)
+echo -e "${BLUE}Step 0: Updating OOS subfolder operating system...${NC}"
+if [[ -f "$PROJECT_ROOT/bin/oos-update-from-github.sh" ]]; then
+    bash "$PROJECT_ROOT/bin/oos-update-from-github.sh"
+else
+    echo -e "${YELLOW}⚠️  OOS update script not found - you may have outdated commands${NC}"
+fi
+
 # Step 1: Run development gate
 echo -e "${BLUE}Step 1: Validating development environment...${NC}"
 if DEV_GATE_BYPASS=true "$PROJECT_ROOT/bin/dev-gate.sh"; then

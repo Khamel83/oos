@@ -44,6 +44,9 @@ curl -sSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bas
 cd my-project
 ./bin/init-full-system.sh
 
+# For existing projects with OOS ops/ directory
+# Use /oos-start slash command in Claude Code for complete setup
+
 # Health check
 python3 bin/agent-os-health.py --verbose
 
@@ -461,6 +464,14 @@ cd oos
 
 **Just say "integrate OOS" in any Claude Code project!**
 
+### ⚡ New: /oos-start Slash Command
+For projects with `ops/` directory, use the **`/oos-start`** slash command for instant setup:
+- ✅ **One-command bootstrapping** with complete project verification
+- ✅ **5-step workflow**: repo sanity, preflight checks, timer status, command updates, verification report
+- ✅ **Context-aware path resolution** (works from any directory)
+- ✅ **Free-tier-first architecture** with zero ongoing costs
+
+### 🛠️ Development Integration
 Claude Code will automatically:
 1. **Set up OOS development tools** (oos-dev-tools.js)
 2. **Add package.json scripts** for development commands
