@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Simple OOS Installer - Works from anywhere
+# OOS Installer - Run from any project
+# URL: https://raw.githubusercontent.com/Khamel83/oos/master/install.sh
 
 set -euo pipefail
 
@@ -10,7 +11,7 @@ echo -e "\033[1;34m🚀 Installing OOS into $PROJECT_NAME\033[0m"
 echo "=================================="
 
 cd "$INSTALL_DIR"
-mkdir -p .claude bin
+mkdir -p .claude bin modules compositions
 
 # Download working slash commands
 echo "📋 Installing slash commands..."
@@ -32,40 +33,50 @@ for script in "${scripts[@]}"; do
     chmod +x "bin/$script"
 done
 
-# Download modules
-echo "🧩 Installing key modules..."
+# Download key modules
+echo "🧩 Installing modules..."
 mkdir -p modules/{security,testing,python}
 
-# Security modules
-for module in scan_secrets.sh check_permissions.sh; do
-    curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/security/$module" > "modules/security/$module"
-    chmod +x "modules/security/$module"
-done
+# Security
+curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/security/scan_secrets.sh" > "modules/security/scan_secrets.sh"
+curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/security/check_permissions.sh" > "modules/security/check_permissions.sh"
+chmod +x modules/security/*.sh
 
-# Testing modules
-for module in lint_code.sh run_pytest.sh; do
-    curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/testing/$module" > "modules/testing/$module"
-    chmod +x "modules/testing/$module"
-done
+# Testing
+curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/testing/lint_code.sh" > "modules/testing/lint_code.sh"
+curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/testing/run_pytest.sh" > "modules/testing/run_pytest.sh"
+chmod +x modules/testing/*.sh
 
-# Python modules
+# Python
 curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/modules/python/check_uv.sh" > "modules/python/check_uv.sh"
-chmod +x "modules/python/check_uv.sh"
+chmod +x modules/python/*.sh
 
 # Download compositions
 echo "🏗️ Installing compositions..."
-mkdir -p compositions
-
-for comp in full-dev-setup.sh pre-commit.sh; do
-    curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/compositions/$comp" > "compositions/$comp"
-    chmod +x "compositions/$comp"
-done
+curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/compositions/full-dev-setup.sh" > "compositions/full-dev-setup.sh"
+curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/compositions/pre-commit.sh" > "compositions/pre-commit.sh"
+chmod +x compositions/*.sh
 
 # Create .gitignore
 echo "📝 Updating .gitignore..."
 cat >> .gitignore << 'EOF'
 
-# OOS (Open Operating System)
+# OOS (Open Operating System) - copied from OOS repo
 modules/
 compositions/
 bin/oos-*.sh
+bin/dev-gate.sh
+bin/claude-*.sh
+EOF
+
+echo -e "\033[1;32m✅ OOS Installation Complete!\033[0m"
+echo ""
+echo "Available commands in Claude Code:"
+echo "  /dev-setup     - Validate development environment"
+echo "  /modules       - Run security/python/git modules"
+echo "  /pre-commit    - Pre-commit validation workflow"
+echo "  /update-oos    - Update OOS from GitHub"
+echo "  /create-project - Create new projects from templates"
+echo "  /start-coding  - Complete development session setup"
+echo ""
+echo "🔄 Restart Claude Code to use slash commands!"
