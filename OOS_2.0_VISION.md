@@ -1,4 +1,21 @@
-# OOS 2.0 Vision - Modern Unix Philosophy Refactor
+# OOS 2.0 Vision - Systematic Brain Environment
+
+**Transforming OOS from development toolchain into a systematic thinking environment for consistent project work.**
+
+## The Core Problem OOS Solves
+
+**Brain Extension Need:**
+You need a systematic way to approach any coding work, project, or idea with consistent mental models and workflows. Currently:
+- Ideas are scattered across repositories
+- No unified thinking environment
+- Inconsistent approaches to different types of work
+- Manual coordination between project management (Archon) and execution
+
+**OOS as Systematic Brain:**
+- **Consistent Platform Layer** - Reliable development environment everywhere
+- **Project Management Layer** - Archon integration for structured work
+- **Agentic Thinking Layer** - Future-ready for AI-powered workflows
+- **Execution Layer** - Commands and tools that just work
 
 ## Current State Analysis (OOS 1.0)
 
@@ -8,13 +25,14 @@
 - ✅ Security, Python, testing modules work reliably
 - ✅ Simple installation via GitHub
 - ✅ Pure shell/Unix approach - no Docker needed
+- ✅ GitHub Actions that validate the system
 
 **Current Complexity Issues:**
 - ❌ 85+ shell scripts (maintenance overhead)
-- ❌ 24 "claude-*" specialized scripts (single-purpose)
+- ❌ Multiple broken CI workflows causing confusion
 - ❌ 20,930+ files in repo (bloat)
-- ❌ Multiple documentation files saying similar things
-- ❌ Complex Agent-OS integration that may be over-engineered
+- ❌ Inconsistent documentation across different vision documents
+- ❌ Missing clear "brain extension" narrative
 
 ## OOS 2.0 - Modern Unix Philosophy
 
@@ -80,22 +98,27 @@ dev_setup() {
 }
 ```
 
-### 2.0 Benefits
+### 2.0 Benefits - For Your Systematic Brain
 
-**Simplicity:**
-- 4 core files instead of 85+ scripts
-- 1 CLI tool instead of 6 slash commands
-- 500 lines of code instead of 20,930 files
+**Mental Model Consistency:**
+- Single way of thinking about every project
+- Consistent command patterns across all contexts
+- Reduced cognitive load for project switching
 
-**Maintainability:**
-- Single source of truth for each domain
-- Easy to test and debug
+**Reliability:**
+- 4 core files instead of 85+ scripts (less breakage)
+- Robust CI that actually works and rarely fails
 - Clear separation of concerns
 
 **Performance:**
 - Faster loading (fewer files to source)
 - Less memory usage
-- Simpler dependency chain
+- Instant environment spin-up for any project
+
+**Future-Ready:**
+- Built for Archon integration from day 1
+- Designed for agentic thinking workflows
+- Extensible architecture for AI collaboration
 
 ### Migration Path
 

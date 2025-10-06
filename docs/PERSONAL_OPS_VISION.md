@@ -1,11 +1,20 @@
-# OOS Personal Operational Intelligence System - Vision Document
+# OOS Personal Systematic Brain - Vision Document
 
 ## Project Vision
 
-Transform OOS from infrastructure foundation into a **Personal Operational Intelligence System** that:
+Transform OOS from development toolchain into a **Systematic Brain Environment** that provides:
+
+**Core Brain Extension Capabilities:**
+- **Consistent Thinking Platform** - Unified environment for any coding work, project, or idea
+- **Pattern Recognition** - Identifies your successful approaches across all repositories
+- **Intelligent Orchestration** - Coordinates Archon project management with actual execution
+- **Agentic Thinking Integration** - Ready for AI-powered systematic workflows
+- **Memory & Learning** - Builds knowledge base from your patterns and decisions
+
+**How It Works:**
 - Mines your GitHub repositories for scattered ideas, themes, and concepts
 - Converts those insights into actionable slash commands within Claude Code
-- Creates intelligent command orchestration (like `/check-all` running commands 1,4,5,11 in logical order)
+- Creates intelligent command orchestration (like `/systematic-approach` running the right sequence)
 - Provides a single source of truth for your development patterns, accessible via `/helpme`
 
 ## Core Components
