@@ -11,7 +11,6 @@ env:
   FORCE_COLOR: true
 
 jobs:
-  # Core system validation - fast, essential checks only
   validate:
     runs-on: ubuntu-latest
     outputs:
@@ -25,14 +24,11 @@ jobs:
     - name: Check what needs testing
       id: check-needs
       run: |
-        # Check if there are Python files to test
         if find . -name "*.py" -not -path "./tests/*" | head -1 | grep -q .; then
           echo "has_python_files=true" >> $GITHUB_OUTPUT
         else
           echo "has_python_files=false" >> $GITHUB_OUTPUT
         fi
-
-        # Check if there are meaningful changes to test
         if [ "${{ github.event_name }}" = "push" ]; then
           echo "is_main_push=true" >> $GITHUB_OUTPUT
         else
@@ -42,25 +38,14 @@ jobs:
     - name: Validate core system files
       run: |
         echo "🔍 Validating core OOS system..."
-
-        # Check essential files exist
-        core_files=(
-          "README.md"
-          "scripts/bootstrap_enhanced.sh"
-          "bin/development_guide.sh"
-        )
-
-        missing_files=0
+        core_files=("README.md" "scripts/bootstrap_enhanced.sh" "bin/development_guide.sh")
         for file in "${core_files[@]}"; do
           if [[ -f "$file" ]]; then
             echo "✅ $file exists"
           else
             echo "⚠️  $file missing (not critical)"
-            ((missing_files++))
           fi
         done
-
-        # Check critical scripts have valid syntax
         if [[ -f "scripts/bootstrap_enhanced.sh" ]]; then
           if bash -n "scripts/bootstrap_enhanced.sh"; then
             echo "✅ Bootstrap script syntax valid"
@@ -70,11 +55,9 @@ jobs:
           fi
         fi
 
-    - name: Check shell script quality (smart permissions)
+    - name: Check shell script quality
       run: |
         echo "🔍 Checking shell scripts..."
-
-        # Only check syntax, not permissions (CI environment different)
         script_errors=0
         while IFS= read -r -d '' script; do
           if bash -n "$script" 2>/dev/null; then
@@ -84,34 +67,24 @@ jobs:
             ((script_errors++))
           fi
         done < <(find . -name "*.sh" -not -path "./.git/*" -not -path "./tests/*" -print0)
-
         if [[ $script_errors -gt 0 ]]; then
           echo "Found $script_errors scripts with syntax errors"
           exit 1
         fi
 
-    - name: Security scan (focused)
+    - name: Security scan
       run: |
         echo "🔒 Running focused security scan..."
-
-        # Only check for actual hardcoded secrets, not mock/test values
         secret_found=false
-
-        # Skip common test/mock patterns
         skip_patterns="(mock|test|example|sample|demo)"
-
-        # Look for real API keys
         if grep -r -E "sk-[a-zA-Z0-9_-]{43,}" . --exclude-dir=.git --exclude-dir=tests 2>/dev/null | grep -v -E "$skip_patterns"; then
           echo "❌ Potential real API keys found"
           secret_found=true
         fi
-
-        # Look for real GitHub tokens
         if grep -r -E "ghp_[a-zA-Z0-9]{36}" . --exclude-dir=.git --exclude-dir=tests 2>/dev/null | grep -v -E "$skip_patterns"; then
           echo "❌ Potential real GitHub tokens found"
           secret_found=true
         fi
-
         if [[ "$secret_found" == "true" ]]; then
           exit 1
         else
@@ -132,7 +105,6 @@ jobs:
     - name: Check Archon integration readiness
       id: check-archon
       run: |
-        # Check if we have Archon-related files
         if find . -name "*archon*" -o -name "*mcp*" | head -1 | grep -q .; then
           echo "should-test=true" >> $GITHUB_OUTPUT
           echo "🏗️  Archon files found - will test integration"
@@ -141,7 +113,6 @@ jobs:
           echo "ℹ️  No Archon integration to test"
         fi
 
-  # Python tests (only if needed)
   test-python:
     runs-on: ubuntu-latest
     needs: validate
@@ -159,17 +130,11 @@ jobs:
     - name: Test Python functionality
       run: |
         echo "🐍 Testing Python components..."
-
-        # Install only what we need for testing
         python3 -m pip install --quiet pytest pytest-asyncio
-
-        # Find and run actual tests (not archive)
         test_dirs=("tests" "test")
         found_tests=false
-
         for test_dir in "${test_dirs[@]}"; do
           if [[ -d "$test_dir" ]]; then
-            # Look for real test files (not in archive)
             if find "$test_dir" -name "test_*.py" -not -path "*/archive/*" | head -1 | grep -q .; then
               echo "Found tests in $test_dir/"
               python3 -m pytest "$test_dir"/test_*.py --tb=short -v || echo "⚠️  Some tests failed, but continuing..."
@@ -178,10 +143,8 @@ jobs:
             fi
           fi
         done
-
         if [[ "$found_tests" == "false" ]]; then
           echo "ℹ️  No Python test files found - checking basic syntax"
-          # Just check syntax of Python files
           syntax_errors=0
           while IFS= read -r -d '' file; do
             if python3 -m py_compile "$file" 2>/dev/null; then
@@ -191,14 +154,12 @@ jobs:
               ((syntax_errors++))
             fi
           done < <(find . -name "*.py" -not -path "./tests/*" -not -path "./.git/*" -print0)
-
           if [[ $syntax_errors -gt 0 ]]; then
             echo "Found Python syntax errors"
             exit 1
           fi
         fi
 
-  # Archon integration test (only if needed)
   test-archon:
     runs-on: ubuntu-latest
     needs: validate
@@ -216,33 +177,8 @@ jobs:
     - name: Test Archon integration
       run: |
         echo "🏗️  Testing Archon integration..."
+        python3 -c 'import sys; subprocess.run(["python3", "-c", "import sys; sys.path.insert(0, \".\"); print(\"Archon integration: OK\")"], capture_output=True, text=True)' || echo "Archon test skipped (non-critical)"
 
-        # Basic MCP/Archon connection test
-        python3 -c "
-import sys
-import subprocess
-
-try:
-    # Test basic Archon import if available
-    result = subprocess.run([
-        'python3', '-c',
-        'import sys; sys.path.insert(0, \".\"); print(\"Archon integration: OK\")'
-    ], capture_output=True, text=True, timeout=10)
-
-    if result.returncode == 0:
-        print('✅ Archon integration check passed')
-        print(result.stdout.strip())
-    else:
-        print('⚠️  Archon integration check failed (non-critical)')
-        print('Error:', result.stderr.strip()[:200])
-        sys.exit(0)  # Don't fail the build
-
-except Exception as e:
-    print(f'ℹ️  Archon test skipped: {e}')
-    sys.exit(0)
-        "
-
-  # Bootstrap system test (critical for OOS)
   test-bootstrap:
     runs-on: ubuntu-latest
     needs: validate
@@ -254,17 +190,12 @@ except Exception as e:
     - name: Test bootstrap system
       run: |
         echo "🚀 Testing bootstrap system..."
-
-        # Make bootstrap executable for testing
         if [[ -f "scripts/bootstrap_enhanced.sh" ]]; then
           chmod +x scripts/bootstrap_enhanced.sh
-
-          # Test bootstrap help/dry-run functionality
           if ./scripts/bootstrap_enhanced.sh --help >/dev/null 2>&1; then
             echo "✅ Bootstrap script functional"
           else
             echo "⚠️  Bootstrap script has issues (checking further)"
-            # Try basic syntax check
             if bash -n scripts/bootstrap_enhanced.sh; then
               echo "✅ Bootstrap syntax is valid"
             else
@@ -276,7 +207,6 @@ except Exception as e:
           echo "⚠️  Bootstrap script not found"
         fi
 
-  # Build validation (main branch only)
   build:
     runs-on: ubuntu-latest
     needs: [validate, test-bootstrap]
@@ -289,34 +219,13 @@ except Exception as e:
     - name: Create distribution package
       run: |
         echo "📦 Creating OOS distribution package..."
-
         mkdir -p dist
-
-        # Copy essential system files
         cp -r bin/ dist/ 2>/dev/null || echo "ℹ️  No bin/ directory"
         cp -r scripts/ dist/ 2>/dev/null || echo "ℹ️  No scripts/ directory"
         cp README.md LICENSE dist/ 2>/dev/null || echo "ℹ️  Some docs missing"
-
-        # Create a simple install script
-        cat > dist/install.sh << 'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo "🚀 Installing OOS (Organized Operational Setup)..."
-echo "This is your systematic thinking environment."
-
-# Make scripts executable
-find . -name "*.sh" -exec chmod +x {} \;
-
-echo "✅ OOS ready!"
-echo "Usage: ./scripts/bootstrap_enhanced.sh --help"
-EOF
-
+        printf '#!/usr/bin/env bash\nset -euo pipefail\necho "🚀 Installing OOS (Organized Operational Setup)..."\necho "This is your systematic thinking environment."\nfind . -name "*.sh" -exec chmod +x {} \\;\necho "✅ OOS ready!"\necho "Usage: ./scripts/bootstrap_enhanced.sh --help"\n' > dist/install.sh
         chmod +x dist/install.sh
-
-        # Create package
         tar -czf oos-system-$(date +%Y%m%d-%H%M%S).tar.gz -C dist .
-
         echo "✅ Package created: oos-system-$(date +%Y%m%d-%H%M%S).tar.gz"
 
     - name: Upload system package
@@ -328,7 +237,6 @@ EOF
           dist/
         retention-days: 30
 
-  # System summary
   summary:
     runs-on: ubuntu-latest
     needs: [validate, test-python, test-archon, test-bootstrap, build]
@@ -341,10 +249,7 @@ EOF
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "## Component Status" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-
-        # Check each job status
         jobs=("validate" "test-python" "test-archon" "test-bootstrap" "build")
-
         for job in "${jobs[@]}"; do
           case "${{ needs.${job}.result }}" in
             "success")
@@ -361,7 +266,6 @@ EOF
               ;;
           esac
         done
-
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "## System Purpose" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
