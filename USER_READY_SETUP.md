@@ -1,33 +1,34 @@
-# 🚀 OOS - User Ready Setup Guide
+# 🚀 OOS - Your Systematic Brain Environment
 
 ## ✅ What Works Right Now (Guaranteed)
 
-**One command installation that works in any project:**
+**One command installation that creates your systematic thinking environment:**
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 ```
 
-### After Installation, You Get:
-- ✅ **6 Working Slash Commands** in Claude Code
-- ✅ **Security Module** - Secret scanning and permission checking
-- ✅ **Python Module** - uv package manager validation
-- ✅ **Testing Module** - Code linting and pytest integration
-- ✅ **Complete Workflows** - Environment setup and pre-commit validation
+### After Installation, You Get Your Brain Extension:
+- ✅ **6 Working Slash Commands** in Claude Code - Integrated thinking tools
+- ✅ **Security Module** - Automated validation that supports your workflow
+- ✅ **Python Module** - Development environment validation
+- ✅ **Testing Module** - Quality assurance that doesn't slow you down
+- ✅ **Complete Workflows** - Systematic environment setup and validation
+- ✅ **Archon Integration Ready** - Project management that coordinates with your thinking
 
 ## 🎯 Immediate Usage (After Installation)
 
-### 1. Start Developing
+### 1. Start Your First Systematic Session
 ```bash
 cd /path/to/your-project
 /start-coding
 ```
 
-### 2. Available Commands
+### 2. Available Thinking Tools
 ```bash
-/modules list                    # See all available modules
-/dev-setup                      # Validate your environment
-/pre-commit                     # Run before committing code
-/update-oos                     # Update OOS from GitHub
+/modules list                    # See all systematic tools
+/dev-setup                      # Validate your brain environment
+/pre-commit                     # Run systematic quality checks
+/update-oos                     # Update your thinking tools
 /create-project                 # Create new projects
 ```
 

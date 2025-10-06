@@ -1,11 +1,18 @@
-# 📚 OOS Documentation Index
+# 📚 OOS Documentation Guide - Your Systematic Brain Environment
 
-## 🚀 Quick Access
+## 🧠 Where to Start
 
-### For New Users
-1. [README.md](README.md) - **Start here** - Complete overview and usage
-2. [USER_READY_SETUP.md](USER_READY_SETUP.md) - **Immediate usage guide** - What works right now
-3. [Installation](README.md#installation) - One-command installation
+**New to OOS?** Start here:
+1. [Quick Start](QUICK_START.md) - 2 minute setup
+2. [README](README.md) - Complete overview
+3. [User Guide](USER_READY_SETUP.md) - Detailed usage
+
+## 📋 Understanding the Vision
+
+**Why OOS exists as your brain extension:**
+- [System Vision](OOS_2.0_VISION.md) - Core concept: systematic brain environment
+- [Personal Operations](docs/PERSONAL_OPS_VISION.md) - How it works as thinking workflow
+- [Development Ethos](HUMAN_AI_DEVELOPMENT_ETHOS.md) - Human+AI partnership approach
 
 ### For Developers
 1. [Daily Usage Pattern](README.md#-daily-usage-pattern-human-context) - How to use OOS every day
