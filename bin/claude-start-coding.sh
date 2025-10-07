@@ -43,20 +43,29 @@ echo -e "\n${BLUE}Step 2: Fixing Environment Issues${NC}"
 
 # Check and fix 1Password authentication
 if ! op whoami >/dev/null 2>&1; then
-    echo "• 1Password: ⚠️  Not authenticated - signing in..."
+    echo "• 1Password: ⚠️  Not authenticated - attempting automatic sign-in..."
     if command -v op >/dev/null 2>&1; then
-        echo "Run: op signin"
-        echo "Or authenticate via 1Password app, then try again"
-        read -p "Press Enter after signing into 1Password, or 's' to skip: " response
-        if [[ "$response" != "s" ]]; then
-            if op whoami >/dev/null 2>&1; then
-                echo "• 1Password: ✅ Successfully authenticated"
-            else
-                echo "• 1Password: ⚠️  Still not authenticated (continuing anyway)"
+        # Try automatic signin first
+        if op signin --account my 2>/dev/null || op signin 2>/dev/null; then
+            echo "• 1Password: ✅ Successfully authenticated"
+        else
+            echo "• 1Password: Opening 1Password app for Touch ID/Face ID authentication..."
+            # Try to open 1Password app for biometric auth
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                open -a "1Password 7 - Password Manager" 2>/dev/null || open -a "1Password" 2>/dev/null
+            fi
+            echo "• Please authenticate in 1Password app, then press Enter..."
+            read -p "Press Enter after authenticating (or 's' to skip): " response
+            if [[ "$response" != "s" ]]; then
+                if op whoami >/dev/null 2>&1; then
+                    echo "• 1Password: ✅ Successfully authenticated"
+                else
+                    echo "• 1Password: ⚠️  Authentication failed - run 'op signin' manually"
+                fi
             fi
         fi
     else
-        echo "• 1Password CLI not installed (continuing anyway)"
+        echo "• 1Password CLI not installed - install with: brew install 1password-cli"
     fi
 else
     echo "• 1Password: ✅ Already authenticated"
@@ -89,44 +98,68 @@ if [[ -d "$PROJECT_ROOT/.git" ]]; then
     echo "• Git repository: ✅ Found"
     echo "• Branch: $(git branch --show-current 2>/dev/null || echo 'unknown')"
 
-    # Check for uncommitted changes and offer to commit
+    # Check for uncommitted changes and auto-commit with AI
     if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-        echo "• Working directory: ⚠️  Has uncommitted changes"
+        echo "• Working directory: ⚠️  Has uncommitted changes - attempting auto-commit..."
         echo ""
         echo "Uncommitted files:"
         git status --porcelain | head -10
         echo ""
-        read -p "Commit these changes? (y/n/s=show diff): " response
-        case "$response" in
-            y|Y)
-                if [[ -f "$PROJECT_ROOT/bin/claude-smart-commit.sh" ]]; then
-                    echo "Using AI to generate commit message..."
-                    bash "$PROJECT_ROOT/bin/claude-smart-commit.sh"
-                else
-                    read -p "Enter commit message: " commit_msg
-                    if [[ -n "$commit_msg" ]]; then
-                        git add -A && git commit -m "$commit_msg"
-                        echo "• Working directory: ✅ Changes committed"
-                    fi
+
+        # Try AI commit first if available
+        if [[ -f "$PROJECT_ROOT/bin/claude-smart-commit.sh" ]]; then
+            echo "🤖 Using AI to generate commit message and auto-commit..."
+            if bash "$PROJECT_ROOT/bin/claude-smart-commit.sh"; then
+                echo "• Working directory: ✅ Changes auto-committed with AI message"
+            else
+                echo "• Working directory: ⚠️  AI commit failed"
+                read -p "Enter manual commit message (or 's' to skip): " commit_msg
+                if [[ -n "$commit_msg" && "$commit_msg" != "s" ]]; then
+                    git add -A && git commit -m "$commit_msg"
+                    echo "• Working directory: ✅ Changes committed manually"
                 fi
-                ;;
-            s|S)
-                git diff --stat
-                echo ""
-                read -p "Commit after reviewing? (y/n): " commit_response
-                if [[ "$commit_response" == "y" || "$commit_response" == "Y" ]]; then
-                    if [[ -f "$PROJECT_ROOT/bin/claude-smart-commit.sh" ]]; then
-                        bash "$PROJECT_ROOT/bin/claude-smart-commit.sh"
-                    else
+            fi
+        else
+            # No AI available - be more aggressive with auto-commit
+            change_count=$(git status --porcelain | wc -l)
+            if [[ $change_count -le 5 ]]; then
+                echo "🚀 Small changeset detected - auto-committing with generated message..."
+                auto_msg="feat: development session changes
+
+- $(git status --porcelain | head -3 | sed 's/^...//' | tr '\n' '\n- ' | sed 's/- $//')
+
+🤖 Auto-committed by /start-coding"
+                git add -A && git commit -m "$auto_msg"
+                echo "• Working directory: ✅ Changes auto-committed"
+            else
+                echo "⚠️  Large changeset - manual review recommended"
+                read -p "Commit all changes? (y/n/s=show diff): " response
+                case "$response" in
+                    y|Y)
                         read -p "Enter commit message: " commit_msg
-                        git add -A && git commit -m "$commit_msg"
-                    fi
-                fi
-                ;;
-            *)
-                echo "• Working directory: ⚠️  Uncommitted changes (skipped)"
-                ;;
-        esac
+                        if [[ -n "$commit_msg" ]]; then
+                            git add -A && git commit -m "$commit_msg"
+                            echo "• Working directory: ✅ Changes committed"
+                        fi
+                        ;;
+                    s|S)
+                        git diff --stat
+                        echo ""
+                        read -p "Commit after reviewing? (y/n): " commit_response
+                        if [[ "$commit_response" == "y" || "$commit_response" == "Y" ]]; then
+                            read -p "Enter commit message: " commit_msg
+                            if [[ -n "$commit_msg" ]]; then
+                                git add -A && git commit -m "$commit_msg"
+                                echo "• Working directory: ✅ Changes committed"
+                            fi
+                        fi
+                        ;;
+                    *)
+                        echo "• Working directory: ⚠️  Uncommitted changes (skipped)"
+                        ;;
+                esac
+            fi
+        fi
     else
         echo "• Working directory: ✅ Clean"
     fi
