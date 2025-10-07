@@ -15,9 +15,9 @@ mkdir -p .claude bin modules compositions
 
 # Install Claude Code commands (new Markdown format)
 echo "📋 Installing Claude Code commands..."
-mkdir -p ~/.claude/commands
+mkdir -p .claude/commands
 
-# Download all OOS command files
+# Download all OOS command files to PROJECT directory
 commands=(
     "archon-complete.md"
     "archon-research.md"
@@ -37,11 +37,81 @@ commands=(
 
 for cmd in "${commands[@]}"; do
     echo "  📥 Installing /$cmd"
-    curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/.claude/commands/$cmd" > ~/.claude/commands/"$cmd"
+    curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/.claude/commands/$cmd" > .claude/commands/"$cmd"
 done
 
-# Create global start-coding command
-cat > ~/.claude/commands/start-coding.md << 'EOF'
+# Create project-specific commands for OOS tools
+cat > .claude/commands/modules.md << 'EOF'
+---
+description: 🧩 Unix Philosophy - run/compose focused modules (security, python, git)
+argument-hint: [module_name]
+allowed-tools: Bash(*)
+---
+
+Run focused OOS modules for security, python, git, and other development tasks.
+
+```bash
+./bin/oos-module-runner.sh "$ARGUMENTS"
+```
+EOF
+
+cat > .claude/commands/dev-setup.md << 'EOF'
+---
+description: 🚀 Complete development environment validation (security + python + git)
+argument-hint: [optional_context]
+allowed-tools: Bash(*)
+---
+
+Complete development environment validation combining security, python, and git checks.
+
+```bash
+./compositions/full-dev-setup.sh "$ARGUMENTS"
+```
+EOF
+
+cat > .claude/commands/pre-commit.md << 'EOF'
+---
+description: 🔍 Pre-commit validation - security scan + lint + tests + AI commit message
+argument-hint: [optional_message]
+allowed-tools: Bash(*)
+---
+
+Pre-commit validation workflow with security scanning, linting, tests, and AI-generated commit messages.
+
+```bash
+./compositions/pre-commit.sh "$ARGUMENTS"
+```
+EOF
+
+cat > .claude/commands/create-project.md << 'EOF'
+---
+description: 🏗️ Create new project from template (python-project, node-project, etc)
+argument-hint: [template_name]
+allowed-tools: Bash(*)
+---
+
+Create new projects from OOS templates with proper structure and tooling.
+
+```bash
+./bin/oos-template-manager.sh "$ARGUMENTS"
+```
+EOF
+
+cat > .claude/commands/update-oos.md << 'EOF'
+---
+description: 🌐 Update OOS subfolder operating system from GitHub - RESTART Claude Code after this!
+argument-hint: [optional_branch]
+allowed-tools: Bash(*)
+---
+
+Update OOS subfolder operating system from GitHub with latest features and fixes.
+
+```bash
+./bin/oos-update-from-github.sh "$ARGUMENTS"
+```
+EOF
+
+cat > .claude/commands/start-coding.md << 'EOF'
 ---
 description: 🚀 Complete development session setup
 argument-hint: [optional project context]
@@ -49,8 +119,6 @@ allowed-tools: Bash(*)
 ---
 
 Run the complete development session setup script to validate environment and prepare for coding.
-
-Please run the start-coding script from the project's bin directory:
 
 ```bash
 ./bin/claude-start-coding.sh
@@ -64,7 +132,7 @@ This will:
 - Show available tools and tips
 EOF
 
-echo "✅ All Claude Code commands installed globally"
+echo "✅ All Claude Code commands installed in project"
 
 # Download essential scripts
 echo "🔧 Installing OOS tools..."
@@ -128,17 +196,18 @@ EOF
 
 echo -e "\033[1;32m✅ OOS Installation Complete!\033[0m"
 echo ""
-echo "Available global commands in Claude Code:"
+echo "Available commands in Claude Code (when working in this project):"
 echo "  /start-coding     - Complete development session setup"
+echo "  /modules          - Run security/python/git modules"
+echo "  /dev-setup        - Complete development environment validation"
+echo "  /pre-commit       - Pre-commit validation workflow"
+echo "  /create-project   - Create new projects from templates"
+echo "  /update-oos       - Update OOS from GitHub"
 echo "  /help-me          - Smart context engineering help"
 echo "  /optimize         - Optimize current context for token efficiency"
 echo "  /auto-fix         - Automatically fix code consistency issues"
 echo "  /smart-commit     - Generate intelligent commit messages"
-echo "  /brain-dump       - Smart processing of rambling input"
-echo "  /clarify          - Start clarification workflow"
-echo "  /workflow         - Start structured workflow for complex tasks"
 echo "  /archon-*         - Archon project management commands"
-echo ""
-echo "To access other OOS tools, run ./bin/claude-start-coding.sh or use the modules directly."
+echo "  + more..."
 echo ""
 echo "🔄 Restart Claude Code to use all slash commands!"
