@@ -43,11 +43,39 @@ echo -e "\n${BLUE}Step 2: Fixing Environment Issues${NC}"
 
 # Check and fix 1Password authentication
 if ! op whoami >/dev/null 2>&1; then
-    echo "• 1Password: ⚠️  Not authenticated - attempting automatic sign-in..."
+    echo "• 1Password: ⚠️  Not authenticated - checking service account..."
     if command -v op >/dev/null 2>&1; then
-        # Try automatic signin first
-        if op signin --account my 2>/dev/null || op signin 2>/dev/null; then
-            echo "• 1Password: ✅ Successfully authenticated"
+        # Check for service account first
+        local service_account_file="$HOME/.config/op/service_account.txt"
+        if [[ -f "$service_account_file" ]]; then
+            export OP_SERVICE_ACCOUNT_TOKEN="$(cat "$service_account_file")"
+            if op whoami >/dev/null 2>&1; then
+                echo "• 1Password: ✅ Service account authentication working"
+            else
+                echo "• 1Password: ⚠️  Service account token not working, attempting setup..."
+                if [[ -f "$SCRIPT_DIR/setup-1password-service.sh" ]]; then
+                    echo "→ Running service account setup..."
+                    if "$SCRIPT_DIR/setup-1password-service.sh" --test >/dev/null 2>&1; then
+                        echo "• 1Password: ✅ Service account configured and working"
+                    else
+                        echo "• 1Password: ⚠️  Service account setup failed, trying manual signin..."
+                        if op signin --account my 2>/dev/null || op signin 2>/dev/null; then
+                            echo "• 1Password: ✅ Successfully authenticated manually"
+                        else
+                            echo "• 1Password: ❌ Authentication failed - please run: $SCRIPT_DIR/setup-1password-service.sh"
+                        fi
+                    fi
+                fi
+            fi
+        else
+            # No service account, try manual signin
+            echo "• 1Password: ⚠️  No service account found - attempting manual sign-in..."
+            if op signin --account my 2>/dev/null || op signin 2>/dev/null; then
+                echo "• 1Password: ✅ Successfully authenticated"
+                echo "  💡 For long-term authentication, run: $SCRIPT_DIR/setup-1password-service.sh"
+            else
+                echo "• 1Password: ❌ Manual signin failed - please run: $SCRIPT_DIR/setup-1password-service.sh"
+            fi
         else
             echo "• 1Password: Opening 1Password app for Touch ID/Face ID authentication..."
             # Try to open 1Password app for biometric auth

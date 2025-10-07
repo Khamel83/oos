@@ -77,6 +77,27 @@ bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 | `/archon-complete` | Mark tasks complete |
 | `/archon-research` | Search knowledge base |
 
+## 1Password Integration
+
+OOS includes automatic 1Password service account setup for long-term authentication:
+
+```bash
+# Set up service account (works for weeks/months)
+./bin/setup-1password-service.sh
+
+# Test existing setup
+./bin/setup-1password-service.sh --test
+
+# Reset and reconfigure
+./bin/setup-1password-service.sh --reset
+```
+
+**Benefits:**
+- ✅ Long-term authentication (weeks/months)
+- ✅ Works across all OOS installations automatically
+- ✅ No manual signin required
+- ✅ Integrated with `/start-coding` and development gate
+
 ## Documentation
 
 - [Quick Start](QUICK_START.md) - 2 minute setup for your systematic environment

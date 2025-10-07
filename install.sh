@@ -141,6 +141,8 @@ scripts=(
     "oos-template-manager.sh"
     "oos-update-from-github.sh"
     "claude-start-coding.sh"
+    "setup-1password-service.sh"
+    "dev-gate.sh"
 )
 
 for script in "${scripts[@]}"; do
