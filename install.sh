@@ -13,10 +13,35 @@ echo "=================================="
 cd "$INSTALL_DIR"
 mkdir -p .claude bin modules compositions
 
-# Download working slash commands
-echo "📋 Installing slash commands..."
-curl -s https://raw.githubusercontent.com/Khamel83/oos/master/.claude/project_commands.json > .claude/slash_commands.json
-echo "✅ Slash commands installed"
+# Install Claude Code commands (new Markdown format)
+echo "📋 Installing Claude Code commands..."
+mkdir -p ~/.claude/commands
+
+# Create global start-coding command
+cat > ~/.claude/commands/start-coding.md << 'EOF'
+---
+description: 🚀 Complete development session setup
+argument-hint: [optional project context]
+allowed-tools: Bash(*)
+---
+
+Run the complete development session setup script to validate environment and prepare for coding.
+
+Please run the start-coding script from the project's bin directory:
+
+```bash
+./bin/claude-start-coding.sh
+```
+
+This will:
+- Update OOS subfolder operating system
+- Validate development environment
+- Check project health
+- Set up development commands
+- Show available tools and tips
+EOF
+
+echo "✅ Claude Code commands installed globally"
 
 # Download essential scripts
 echo "🔧 Installing OOS tools..."
@@ -81,11 +106,8 @@ EOF
 echo -e "\033[1;32m✅ OOS Installation Complete!\033[0m"
 echo ""
 echo "Available commands in Claude Code:"
-echo "  /dev-setup     - Validate development environment"
-echo "  /modules       - Run security/python/git modules"
-echo "  /pre-commit    - Pre-commit validation workflow"
-echo "  /update-oos    - Update OOS from GitHub"
-echo "  /create-project - Create new projects from templates"
-echo "  /start-coding  - Complete development session setup"
+echo "  /start-coding  - Complete development session setup (installed globally)"
 echo ""
-echo "🔄 Restart Claude Code to use slash commands!"
+echo "To access other OOS tools, run ./bin/claude-start-coding.sh or use the modules directly."
+echo ""
+echo "🔄 Restart Claude Code to use the /start-coding command!"
