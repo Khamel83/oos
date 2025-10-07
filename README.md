@@ -9,9 +9,13 @@ OOS transforms how you approach any coding work, project, or idea by providing a
 
 ## Install
 
+Run this in **any project directory** (new or existing):
+
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 ```
+
+**Then restart Claude Code** to activate all slash commands.
 
 ## Use
 
@@ -20,13 +24,17 @@ bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 /modules list          # See available thinking tools
 /dev-setup             # Validate your brain environment
 /pre-commit            # Run systematic checks before committing
+/help-me               # Smart context engineering help
+/optimize              # Optimize current context for token efficiency
+/auto-fix              # Automatically fix code consistency issues
+/smart-commit          # Generate intelligent commit messages
 ```
 
 ## What You Get
 
 **Your Systematic Brain Environment:**
 - **Consistent Mental Models** - Same thinking approach for every project
-- **6+ slash commands** - Integrate your systematic workflow into Claude Code
+- **20+ slash commands** - Complete systematic workflow integration in Claude Code
 - **Project Management Layer** - Archon integration for structured work tracking
 - **Quality Assurance** - Automated validation that supports your thinking
 - **Bootstrap System** - Instantly create consistent thinking environments
@@ -40,15 +48,34 @@ bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 
 ## Commands
 
+**Core Development:**
 | Command | What it does |
 |---------|--------------|
 | `/start-coding` | Start systematic development session |
-| `/modules list` | Show all thinking tools |
-| `/modules security/scan_secrets .` | Scan for security issues |
-| `/dev-setup` | Validate your brain environment |
-| `/pre-commit` | Run systematic quality checks |
+| `/modules [name]` | Run security/python/git modules |
+| `/dev-setup` | Complete development environment validation |
+| `/pre-commit` | Pre-commit validation workflow |
 | `/update-oos` | Update your brain tools |
-| `/create-project` | Create new systematic project |
+| `/create-project [template]` | Create new systematic project |
+
+**AI-Powered Workflow:**
+| Command | What it does |
+|---------|--------------|
+| `/help-me` | Smart context engineering help |
+| `/optimize` | Optimize current context for token efficiency |
+| `/auto-fix` | Automatically fix code consistency issues |
+| `/smart-commit` | Generate intelligent commit messages |
+| `/brain-dump` | Smart processing of rambling input |
+| `/clarify` | Start clarification workflow |
+| `/workflow` | Start structured workflow for complex tasks |
+
+**Project Management:**
+| Command | What it does |
+|---------|--------------|
+| `/archon-status` | Show current project status |
+| `/archon-task-start` | Start working on tasks |
+| `/archon-complete` | Mark tasks complete |
+| `/archon-research` | Search knowledge base |
 
 ## Documentation
 
