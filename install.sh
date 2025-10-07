@@ -17,6 +17,29 @@ mkdir -p .claude bin modules compositions
 echo "📋 Installing Claude Code commands..."
 mkdir -p ~/.claude/commands
 
+# Download all OOS command files
+commands=(
+    "archon-complete.md"
+    "archon-research.md"
+    "archon-status.md"
+    "archon-task-start.md"
+    "auto-fix.md"
+    "brain-dump.md"
+    "clarify.md"
+    "context-stats.md"
+    "doc-check.md"
+    "help-me.md"
+    "meta-ai.md"
+    "optimize.md"
+    "smart-commit.md"
+    "workflow.md"
+)
+
+for cmd in "${commands[@]}"; do
+    echo "  📥 Installing /$cmd"
+    curl -s "https://raw.githubusercontent.com/Khamel83/oos/master/.claude/commands/$cmd" > ~/.claude/commands/"$cmd"
+done
+
 # Create global start-coding command
 cat > ~/.claude/commands/start-coding.md << 'EOF'
 ---
@@ -41,7 +64,7 @@ This will:
 - Show available tools and tips
 EOF
 
-echo "✅ Claude Code commands installed globally"
+echo "✅ All Claude Code commands installed globally"
 
 # Download essential scripts
 echo "🔧 Installing OOS tools..."
@@ -105,9 +128,17 @@ EOF
 
 echo -e "\033[1;32m✅ OOS Installation Complete!\033[0m"
 echo ""
-echo "Available commands in Claude Code:"
-echo "  /start-coding  - Complete development session setup (installed globally)"
+echo "Available global commands in Claude Code:"
+echo "  /start-coding     - Complete development session setup"
+echo "  /help-me          - Smart context engineering help"
+echo "  /optimize         - Optimize current context for token efficiency"
+echo "  /auto-fix         - Automatically fix code consistency issues"
+echo "  /smart-commit     - Generate intelligent commit messages"
+echo "  /brain-dump       - Smart processing of rambling input"
+echo "  /clarify          - Start clarification workflow"
+echo "  /workflow         - Start structured workflow for complex tasks"
+echo "  /archon-*         - Archon project management commands"
 echo ""
 echo "To access other OOS tools, run ./bin/claude-start-coding.sh or use the modules directly."
 echo ""
-echo "🔄 Restart Claude Code to use the /start-coding command!"
+echo "🔄 Restart Claude Code to use all slash commands!"
