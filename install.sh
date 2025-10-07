@@ -142,6 +142,7 @@ scripts=(
     "oos-update-from-github.sh"
     "claude-start-coding.sh"
     "setup-1password-service.sh"
+    "setup-archon.sh"
     "dev-gate.sh"
 )
 

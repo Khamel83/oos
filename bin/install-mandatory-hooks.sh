@@ -166,11 +166,9 @@ if [[ -f .dev-gate-passed ]]; then
     local current_time=$(date +%s)
     local age=$((current_time - gate_time))
 
-    # If gate is older than configured time (default 4 hours), re-validate
-    local timeout_seconds=\${DEV_GATE_TIMEOUT:-14400}  # 4 hours default
-    if [[ \$age -gt \$timeout_seconds ]]; then
-        local hours=\$((timeout_seconds / 3600))
-        echo "⚠️  Development gate is stale (older than \${hours} hours)"
+    # If gate is older than 1 hour, re-validate
+    if [[ $age -gt 3600 ]]; then
+        echo "⚠️  Development gate is stale (older than 1 hour)"
         echo "Re-validating environment..."
         if ./bin/dev-gate.sh; then
             echo "✅ Environment re-validated"
@@ -210,7 +208,7 @@ main() {
     echo "  ❌ Cannot commit without passing development gate"
     echo "  ❌ Cannot push without valid environment"
     echo "  🔄 Environment auto-checked after branch changes"
-    echo "  ⏰ Gate status expires after 4 hours (configurable with DEV_GATE_TIMEOUT)"
+    echo "  ⏰ Gate status expires after 1 hour"
     echo
     echo -e "${BLUE}Emergency bypasses:${NC}"
     echo "  DEV_GATE_BYPASS=true git commit"

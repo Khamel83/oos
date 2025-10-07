@@ -79,47 +79,26 @@ check_uv_environment() {
 check_environment_variables() {
     log_info "Checking environment variable setup..."
 
-    # Check if 1Password CLI is available
+    # Check if 1Password CLI is available and signed in
     if ! command -v op &> /dev/null; then
         log_error "1Password CLI (op) is not installed"
         return 1
     fi
 
-    # Check service account authentication first
-    local service_account_file="$HOME/.config/op/service_account.txt"
-    if [[ -f "$service_account_file" ]]; then
-        export OP_SERVICE_ACCOUNT_TOKEN="$(cat "$service_account_file")"
-        if op whoami &> /dev/null; then
-            log_success "1Password service account authentication working"
-        else
-            log_warning "Service account token not working, attempting to set up..."
-            if [[ -f "$SCRIPT_DIR/setup-1password-service.sh" ]]; then
-                log_info "Running service account setup..."
-                "$SCRIPT_DIR/setup-1password-service.sh" --test 2>/dev/null || {
-                    log_error "Service account setup failed. Run: $SCRIPT_DIR/setup-1password-service.sh"
-                    return 1
-                }
-            fi
-        fi
-    else
-        # Fall back to manual authentication for now
-        if ! op whoami &> /dev/null; then
-            log_warning "Not signed into 1Password CLI. For long-term authentication, run: $SCRIPT_DIR/setup-1password-service.sh"
-            log_info "Or sign in manually: op signin"
-            return 1
-        fi
+    if ! op whoami &> /dev/null; then
+        log_error "Not signed into 1Password CLI. Run: op signin"
+        return 1
     fi
 
-    log_success "1Password CLI is available and authenticated"
+    log_success "1Password CLI is available and signed in"
 
     # Check if we can access the environment configuration
     local vault="${OP_VAULT:-Personal}"
     local item="${OP_ITEM:-bootstrap-env}"
 
     if ! op item get "$item" --vault "$vault" &> /dev/null; then
-        log_warning "Cannot access environment item '$item' in vault '$vault'"
-        log_info "This may be expected if you're not using 1Password for environment variables"
-        return 0  # Make this a warning, not an error
+        log_error "Cannot access environment item '$item' in vault '$vault'"
+        return 1
     fi
 
     log_success "Environment variables are accessible from 1Password"
