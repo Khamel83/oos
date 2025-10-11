@@ -136,6 +136,12 @@ essential_scripts=(
     "dev-gate.sh"
     "claude-dev-gate.sh"
     "claude-start-coding.sh"
+    # Complete workflow scripts
+    "complete-workflow.sh"
+    "validate-oos"
+    "test-user-scenarios"
+    "provision-infrastructure.sh"
+    "take-screenshot.sh"
 )
 
 for script in "${essential_scripts[@]}"; do
