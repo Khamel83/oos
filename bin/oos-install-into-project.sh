@@ -112,7 +112,7 @@ if [[ -d ".claude/commands" ]]; then
     echo -e "${GREEN}✅ Installed $command_count markdown commands${NC}"
 
     # List key workflow commands
-    key_commands=("complete-workflow" "validate" "ruat" "provision" "screenshot")
+    key_commands=("complete-workflow" "validate" "ruat" "provision" "screenshot" "oos-refresh" "startup-check")
     for cmd in "${key_commands[@]}"; do
         if [[ -f ".claude/commands/$cmd.md" ]]; then
             echo -e "  ${GREEN}✓${NC} $cmd"
@@ -142,6 +142,8 @@ essential_scripts=(
     "test-user-scenarios"
     "provision-infrastructure.sh"
     "take-screenshot.sh"
+    # Command refresh system
+    "oos-refresh-commands.sh"
 )
 
 for script in "${essential_scripts[@]}"; do
@@ -233,6 +235,11 @@ Available OOS commands:
   /pre-commit    - Security + lint + test + AI commit message
   /modules       - Run/compose individual modules
   /create-project - Create new projects from templates
+  /complete-workflow - Run A→B→C→D systematic workflow
+  /validate      - Comprehensive OOS validation
+  /ruat          - User acceptance testing
+  /oos-refresh   - Auto-refresh slash commands
+  /startup-check - Startup health check
 EOF
 
 echo -e "${GREEN}✅ OOS marker created${NC}"
@@ -247,9 +254,10 @@ echo -e "${GREEN}✅ Essential scripts in bin/${NC}"
 
 echo -e "\n${YELLOW}Next Steps:${NC}"
 echo "1. Restart Claude Code to load new slash commands"
-echo "2. Run: /dev-setup (to validate your environment)"
-echo "3. Run: /modules list (to see available modules)"
-echo "4. Start using OOS workflows!"
+echo "2. Run: /startup-check (validate and refresh commands)"
+echo "3. Run: /dev-setup (to validate your environment)"
+echo "4. Run: /complete-workflow plan (see the A→B→C→D workflow)"
+echo "5. Start using OOS workflows!"
 
 echo -e "\n${BLUE}Available OOS Commands:${NC}"
 echo "• /dev-setup     - Complete environment validation"
