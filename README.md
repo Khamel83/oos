@@ -17,6 +17,12 @@ bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 
 **Then restart Claude Code** to activate all slash commands.
 
+**After restarting, run:**
+```bash
+/startup-check         # Validate and refresh commands automatically
+/complete-workflow plan # See the systematic A→B→C→D workflow
+```
+
 ## Use
 
 ```bash
@@ -27,6 +33,8 @@ bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 /ruat                  # Recursive User-Acceptance Testing
 /provision             # AI-powered infrastructure provisioning
 /screenshot            # Take screenshot and analyze with Claude
+/oos-refresh           # Auto-refresh slash commands and validate
+/startup-check         # Startup health check (run automatically)
 /help-me               # Smart context engineering help
 /pre-commit            # Run systematic checks before committing
 /smart-commit          # Generate intelligent commit messages
@@ -37,10 +45,23 @@ bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 **Your Systematic Brain Environment:**
 - **Consistent Mental Models** - Same thinking approach for every project
 - **20+ slash commands** - Complete systematic workflow integration in Claude Code
+- **Auto-Refresh System** - Commands stay current and validate themselves automatically
 - **Project Management Layer** - Archon integration for structured work tracking
 - **Quality Assurance** - Automated validation that supports your thinking
 - **Bootstrap System** - Instantly create consistent thinking environments
 - **Future-Ready Architecture** - Built for agentic thinking and AI collaboration
+
+### 🔄 Auto-Refresh & Validation
+
+OOS automatically maintains itself:
+
+- **Startup Health Check** - `/startup-check` runs automatically to validate commands
+- **Version Tracking** - Detects when OOS updates and refreshes commands
+- **Rollback Protection** - Automatic backup and restore if updates fail
+- **Validation Testing** - Every command is tested for functionality
+- **Fuckup Detection** - Issues are caught and reported immediately
+
+This ensures your slash commands always work or you get clear error messages about what's wrong.
 
 ### 🧠 How It Works as Your Brain Extension:
 
