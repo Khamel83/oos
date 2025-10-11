@@ -129,6 +129,14 @@ if grep -q '^CONTEXT7_API_KEY=' .env; then
   [[ -n "$KEY" ]] && claude mcp add --transport http context7 "https://context7.liam.sh/mcp" --header "CONTEXT7_API_KEY: $KEY" || true
 fi
 
+# ---------- Fix MCP and Slash Commands ----------
+if [[ -f "bin/setup-mcp.sh" ]]; then
+  echo "🔧 Setting up MCP and slash commands..."
+  ./bin/setup-mcp.sh "$NAME"
+else
+  echo "⚠️  MCP setup script not found - manual setup may be needed"
+fi
+
 # ---------- Repo init + create on GitHub (no secrets mirrored) ----------
 git init -q; git add -A; git commit -m "chore: bootstrap ${NAME}" >/dev/null 2>&1 || true
 if command -v gh >/dev/null; then
