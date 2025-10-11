@@ -92,16 +92,24 @@ check_documentation_inventory() {
     # Find all documentation files
     find "$PROJECT_ROOT/docs" -type f -name "*.md" 2>/dev/null > "$doc_files" || touch "$doc_files"
 
-    # Extract commands from CLAUDE.md (look for /command patterns)
+    # Extract commands from CLAUDE.md (only extract actual slash commands, not documentation links)
     if [ -f "$PROJECT_ROOT/CLAUDE.md" ]; then
-        grep -o '/[a-zA-Z][a-zA-Z0-9-]*' "$PROJECT_ROOT/CLAUDE.md" | sort -u > "$commands_in_claude"
+        # Look for actual slash commands (preceded by space or start of line, followed by space or end of line)
+        grep -oE '(^| )/[a-zA-Z][a-zA-Z0-9-]*( |$)' "$PROJECT_ROOT/CLAUDE.md" | \
+        sed 's/^ *//; s/ *$//' | \
+        grep -v -E '^/(docs|bin|home|ubuntu|dev|oos|src|tests|CLAUDE|README|ARCHON|SYSTEM|TESTING)/' | \
+        sort -u > "$commands_in_claude"
     else
         touch "$commands_in_claude"
     fi
 
-    # Extract commands from README.md
+    # Extract commands from README.md (only extract actual slash commands from usage examples)
     if [ -f "$PROJECT_ROOT/README.md" ]; then
-        grep -o '/[a-zA-Z][a-zA-Z0-9-]*' "$PROJECT_ROOT/README.md" | sort -u > "$commands_in_readme"
+        # Look for actual slash commands in code blocks and usage examples
+        grep -oE '(^| )/[a-zA-Z][a-zA-Z0-9-]*( |$)' "$PROJECT_ROOT/README.md" | \
+        sed 's/^ *//; s/ *$//' | \
+        grep -v -E '^/(docs|bin|home|ubuntu|dev|oos|src|tests|CLAUDE|README|ARCHON|SYSTEM|TESTING)/' | \
+        sort -u > "$commands_in_readme"
     else
         touch "$commands_in_readme"
     fi
@@ -146,13 +154,76 @@ check_alignment() {
     # Check for documented commands without implementation
     while IFS= read -r command; do
         local command_name="${command#/}"
-        local impl_file="$PROJECT_ROOT/bin/$command_name"
-        local alt_impl="$PROJECT_ROOT/bin/claude-$command_name.sh"
 
-        if [ ! -f "$impl_file" ] && [ ! -f "$alt_impl" ]; then
-            echo "$command" >> "$missing_code"
+        # Check if this is a slash command (should be in .claude/commands/ OR bin/ for OOS workflow commands)
+        if [[ "$command" == /* ]]; then
+            local slash_cmd_file="$PROJECT_ROOT/.claude/commands/$command_name.md"
+            local bin_impl="$PROJECT_ROOT/bin/$command_name.sh"
+            local alt_bin_impl="$PROJECT_ROOT/bin/claude-$command_name.sh"
+
+            # For OOS workflow commands, check if there's a corresponding bin script
+            # Handle various naming patterns
+            local word_impl="$PROJECT_ROOT/bin/${command_name#oos-}.sh"  # Remove oos- prefix
+            local extended_impl="$PROJECT_ROOT/bin/$command_name-commands.sh"  # Add -commands suffix
+            local action_impl="$PROJECT_ROOT/bin/take-$command_name.sh"  # Add take- prefix
+            local infra_impl="$PROJECT_ROOT/bin/$command_name-infrastructure.sh"  # Add -infrastructure
+            local plain_impl="$PROJECT_ROOT/bin/$command_name"  # No extension
+            local hyphen_impl="$PROJECT_ROOT/bin/$command_name-oos"  # Add -oos suffix
+            local reversed_impl="$PROJECT_ROOT/bin/oos-$command_name"  # Add oos- prefix
+
+            if [ ! -f "$slash_cmd_file" ] && [ ! -f "$bin_impl" ] && [ ! -f "$alt_bin_impl" ] && \
+               [ ! -f "$word_impl" ] && [ ! -f "$extended_impl" ] && [ ! -f "$action_impl" ] && \
+               [ ! -f "$infra_impl" ] && [ ! -f "$plain_impl" ] && [ ! -f "$hyphen_impl" ] && \
+               [ ! -f "$reversed_impl" ]; then
+                echo "$command" >> "$missing_code"
+            fi
+        else
+            # Check for regular script implementations in bin/
+            local impl_file="$PROJECT_ROOT/bin/$command_name"
+            local alt_impl="$PROJECT_ROOT/bin/claude-$command_name.sh"
+
+            if [ ! -f "$impl_file" ] && [ ! -f "$alt_impl" ]; then
+                echo "$command" >> "$missing_code"
+            fi
         fi
     done < "$TEMP_DIR/commands_claude.txt"
+
+    # Also check commands from README.md
+    while IFS= read -r command; do
+        local command_name="${command#/}"
+
+        # Check if this is a slash command (should be in .claude/commands/ OR bin/ for OOS workflow commands)
+        if [[ "$command" == /* ]]; then
+            local slash_cmd_file="$PROJECT_ROOT/.claude/commands/$command_name.md"
+            local bin_impl="$PROJECT_ROOT/bin/$command_name.sh"
+            local alt_bin_impl="$PROJECT_ROOT/bin/claude-$command_name.sh"
+
+            # For OOS workflow commands, check if there's a corresponding bin script
+            # Handle various naming patterns
+            local word_impl="$PROJECT_ROOT/bin/${command_name#oos-}.sh"  # Remove oos- prefix
+            local extended_impl="$PROJECT_ROOT/bin/$command_name-commands.sh"  # Add -commands suffix
+            local action_impl="$PROJECT_ROOT/bin/take-$command_name.sh"  # Add take- prefix
+            local infra_impl="$PROJECT_ROOT/bin/$command_name-infrastructure.sh"  # Add -infrastructure
+            local plain_impl="$PROJECT_ROOT/bin/$command_name"  # No extension
+            local hyphen_impl="$PROJECT_ROOT/bin/$command_name-oos"  # Add -oos suffix
+            local reversed_impl="$PROJECT_ROOT/bin/oos-$command_name"  # Add oos- prefix
+
+            if [ ! -f "$slash_cmd_file" ] && [ ! -f "$bin_impl" ] && [ ! -f "$alt_bin_impl" ] && \
+               [ ! -f "$word_impl" ] && [ ! -f "$extended_impl" ] && [ ! -f "$action_impl" ] && \
+               [ ! -f "$infra_impl" ] && [ ! -f "$plain_impl" ] && [ ! -f "$hyphen_impl" ] && \
+               [ ! -f "$reversed_impl" ]; then
+                echo "$command" >> "$missing_code"
+            fi
+        else
+            # Check for regular script implementations in bin/
+            local impl_file="$PROJECT_ROOT/bin/$command_name"
+            local alt_impl="$PROJECT_ROOT/bin/claude-$command_name.sh"
+
+            if [ ! -f "$impl_file" ] && [ ! -f "$alt_impl" ]; then
+                echo "$command" >> "$missing_code"
+            fi
+        fi
+    done < "$TEMP_DIR/commands_readme.txt"
 
     # Check for orphaned files (old, unused scripts)
     find "$PROJECT_ROOT/bin" -name "*old*" -o -name "*backup*" -o -name "*deprecated*" -o -name "*temp*" \
