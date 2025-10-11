@@ -29,6 +29,41 @@
       "name": "start-coding",
       "description": "🚀 Complete development session setup",
       "script": "bin/claude-start-coding.sh"
+    },
+    {
+      "name": "screenshot",
+      "description": "📸 Take screenshot and analyze with Claude",
+      "script": "bin/take-screenshot.sh"
+    },
+    {
+      "name": "provision",
+      "description": "🏗️ AI-powered infrastructure provisioning",
+      "script": "bin/provision-infrastructure.sh"
+    },
+    {
+      "name": "validate",
+      "description": "✅ Run comprehensive OOS validation",
+      "script": "bin/validate-oos"
+    },
+    {
+      "name": "ruat",
+      "description": "🧪 Run user acceptance testing (RUAT)",
+      "script": "bin/test-user-scenarios"
+    },
+    {
+      "name": "test-user-scenarios",
+      "description": "🧪 Run user acceptance testing (RUAT)",
+      "script": "bin/test-user-scenarios"
+    },
+    {
+      "name": "complete-workflow",
+      "description": "🚀 Run complete idea-to-completion workflow",
+      "script": "bin/complete-workflow.sh"
+    },
+    {
+      "name": "idea-to-done",
+      "description": "🎯 Complete project workflow A→B→C→D",
+      "script": "bin/complete-workflow.sh"
     }
   ]
 }
