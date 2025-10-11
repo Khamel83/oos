@@ -105,6 +105,25 @@ EOF
     echo -e "${GREEN}✅ Complete workflow commands added${NC}"
 fi
 
+# Step 2.7: Validate markdown commands installation
+echo -e "${BLUE}🔍 Validating slash command installation...${NC}"
+if [[ -d ".claude/commands" ]]; then
+    command_count=$(ls .claude/commands/*.md 2>/dev/null | wc -l)
+    echo -e "${GREEN}✅ Installed $command_count markdown commands${NC}"
+
+    # List key workflow commands
+    key_commands=("complete-workflow" "validate" "ruat" "provision" "screenshot")
+    for cmd in "${key_commands[@]}"; do
+        if [[ -f ".claude/commands/$cmd.md" ]]; then
+            echo -e "  ${GREEN}✓${NC} $cmd"
+        else
+            echo -e "  ${YELLOW}⚠${NC} $cmd (missing)"
+        fi
+    done
+else
+    echo -e "${RED}❌ No commands directory created${NC}"
+fi
+
 # Step 3: Copy essential OOS scripts to project
 echo -e "\n${BLUE}🔧 Installing OOS tools...${NC}"
 mkdir -p bin
