@@ -1,0 +1,29 @@
+{
+  "commands": {
+    "screenshot": {
+      "command": "./bin/take-screenshot.sh",
+      "description": "Take screenshot and analyze with Claude",
+      "category": "Analysis"
+    },
+    "analyze-screen": {
+      "command": "./bin/take-screenshot.sh",
+      "description": "Alias for screenshot analysis",
+      "category": "Analysis"
+    },
+    "provision": {
+      "command": "./bin/provision-infrastructure.sh",
+      "description": "AI-powered infrastructure provisioning",
+      "category": "Deployment"
+    },
+    "deploy": {
+      "command": "./bin/provision-infrastructure.sh --deploy",
+      "description": "Deploy infrastructure directly",
+      "category": "Deployment"
+    },
+    "provision-preview": {
+      "command": "./bin/provision-infrastructure.sh --preview",
+      "description": "Preview infrastructure without deploying",
+      "category": "Deployment"
+    }
+  }
+}
