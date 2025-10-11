@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+"""
+Auto-Documentation and Consistency System
+
+Implements automated documentation generation, GitHub commit hooks,
+and consistency enforcement to "save you from yourself"
+"""
+
+import json
+import asyncio
+import subprocess
+import re
+from typing import Dict, List, Any, Optional, Tuple
+from dataclasses import dataclass, asdict
+from datetime import datetime
+from pathlib import Path
+import logging
+import hashlib
+import yaml
+
+
+@dataclass
+class DocumentationRule:
+    """Rule for auto-generating documentation"""
+    rule_id: str
+    trigger_patterns: List[str]  # File patterns that trigger this rule
+    documentation_type: str  # 'function', 'class', 'module', 'readme', 'changelog'
+    template: str
+    required_sections: List[str]
+    auto_generate: bool = True
+    enforce: bool = True
+
+
+@dataclass
+class ConsistencyCheck:
+    """Consistency check configuration"""
+    check_id: str
+    check_type: str  # 'naming', 'structure', 'style', 'documentation'
+    pattern: str
+    expected: str
+    severity: str  # 'error', 'warning', 'info'
+    auto_fix: bool = False
+
+
+@dataclass
+class AutoDocResult:
+    """Result of auto-documentation operation"""
+    operation: str
+    files_processed: List[str]
+    documentation_generated: List[str]
+    consistency_issues: List[Dict[str, Any]]
+    commit_suggested: bool
+    commit_message: Optional[str] = None
+
+
+class GitIntegration:
+    """Git integration for automated commits and hooks"""
+
+    def __init__(self, repo_path: str = "."):
+        self.repo_path = Path(repo_path)
+        self.logger = logging.getLogger(__name__)
+
+    async def setup_hooks(self):
+        """Setup Git hooks for auto-documentation"""
+        hooks_dir = self.repo_path / ".git" / "hooks"
+        hooks_dir.mkdir(exist_ok=True)
+
+        # Pre-commit hook
+        pre_commit_hook = hooks_dir / "pre-commit"
+        pre_commit_content = """#!/bin/bash
+# OOS Auto-documentation pre-commit hook
+
+echo "🔍 Running OOS consistency checks..."
+
+# Check if auto-documentation is needed
+python3 -m oos.src.auto_documentation --check-consistency --pre-commit
+
+if [ $? -ne 0 ]; then
+    echo "❌ Consistency checks failed. Run: python3 -m oos.src.auto_documentation --fix"
+    exit 1
+fi
+
+echo "✅ Consistency checks passed"
+"""
+
+        pre_commit_hook.write_text(pre_commit_content)
+        pre_commit_hook.chmod(0o755)
+
+        # Post-commit hook
+        post_commit_hook = hooks_dir / "post-commit"
+        post_commit_content = """#!/bin/bash
+# OOS Auto-documentation post-commit hook
+
+echo "📝 Checking for documentation updates..."
+
+# Generate documentation if needed
+python3 -m oos.src.auto_documentation --post-commit
+
+echo "✅ Documentation check complete"
+"""
+
+        post_commit_hook.write_text(post_commit_content)
+        post_commit_hook.chmod(0o755)
+
+        self.logger.info("Git hooks installed successfully")
+
+    async def suggest_commit_message(self, changed_files: List[str]) -> str:
+        """Generate intelligent commit message based on changes"""
+
+        # Analyze file changes
+        change_types = self._analyze_changes(changed_files)
+
+        # Generate message based on patterns
+        if change_types['new_features']:
+            primary = f"feat: add {', '.join(change_types['new_features'])}"
+        elif change_types['fixes']:
+            primary = f"fix: resolve {', '.join(change_types['fixes'])}"
+        elif change_types['docs']:
+            primary = f"docs: update {', '.join(change_types['docs'])}"
+        elif change_types['refactoring']:
+            primary = f"refactor: improve {', '.join(change_types['refactoring'])}"
+        else:
+            primary = "chore: update files"
+
+        # Add scope if detected
+        scope = self._detect_scope(changed_files)
+        if scope:
+            primary = primary.replace(":", f"({scope}):", 1)
+
+        # Add details
+        details = []
+        if len(changed_files) > 1:
+            details.append(f"Modified {len(changed_files)} files")
+
+        if change_types['breaking']:
+            details.append("BREAKING CHANGE: " + change_types['breaking'])
+
+   
