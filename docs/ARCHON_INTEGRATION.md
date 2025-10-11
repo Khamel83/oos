@@ -203,8 +203,10 @@ Should list actual tasks from Archon.
 ### "Archon tools not working"
 
 1. Check MCP connection: `claude mcp list`
-2. Should show: `archon: http://archon.khamel.com:8051/mcp`
-3. If missing, reconnect: `claude mcp add --transport http archon https://archon.khamel.com:8051/mcp`
+2. Should show: `archon: http://100.103.45.61:8051/mcp (HTTP) - ✓ Connected`
+3. If missing, reconnect: `claude mcp add --transport http archon http://100.103.45.61:8051/mcp`
+
+**Note**: Use direct IP address `100.103.45.61:8051` until OCI firewall is configured for domain access. See `docs/ARCHON_OCI_FIREWALL_FIX.md` for details.
 
 ### "Can't find docs in Archon"
 

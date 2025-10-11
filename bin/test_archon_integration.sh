@@ -30,7 +30,7 @@ if claude mcp list 2>&1 | grep -i "archon"; then
     echo "✅ Archon found in MCP servers"
 else
     echo "❌ Archon NOT found in MCP servers"
-    echo "Expected to see: archon: http://archon.khamel.com:8051/mcp"
+    echo "Expected to see: archon: http://100.103.45.61:8051/mcp (HTTP) - ✓ Connected"
 fi
 echo ""
 
@@ -95,13 +95,23 @@ echo ""
 # Test 7: Test Archon endpoint connectivity
 echo "TEST 7: Archon Endpoint Connectivity"
 echo "-----------------------------------"
-echo "Testing: https://archon.khamel.com:8051/mcp"
+echo "Testing direct IP: http://100.103.45.61:8051/mcp"
 if command -v curl &> /dev/null; then
-    response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 https://archon.khamel.com:8051/mcp 2>&1)
-    if [ "$response" = "400" ] || [ "$response" = "200" ]; then
+    response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://100.103.45.61:8051/mcp 2>&1)
+    if [ "$response" = "400" ] || [ "$response" = "200" ] || [ "$response" = "405" ]; then
         echo "✅ Archon endpoint responding (HTTP $response)"
     else
         echo "❌ Archon endpoint not responding (HTTP $response)"
+    fi
+
+    echo "Testing domain: http://archon.khamel.com:8051/mcp"
+    response_domain=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://archon.khamel.com:8051/mcp 2>&1)
+    if [ "$response_domain" = "400" ] || [ "$response_domain" = "200" ] || [ "$response_domain" = "405" ]; then
+        echo "✅ Domain endpoint also responding (HTTP $response_domain)"
+        echo "⚠️  Consider switching back to domain name in MCP config"
+    else
+        echo "❌ Domain endpoint blocked by OCI firewall (HTTP $response_domain)"
+        echo "ℹ️  See docs/ARCHON_OCI_FIREWALL_FIX.md for firewall configuration"
     fi
 else
     echo "⚠️  curl not available, skipping connectivity test"
