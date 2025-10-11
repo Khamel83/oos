@@ -1,33 +1,230 @@
-# Archon Integration Guide - Complete Task Management & Documentation
+# Archon Integration for OOS
 
-This guide covers the complete Archon MCP integration with OOS, including automatic setup, task management workflows, and production-ready usage patterns.
+## CRITICAL: Mandatory Archon Usage
 
-## 🚀 Quick Start (TL;DR)
+OOS requires explicit use of Archon tools for all knowledge queries and task management. This document defines how Claude Code must interact with Archon when working in an OOS environment.
 
-```bash
-# 1. Bootstrap automatically integrates Archon
-./scripts/bootstrap_enhanced.sh
+## The Problem OOS Solves
 
-# 2. Create your project in Claude Code
-# Use the mcp__archon__create_project function
+Without explicit instructions, Claude Code won't automatically use Archon tools. This integration ensures systematic use of your brain extension's knowledge base and task tracking.
 
-# 3. Update .env with project ID
-echo "ARCHON_PROJECT_ID=your-project-id" >> .env
+## Archon Tools Available
 
-# 4. Start using task management
-./oos task list
-/archon-status  # In Claude Code
+When connected to Archon (archon.khamel.com), you have these tools:
+
+### Knowledge Base Tools
+- `archon_query_knowledge` - Search uploaded docs, crawled websites
+- `archon_list_sources` - See available data sources for filtering
+
+### Task Management Tools
+- `archon_create_task` - Add new tasks
+- `archon_read_task` - Get task details
+- `archon_update_task` - Update task status/details
+- `archon_delete_task` - Remove tasks
+- `archon_list_tasks` - See all project tasks
+
+### Project Tools
+- `archon_create_project` - Initialize project structure
+- `archon_read_project` - Get project metadata
+- `archon_update_project` - Modify project settings
+
+## Mandatory Usage Rules
+
+### Rule 1: Search Archon Before Answering
+
+**BEFORE answering ANY question about:**
+- OOS documentation → `archon_query_knowledge("OOS [topic]")`
+- USC policies/procedures → `archon_query_knowledge("USC [topic]")`
+- Project-specific patterns → `archon_query_knowledge("[project] patterns")`
+- Python best practices for THIS project → Search Archon first
+
+**Never answer from general knowledge if project-specific info exists in Archon.**
+
+### Rule 2: Check Tasks Before Suggesting Work
+
+**BEFORE suggesting what to work on:**
+```
+archon_list_tasks(project_id="[current-project]")
 ```
 
-## 🎯 Overview
+**BEFORE starting coding session:**
+```
+archon_list_tasks(status="in_progress")
+```
 
-Archon MCP provides project and task management capabilities integrated with OOS. The key principle is **complete project isolation** - each project operates independently with its own:
+### Rule 3: Update Tasks During Work
 
-- Unique project ID
-- Isolated task management
-- Separate documentation
-- Independent monitoring
-- Isolated security audit trails
+**AFTER completing work:**
+```
+archon_update_task(task_id="...", status="completed")
+```
+
+**WHEN starting new work:**
+```
+archon_update_task(task_id="...", status="in_progress")
+```
+
+## Integration with OOS Commands
+
+### /start-coding Integration
+
+When user runs `/start-coding`, automatically:
+1. Check Archon connection status
+2. List current project tasks
+3. Query Archon for project context
+4. Show what's in progress
+
+### /help-me Integration
+
+When user runs `/help-me`:
+1. Search Archon knowledge base for relevant docs
+2. Check if there are related tasks
+3. Use Archon context to provide specific help
+
+### /archon-* Commands
+
+These commands are explicitly about Archon:
+- `/archon-status` → Call `archon_read_project` and `archon_list_tasks`
+- `/archon-task-start` → Call `archon_update_task` with status="in_progress"
+- `/archon-complete` → Call `archon_update_task` with status="completed"
+- `/archon-research` → Call `archon_query_knowledge`
+
+## Response Patterns
+
+### Pattern 1: Documentation Questions
+
+User: "How do I handle database connections in OOS?"
+
+CORRECT:
+```
+Let me search your OOS documentation in Archon.
+[calls archon_query_knowledge("OOS database connection patterns")]
+Based on your project docs: [answer from Archon results]
+```
+
+INCORRECT:
+```
+❌ "Typically in Python you'd use SQLAlchemy..."
+```
+
+### Pattern 2: Task Planning
+
+User: "What should I work on next?"
+
+CORRECT:
+```
+[calls archon_list_tasks(project_id="oos", status="todo")]
+Based on your Archon task list: [list top priorities]
+```
+
+INCORRECT:
+```
+❌ "You could work on improving error handling..."
+```
+
+### Pattern 3: USC-Specific Questions
+
+User: "What's the vacation policy?"
+
+CORRECT:
+```
+[calls archon_query_knowledge("USC vacation policy HR")]
+According to your uploaded USC HR docs: [answer]
+```
+
+INCORRECT:
+```
+❌ "I don't have access to USC-specific policies..."
+```
+
+## Default Behavior
+
+### Always Assume Archon is Available
+
+Never say:
+- ❌ "I don't have access to your docs"
+- ❌ "I can't see your task list"
+- ❌ "Let me check if Archon is connected"
+
+Instead:
+- ✅ Use Archon tools immediately
+- ✅ If tool fails, THEN explain the connection issue
+
+### Always Be Specific
+
+Don't say:
+- ❌ "Check your task manager"
+- ❌ "Look at your documentation"
+
+Instead:
+- ✅ "I checked your Archon task list and found..."
+- ✅ "According to your Archon knowledge base..."
+
+## What's in Archon for OOS
+
+### Expected Knowledge Base Content
+
+- OOS documentation (README, guides, system vision)
+- USC HR policies and procedures
+- Python patterns and best practices for this workflow
+- Project-specific conventions and standards
+- 1Password integration docs
+- Archon integration docs (this file)
+
+### Expected Project Structure
+
+- Project Name: `oos`
+- Features organized by component (core, integrations, commands)
+- Tasks tracking development work
+- Status tracking (todo, in_progress, done, blocked)
+
+## Testing Integration
+
+### Verify Archon Connection
+
+In Claude Code:
+```
+Search my Archon docs for OOS start-coding command
+```
+
+Should return documentation about `/start-coding`.
+
+### Verify Task Management
+
+In Claude Code:
+```
+What's on my Archon task list for OOS?
+```
+
+Should list actual tasks from Archon.
+
+## Troubleshooting
+
+### "Archon tools not working"
+
+1. Check MCP connection: `claude mcp list`
+2. Should show: `archon: http://archon.khamel.com:8051/mcp`
+3. If missing, reconnect: `claude mcp add --transport http archon https://archon.khamel.com:8051/mcp`
+
+### "Can't find docs in Archon"
+
+1. Verify docs are uploaded at archon.khamel.com:3737
+2. Check Knowledge Base tab
+3. Upload missing documentation
+4. Retry query after upload
+
+### "Tasks not showing"
+
+1. Verify project exists in Archon
+2. Check project name matches (case-sensitive)
+3. Ensure tasks are created in correct project
+
+## Future Enhancements
+
+- Automatic Archon query injection in all OOS commands
+- Smart context loading from Archon on `/start-coding`
+- Automatic task creation from commit messages
+- Integration with `/brain-dump` for task extraction
 
 ## 🏗️ Project Architecture
 
