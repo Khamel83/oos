@@ -1,0 +1,586 @@
+#!/bin/bash
+
+# OOS COMPREHENSIVE VALIDATION FRAMEWORK
+# =====================================
+# Ensures everything written is documented, everything documented is written,
+# everything is tested, works as described AND intended, remains simple,
+# and all features work together harmoniously.
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPORT_FILE="$PROJECT_ROOT/validation-report.md"
+TEMP_DIR="/tmp/oos-validation-$$"
+
+# Counters for summary
+TOTAL_ISSUES=0
+HIGH_PRIORITY=0
+MEDIUM_PRIORITY=0
+LOW_PRIORITY=0
+
+# Create temp directory
+mkdir -p "$TEMP_DIR"
+
+echo -e "${CYAN}OOS VALIDATION FRAMEWORK${NC}"
+echo -e "${CYAN}========================${NC}"
+echo ""
+
+# Initialize report
+cat > "$REPORT_FILE" << 'EOF'
+# OOS Validation Report
+
+Generated: $(date)
+
+## Summary
+
+| Metric | Value |
+|--------|-------|
+EOF
+
+# ==============================================================================
+# SECTION 1: CODE INVENTORY
+# ==============================================================================
+
+echo -e "${BLUE}📋 Section 1: Code Inventory${NC}"
+echo "----------------------------"
+
+check_code_inventory() {
+    local code_files="$TEMP_DIR/code_files.txt"
+    local executable_files="$TEMP_DIR/executable_files.txt"
+
+    # Find all code files
+    find "$PROJECT_ROOT" -type f \( -name "*.sh" -o -name "*.py" -o -name "*.js" \) \
+        ! -path "*/venv/*" ! -path "*/.git/*" ! -path "*/node_modules/*" \
+        > "$code_files"
+
+    # Find all executable files in bin/
+    find "$PROJECT_ROOT/bin" -type f -executable 2>/dev/null > "$executable_files" || touch "$executable_files"
+
+    local code_count=$(wc -l < "$code_files")
+    local exec_count=$(wc -l < "$executable_files")
+
+    echo -e "  ✅ Found $code_count code files"
+    echo -e "  ✅ Found $exec_count executable files in bin/"
+
+    # Store for cross-reference
+    echo "| Code Files | $code_count |" >> "$REPORT_FILE"
+    echo "| Executable Files | $exec_count |" >> "$REPORT_FILE"
+}
+
+# ==============================================================================
+# SECTION 2: DOCUMENTATION INVENTORY
+# ==============================================================================
+
+echo -e "${BLUE}📚 Section 2: Documentation Inventory${NC}"
+echo "------------------------------------"
+
+check_documentation_inventory() {
+    local doc_files="$TEMP_DIR/doc_files.txt"
+    local commands_in_claude="$TEMP_DIR/commands_claude.txt"
+    local commands_in_readme="$TEMP_DIR/commands_readme.txt"
+
+    # Find all documentation files
+    find "$PROJECT_ROOT/docs" -type f -name "*.md" 2>/dev/null > "$doc_files" || touch "$doc_files"
+
+    # Extract commands from CLAUDE.md (look for /command patterns)
+    if [ -f "$PROJECT_ROOT/CLAUDE.md" ]; then
+        grep -o '/[a-zA-Z][a-zA-Z0-9-]*' "$PROJECT_ROOT/CLAUDE.md" | sort -u > "$commands_in_claude"
+    else
+        touch "$commands_in_claude"
+    fi
+
+    # Extract commands from README.md
+    if [ -f "$PROJECT_ROOT/README.md" ]; then
+        grep -o '/[a-zA-Z][a-zA-Z0-9-]*' "$PROJECT_ROOT/README.md" | sort -u > "$commands_in_readme"
+    else
+        touch "$commands_in_readme"
+    fi
+
+    local doc_count=$(wc -l < "$doc_files")
+    local claude_commands=$(wc -l < "$commands_in_claude")
+    local readme_commands=$(wc -l < "$commands_in_readme")
+
+    echo -e "  ✅ Found $doc_count documentation files"
+    echo -e "  ✅ Found $claude_commands commands in CLAUDE.md"
+    echo -e "  ✅ Found $readme_commands commands in README.md"
+
+    echo "| Documentation Files | $doc_count |" >> "$REPORT_FILE"
+    echo "| Commands in CLAUDE.md | $claude_commands |" >> "$REPORT_FILE"
+    echo "| Commands in README.md | $readme_commands |" >> "$REPORT_FILE"
+}
+
+# ==============================================================================
+# SECTION 3: ALIGNMENT VALIDATION
+# ==============================================================================
+
+echo -e "${BLUE}🔍 Section 3: Code-Documentation Alignment${NC}"
+echo "--------------------------------------------"
+
+check_alignment() {
+    local missing_docs="$TEMP_DIR/missing_docs.txt"
+    local missing_code="$TEMP_DIR/missing_code.txt"
+    local orphaned_files="$TEMP_DIR/orphaned_files.txt"
+
+    # Check for executable files without documentation
+    while IFS= read -r exec_file; do
+        local basename=$(basename "$exec_file")
+        local doc_file="$PROJECT_ROOT/docs/commands/${basename}.md"
+        local mentioned_in_claude=$(grep -l "$basename" "$PROJECT_ROOT/CLAUDE.md" 2>/dev/null || true)
+        local mentioned_in_readme=$(grep -l "$basename" "$PROJECT_ROOT/README.md" 2>/dev/null || true)
+
+        if [ ! -f "$doc_file" ] && [ -z "$mentioned_in_claude" ] && [ -z "$mentioned_in_readme" ]; then
+            echo "$exec_file" >> "$missing_docs"
+        fi
+    done < "$TEMP_DIR/executable_files.txt"
+
+    # Check for documented commands without implementation
+    while IFS= read -r command; do
+        local command_name="${command#/}"
+        local impl_file="$PROJECT_ROOT/bin/$command_name"
+        local alt_impl="$PROJECT_ROOT/bin/claude-$command_name.sh"
+
+        if [ ! -f "$impl_file" ] && [ ! -f "$alt_impl" ]; then
+            echo "$command" >> "$missing_code"
+        fi
+    done < "$TEMP_DIR/commands_claude.txt"
+
+    # Check for orphaned files (old, unused scripts)
+    find "$PROJECT_ROOT/bin" -name "*old*" -o -name "*backup*" -o -name "*deprecated*" -o -name "*temp*" \
+        2>/dev/null > "$orphaned_files" || touch "$orphaned_files"
+
+    local missing_docs_count=$(wc -l < "$missing_docs" 2>/dev/null || echo 0)
+    local missing_code_count=$(wc -l < "$missing_code" 2>/dev/null || echo 0)
+    local orphaned_count=$(wc -l < "$orphaned_files" 2>/dev/null || echo 0)
+
+    echo -e "  ${RED}❌ $missing_docs_count files missing documentation${NC}"
+    echo -e "  ${RED}❌ $missing_code_count documented commands missing implementation${NC}"
+    echo -e "  ${YELLOW}⚠️  $orphaned_count potentially orphaned files${NC}"
+
+    TOTAL_ISSUES=$((TOTAL_ISSUES + missing_docs_count + missing_code_count))
+    HIGH_PRIORITY=$((HIGH_PRIORITY + missing_code_count))
+    MEDIUM_PRIORITY=$((MEDIUM_PRIORITY + missing_docs_count))
+    LOW_PRIORITY=$((LOW_PRIORITY + orphaned_count))
+
+    echo "| Missing Documentation | $missing_docs_count |" >> "$REPORT_FILE"
+    echo "| Missing Implementation | $missing_code_count |" >> "$REPORT_FILE"
+    echo "| Orphaned Files | $orphaned_count |" >> "$REPORT_FILE"
+}
+
+# ==============================================================================
+# SECTION 4: FUNCTIONAL TESTING
+# ==============================================================================
+
+echo -e "${BLUE}🧪 Section 4: Functional Testing${NC}"
+echo "--------------------------------"
+
+run_functional_tests() {
+    local test_results="$TEMP_DIR/test_results.txt"
+    local failed_tests="$TEMP_DIR/failed_tests.txt"
+
+    echo "Running functional tests..." > "$test_results"
+
+    # Test 1: All executables can run --help or -h
+    local exec_test_failures=0
+    while IFS= read -r exec_file; do
+        local basename=$(basename "$exec_file")
+        if ! timeout 10 "$exec_file" --help >/dev/null 2>&1 && \
+           ! timeout 10 "$exec_file" -h >/dev/null 2>&1 && \
+           ! timeout 10 "$exec_file" help >/dev/null 2>&1; then
+            echo "$basename: No help/usage available" >> "$failed_tests"
+            exec_test_failures=$((exec_test_failures + 1))
+        fi
+    done < "$TEMP_DIR/executable_files.txt"
+
+    # Test 2: Archon integration
+    local archon_status="PASS"
+    if ! command -v claude >/dev/null 2>&1; then
+        archon_status="FAIL - Claude Code not installed"
+        echo "Archon: Claude Code not available" >> "$failed_tests"
+        exec_test_failures=$((exec_test_failures + 1))
+    elif ! claude mcp list 2>/dev/null | grep -q "archon"; then
+        archon_status="FAIL - Archon not connected"
+        echo "Archon: MCP not connected" >> "$failed_tests"
+        exec_test_failures=$((exec_test_failures + 1))
+    fi
+
+    # Test 3: Critical scripts exist and are executable
+    local critical_scripts=("run_tests.sh" "setup-archon-mcp.sh" "validate-oos")
+    local critical_failures=0
+    for script in "${critical_scripts[@]}"; do
+        if [ ! -x "$PROJECT_ROOT/bin/$script" ]; then
+            echo "Critical script missing or not executable: $script" >> "$failed_tests"
+            critical_failures=$((critical_failures + 1))
+        fi
+    done
+
+    local total_test_failures=$((exec_test_failures + critical_failures))
+
+    echo -e "  ${RED}❌ $exec_test_failures executables failed help test${NC}"
+    echo -e "  Archon status: $archon_status"
+    echo -e "  ${RED}❌ $critical_failures critical scripts missing${NC}"
+
+    TOTAL_ISSUES=$((TOTAL_ISSUES + total_test_failures))
+    HIGH_PRIORITY=$((HIGH_PRIORITY + critical_failures))
+    MEDIUM_PRIORITY=$((MEDIUM_PRIORITY + exec_test_failures))
+
+    echo "| Failed Functional Tests | $total_test_failures |" >> "$REPORT_FILE"
+    echo "| Archon Status | $archon_status |" >> "$REPORT_FILE"
+}
+
+# ==============================================================================
+# SECTION 5: USER-ACCEPTANCE TESTING (RUAT)
+# ==============================================================================
+
+echo -e "${BLUE}🧪 Section 5: Recursive User-Acceptance Testing${NC}"
+echo "-----------------------------------------------"
+
+run_user_acceptance_tests() {
+    local ruat_failures=0
+    local ruat_script="$PROJECT_ROOT/bin/test-user-scenarios"
+
+    if [ ! -x "$ruat_script" ]; then
+        echo -e "  ${RED}❌ RUAT framework not found${NC}"
+        ruat_failures=$((ruat_failures + 1))
+    else
+        echo "  Testing user scenarios..."
+
+        # Check if scenario files exist
+        local scenario_count=$(find "$PROJECT_ROOT/tests/scenarios" -name "*.scenarios" 2>/dev/null | wc -l || echo 0)
+
+        if [ "$scenario_count" -eq 0 ]; then
+            echo -e "  ${YELLOW}⚠️  No user scenarios found${NC}"
+            ruat_failures=$((ruat_failures + 1))
+        else
+            echo -e "  Found $scenario_count user scenario files"
+
+            # Test scenario file format
+            local invalid_scenarios=0
+            for scenario_file in "$PROJECT_ROOT/tests/scenarios"/*.scenarios; do
+                if [ -f "$scenario_file" ]; then
+                    # Check if file has valid scenario format
+                    if ! grep -q "GIVEN\|WHEN\|THEN" "$scenario_file"; then
+                        invalid_scenarios=$((invalid_scenarios + 1))
+                    fi
+                fi
+            done
+
+            if [ "$invalid_scenarios" -gt 0 ]; then
+                echo -e "  ${YELLOW}⚠️  $invalid_scenarios scenario files have invalid format${NC}"
+                ruat_failures=$((ruat_failures + 1))
+            fi
+        fi
+    fi
+
+    echo -e "  ${RED}❌ $ruat_failures RUAT framework issues${NC}"
+
+    TOTAL_ISSUES=$((TOTAL_ISSUES + ruat_failures))
+    MEDIUM_PRIORITY=$((MEDIUM_PRIORITY + ruat_failures))
+
+    echo "| RUAT Framework Issues | $ruat_failures |" >> "$REPORT_FILE"
+}
+
+# ==============================================================================
+# SECTION 6: INTEGRATION TESTING
+# ==============================================================================
+
+echo -e "${BLUE}🔗 Section 6: Integration Testing${NC}"
+echo "--------------------------------"
+
+run_integration_tests() {
+    local integration_failures=0
+
+    # Test Archon integration script
+    if [ -x "$PROJECT_ROOT/bin/test_archon_integration.sh" ]; then
+        echo "  Testing Archon integration..."
+        if ! timeout 30 "$PROJECT_ROOT/bin/test_archon_integration.sh" >/dev/null 2>&1; then
+            integration_failures=$((integration_failures + 1))
+        fi
+    else
+        integration_failures=$((integration_failures + 1))
+    fi
+
+    # Test if screenshot and provisioning features work
+    if [ -x "$PROJECT_ROOT/bin/take-screenshot.sh" ]; then
+        echo "  Testing screenshot capability..."
+        # Just check if script exists and is executable - actual screenshot requires GUI
+    else
+        integration_failures=$((integration_failures + 1))
+    fi
+
+    if [ -x "$PROJECT_ROOT/bin/provision-infrastructure.sh" ]; then
+        echo "  Testing infrastructure provisioning..."
+        # Test with --preview mode only
+        if ! timeout 10 "$PROJECT_ROOT/bin/provision-infrastructure.sh" --help >/dev/null 2>&1; then
+            integration_failures=$((integration_failures + 1))
+        fi
+    else
+        integration_failures=$((integration_failures + 1))
+    fi
+
+    echo -e "  ${RED}❌ $integration_failures integration test failures${NC}"
+
+    TOTAL_ISSUES=$((TOTAL_ISSUES + integration_failures))
+    MEDIUM_PRIORITY=$((MEDIUM_PRIORITY + integration_failures))
+
+    echo "| Integration Test Failures | $integration_failures |" >> "$REPORT_FILE"
+}
+
+# ==============================================================================
+# SECTION 6: SIMPLICITY ANALYSIS
+# ==============================================================================
+
+echo -e "${BLUE}📊 Section 6: Simplicity Analysis${NC}"
+echo "--------------------------------"
+
+generate_simplicity_report() {
+    local total_files=$(find "$PROJECT_ROOT" -type f ! -path "*/venv/*" ! -path "*/.git/*" | wc -l)
+    local bin_files=$(find "$PROJECT_ROOT/bin" -type f | wc -l)
+    local doc_files=$(find "$PROJECT_ROOT/docs" -type f -name "*.md" | wc -l)
+    local commands=$(grep -o '/[a-zA-Z][a-zA-Z0-9-]*' "$PROJECT_ROOT/README.md" 2>/dev/null | wc -l || echo 0)
+
+    # Complexity score (lower is better)
+    local complexity_score=$(((total_files / 10) + (bin_files / 5) + (commands / 3)))
+    local simplicity_score=$((10 - (complexity_score > 10 ? 10 : complexity_score)))
+
+    # Check for duplicate functionality
+    local duplicates=0
+    # Look for similar script names that might indicate duplication
+    for pattern in "setup" "test" "claude" "install" "check"; do
+        local count=$(find "$PROJECT_ROOT/bin" -name "*$pattern*" | wc -l)
+        if [ "$count" -gt 3 ]; then
+            duplicates=$((duplicates + count - 3))
+        fi
+    done
+
+    echo -e "  Total files: $total_files"
+    echo -e "  Commands in bin/: $bin_files"
+    echo -e "  Documented commands: $commands"
+    echo -e "  Simplicity score: ${simplicity_score}/10"
+    echo -e "  ${YELLOW}⚠️  $duplicates potential duplicates${NC}"
+
+    LOW_PRIORITY=$((LOW_PRIORITY + duplicates))
+
+    echo "| Total Files | $total_files |" >> "$REPORT_FILE"
+    echo "| Simplicity Score | ${simplicity_score}/10 |" >> "$REPORT_FILE"
+    echo "| Potential Duplicates | $duplicates |" >> "$REPORT_FILE"
+}
+
+# ==============================================================================
+# SECTION 7: HARMONY ANALYSIS
+# ==============================================================================
+
+echo -e "${BLUE}🎵 Section 7: Harmony Analysis${NC}"
+echo "------------------------------"
+
+analyze_harmony() {
+    local harmony_issues=0
+
+    # Check if commands use consistent patterns
+    local inconsistent_naming=0
+    local archon_integration_gaps=0
+
+    # Look for inconsistent command naming
+    if [ -d "$PROJECT_ROOT/bin" ]; then
+        # Check for inconsistent prefixes
+        local claude_prefixed=$(find "$PROJECT_ROOT/bin" -name "claude-*" | wc -l)
+        local no_prefix=$(find "$PROJECT_ROOT/bin" -maxdepth 1 -type f -executable ! -name "claude-*" ! -name "oos-*" | wc -l)
+
+        if [ "$claude_prefixed" -gt 0 ] && [ "$no_prefix" -gt 0 ]; then
+            inconsistent_naming=$((claude_prefixed + no_prefix))
+        fi
+    fi
+
+    # Check if key commands integrate with Archon
+    local key_commands=("start-coding" "pre-commit" "smart-commit")
+    for cmd in "${key_commands[@]}"; do
+        local impl_file="$PROJECT_ROOT/bin/claude-$cmd.sh"
+        if [ -f "$impl_file" ]; then
+            if ! grep -q "archon\|Archon" "$impl_file" 2>/dev/null; then
+                archon_integration_gaps=$((archon_integration_gaps + 1))
+            fi
+        fi
+    done
+
+    harmony_issues=$((inconsistent_naming + archon_integration_gaps))
+
+    echo -e "  ${YELLOW}⚠️  $inconsistent_naming naming inconsistencies${NC}"
+    echo -e "  ${YELLOW}⚠️  $archon_integration_gaps commands missing Archon integration${NC}"
+
+    LOW_PRIORITY=$((LOW_PRIORITY + harmony_issues))
+
+    echo "| Harmony Issues | $harmony_issues |" >> "$REPORT_FILE"
+    echo "| Naming Inconsistencies | $inconsistent_naming |" >> "$REPORT_FILE"
+    echo "| Archon Integration Gaps | $archon_integration_gaps |" >> "$REPORT_FILE"
+}
+
+# ==============================================================================
+# SECTION 8: ACTIONABLE REPORT GENERATION
+# ==============================================================================
+
+echo -e "${BLUE}📋 Section 8: Generating Actionable Report${NC}"
+echo "-------------------------------------------"
+
+generate_action_items() {
+    echo "" >> "$REPORT_FILE"
+    echo "## Issues Found" >> "$REPORT_FILE"
+    echo "" >> "$REPORT_FILE"
+
+    # High Priority Issues
+    if [ "$HIGH_PRIORITY" -gt 0 ]; then
+        echo "### ❌ HIGH PRIORITY (Fix Broken Functionality)" >> "$REPORT_FILE"
+        echo "" >> "$REPORT_FILE"
+
+        if [ -f "$TEMP_DIR/missing_code.txt" ] && [ -s "$TEMP_DIR/missing_code.txt" ]; then
+            echo "**Missing Implementation:**" >> "$REPORT_FILE"
+            while IFS= read -r command; do
+                echo "- Implement missing command: $command" >> "$REPORT_FILE"
+            done < "$TEMP_DIR/missing_code.txt"
+            echo "" >> "$REPORT_FILE"
+        fi
+
+        if [ -f "$TEMP_DIR/failed_tests.txt" ] && [ -s "$TEMP_DIR/failed_tests.txt" ]; then
+            echo "**Failed Tests:**" >> "$REPORT_FILE"
+            while IFS= read -r failure; do
+                echo "- Fix: $failure" >> "$REPORT_FILE"
+            done < "$TEMP_DIR/failed_tests.txt"
+            echo "" >> "$REPORT_FILE"
+        fi
+    fi
+
+    # Medium Priority Issues
+    if [ "$MEDIUM_PRIORITY" -gt 0 ]; then
+        echo "### ⚠️  MEDIUM PRIORITY (Improve Alignment)" >> "$REPORT_FILE"
+        echo "" >> "$REPORT_FILE"
+
+        if [ -f "$TEMP_DIR/missing_docs.txt" ] && [ -s "$TEMP_DIR/missing_docs.txt" ]; then
+            echo "**Missing Documentation:**" >> "$REPORT_FILE"
+            while IFS= read -r file; do
+                echo "- Document: $(basename "$file")" >> "$REPORT_FILE"
+            done < "$TEMP_DIR/missing_docs.txt"
+            echo "" >> "$REPORT_FILE"
+        fi
+    fi
+
+    # Low Priority Issues
+    if [ "$LOW_PRIORITY" -gt 0 ]; then
+        echo "### 💡 LOW PRIORITY (Simplify & Harmonize)" >> "$REPORT_FILE"
+        echo "" >> "$REPORT_FILE"
+
+        if [ -f "$TEMP_DIR/orphaned_files.txt" ] && [ -s "$TEMP_DIR/orphaned_files.txt" ]; then
+            echo "**Potential Cleanup:**" >> "$REPORT_FILE"
+            while IFS= read -r file; do
+                echo "- Review/remove: $(basename "$file")" >> "$REPORT_FILE"
+            done < "$TEMP_DIR/orphaned_files.txt"
+            echo "" >> "$REPORT_FILE"
+        fi
+
+        echo "**Simplification Opportunities:**" >> "$REPORT_FILE"
+        echo "- Consolidate similar scripts in bin/" >> "$REPORT_FILE"
+        echo "- Standardize command naming patterns" >> "$REPORT_FILE"
+        echo "- Enhance Archon integration in key commands" >> "$REPORT_FILE"
+        echo "" >> "$REPORT_FILE"
+    fi
+
+    # Summary at top of report
+    local alignment_score=$((100 - (TOTAL_ISSUES * 5)))
+    alignment_score=$((alignment_score < 0 ? 0 : alignment_score))
+
+    # Update summary section
+    sed -i "/| Total Issues |/d" "$REPORT_FILE"
+    sed -i "/EOF/i | Total Issues | $TOTAL_ISSUES |" "$REPORT_FILE"
+    sed -i "/EOF/i | Alignment Score | ${alignment_score}% |" "$REPORT_FILE"
+    sed -i "/EOF/i | High Priority | $HIGH_PRIORITY |" "$REPORT_FILE"
+    sed -i "/EOF/i | Medium Priority | $MEDIUM_PRIORITY |" "$REPORT_FILE"
+    sed -i "/EOF/i | Low Priority | $LOW_PRIORITY |" "$REPORT_FILE"
+    sed -i '/EOF/d' "$REPORT_FILE"
+}
+
+# ==============================================================================
+# MAIN EXECUTION
+# ==============================================================================
+
+main() {
+    check_code_inventory
+    echo ""
+    check_documentation_inventory
+    echo ""
+    check_alignment
+    echo ""
+    run_functional_tests
+    echo ""
+    run_user_acceptance_tests
+    echo ""
+    run_integration_tests
+    echo ""
+    generate_simplicity_report
+    echo ""
+    analyze_harmony
+    echo ""
+    generate_action_items
+
+    echo -e "${CYAN}📊 VALIDATION COMPLETE${NC}"
+    echo "======================="
+    echo ""
+    echo -e "📋 Total Issues Found: ${RED}$TOTAL_ISSUES${NC}"
+    echo -e "🔥 High Priority: ${RED}$HIGH_PRIORITY${NC}"
+    echo -e "⚠️  Medium Priority: ${YELLOW}$MEDIUM_PRIORITY${NC}"
+    echo -e "💡 Low Priority: ${BLUE}$LOW_PRIORITY${NC}"
+    echo ""
+    echo -e "📄 Detailed report: ${CYAN}$REPORT_FILE${NC}"
+    echo ""
+
+    if [ "$TOTAL_ISSUES" -eq 0 ]; then
+        echo -e "${GREEN}🎉 OOS is in perfect alignment!${NC}"
+        exit 0
+    else
+        echo -e "${YELLOW}🔧 OOS needs attention. Check the report for action items.${NC}"
+        exit 1
+    fi
+}
+
+# Cleanup function
+cleanup() {
+    rm -rf "$TEMP_DIR"
+}
+
+trap cleanup EXIT
+
+# Check for command line arguments
+case "${1:-}" in
+    --help|-h)
+        echo "OOS Validation Framework"
+        echo ""
+        echo "Usage: $0 [options]"
+        echo ""
+        echo "Options:"
+        echo "  --help, -h     Show this help message"
+        echo "  --report       Generate report only (don't fail on issues)"
+        echo "  --quiet        Minimal output"
+        echo ""
+        echo "This script validates that OOS maintains perfect alignment between"
+        echo "code, documentation, tests, and functionality."
+        exit 0
+        ;;
+    --report)
+        echo "Generating validation report..."
+        main
+        exit 0
+        ;;
+    --quiet)
+        exec >/dev/null 2>&1
+        main
+        ;;
+    *)
+        main
+        ;;
+esac

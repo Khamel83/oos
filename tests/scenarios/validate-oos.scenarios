@@ -1,0 +1,53 @@
+# User Scenarios for: validate-oos
+# =================================
+# Real-world user workflows for OOS validation framework
+
+# Project health check scenario
+GIVEN user wants to check OOS project health
+WHEN user runs ./bin/validate-oos
+THEN comprehensive validation report is generated
+AND all issues are clearly categorized by priority
+AND user knows exactly what needs fixing
+AND actionable recommendations are provided
+
+# Pre-commit validation scenario
+GIVEN user wants to commit changes
+WHEN validation runs as part of pre-commit
+THEN only critical issues block the commit
+AND validation runs quickly enough for normal workflow
+AND user gets immediate feedback on problems
+
+# Documentation alignment scenario
+GIVEN project has evolved over time
+WHEN validation checks code-documentation alignment
+THEN missing documentation is identified
+AND orphaned documentation is flagged
+AND user gets clear list of what needs updating
+
+# New developer onboarding scenario
+GIVEN new developer joins OOS project
+WHEN they run validation to understand project state
+THEN report clearly shows project structure
+AND identifies any setup issues
+AND helps them understand what's working vs broken
+
+# Continuous improvement scenario
+GIVEN validation identifies simplification opportunities
+WHEN user reviews suggestions
+THEN recommendations are practical and valuable
+AND following them actually improves the project
+AND complexity is genuinely reduced
+
+# Integration testing scenario
+GIVEN OOS has many interconnected features
+WHEN validation tests integration points
+THEN feature interactions are verified
+AND broken integrations are caught
+AND user knows which features work together
+
+# Performance scenario
+GIVEN validation needs to run on large codebase
+WHEN user runs full validation
+THEN process completes in reasonable time
+AND doesn't consume excessive resources
+AND can be run frequently without annoyance

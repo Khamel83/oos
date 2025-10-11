@@ -1,0 +1,37 @@
+# User Scenarios for: test-feature
+# ============================
+# Real-world user workflows that must work perfectly
+
+# Basic usage scenario
+GIVEN user wants to use test-feature
+WHEN user runs the feature
+THEN feature works as documented
+AND user gets expected output
+AND no confusing errors appear
+
+# Discovery scenario
+GIVEN user doesn't know test-feature exists
+WHEN user looks for help
+THEN feature is discoverable
+AND help clearly explains how to use it
+
+# Error handling scenario
+GIVEN user makes common mistake with test-feature
+WHEN error occurs
+THEN error message is helpful and actionable
+AND user knows exactly how to fix it
+
+# Integration scenario
+GIVEN user is in normal workflow
+WHEN user runs test-feature
+THEN feature integrates seamlessly
+AND doesn't break other tools
+AND feels like natural part of OOS
+
+# Edge case scenario
+GIVEN [describe edge case condition]
+WHEN user encounters edge case
+THEN system handles it gracefully
+AND user isn't confused or stuck
+
+# Add more scenarios based on real usage patterns

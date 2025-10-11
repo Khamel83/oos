@@ -1,0 +1,54 @@
+# User Scenarios for: help-me
+# ============================
+# Real-world user workflows for /help-me command
+
+# Error troubleshooting scenario
+GIVEN user encounters error in terminal
+WHEN user copies error and runs /help-me
+THEN formatted prompt is generated for Claude Code
+AND prompt contains actual error text
+AND prompt requests specific actionable help
+AND output is ready to copy-paste to Claude
+
+# Context-aware help scenario
+GIVEN user is stuck on a specific coding problem
+WHEN user runs /help-me with problem description
+THEN system includes relevant project context
+AND uses Archon knowledge base for project-specific help
+AND generates intelligent prompt for Claude
+AND user gets help that understands their project
+
+# Discovery scenario
+GIVEN user doesn't know /help-me exists
+WHEN user is struggling with development issue
+THEN /help-me is discoverable in documentation
+AND other commands reference it when appropriate
+AND help text clearly explains its purpose
+
+# Output quality scenario
+GIVEN user runs /help-me with vague problem
+WHEN system generates help prompt
+THEN prompt guides user to provide better context
+AND includes debugging questions
+AND results in actionable Claude responses
+
+# Integration with workflow scenario
+GIVEN user is in middle of coding session
+WHEN user hits problem and runs /help-me
+THEN help integrates smoothly with current workflow
+AND doesn't disrupt development environment
+AND gets user back to coding quickly
+
+# Quick access scenario
+GIVEN user needs help urgently during development
+WHEN user runs /help-me
+THEN command executes quickly
+AND doesn't require complex setup
+AND immediately provides useful output
+
+# No context scenario
+GIVEN user runs /help-me without clear problem
+WHEN system has no context to work with
+THEN helpful guidance on how to use /help-me effectively
+AND examples of good help requests
+AND user learns to ask better questions

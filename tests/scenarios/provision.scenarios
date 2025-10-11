@@ -1,0 +1,54 @@
+# User Scenarios for: provision
+# =============================
+# Real-world user workflows for AI infrastructure provisioning
+
+# Simple app deployment scenario
+GIVEN user wants to deploy simple web app
+WHEN user runs /provision "React blog with database"
+THEN AI generates appropriate Docker Compose config
+AND includes all necessary services
+AND configuration is production-ready with SSL
+AND user gets working app at subdomain
+
+# Preview mode scenario
+GIVEN user wants to see infrastructure before deploying
+WHEN user runs /provision with --preview flag
+THEN configuration is generated but not deployed
+AND user can review all files before committing
+AND deployment is safe and reversible
+
+# Custom domain scenario
+GIVEN user wants app on specific subdomain
+WHEN user specifies custom domain in provision command
+THEN infrastructure uses requested domain
+AND SSL certificates are configured correctly
+AND DNS routing works as expected
+
+# Technology detection scenario
+GIVEN user describes app in natural language
+WHEN AI processes the description
+THEN appropriate technology stack is selected
+AND all necessary services are included
+AND configuration matches user intent
+
+# Error handling scenario
+GIVEN user provides unclear or impossible requirements
+WHEN provision command runs
+THEN helpful error message explains the issue
+AND user gets guidance on fixing the request
+AND system doesn't crash or produce broken config
+
+# Integration with existing setup scenario
+GIVEN user has existing Oracle VM infrastructure
+WHEN user provisions new app
+THEN new app integrates with existing setup
+AND doesn't conflict with running services
+AND uses available resources efficiently
+
+# Real-world complexity scenario
+GIVEN user needs complex multi-service application
+WHEN user describes full-stack requirements
+THEN AI generates complete infrastructure
+AND includes monitoring, logging, backups
+AND configuration is genuinely production-ready
+AND user gets enterprise-quality deployment

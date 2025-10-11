@@ -1,0 +1,62 @@
+# User Scenarios for: start-coding
+# =================================
+# Real-world user workflows for /start-coding command
+
+# Basic workflow initiation scenario
+GIVEN user wants to start a coding session
+WHEN user runs /start-coding
+THEN system displays current Archon tasks
+AND user sees project context loaded
+AND all integrations are verified working
+AND user knows exactly what to work on next
+
+# First-time user scenario
+GIVEN user is new to OOS and doesn't know about /start-coding
+WHEN user looks for help getting started
+THEN /start-coding is prominently documented
+AND help explains what it does clearly
+AND examples show typical usage
+
+# Archon connection failure scenario
+GIVEN Archon MCP server is not running
+WHEN user runs /start-coding
+THEN clear error message explains Archon is unreachable
+AND user gets instructions on how to fix it
+AND system doesn't crash or hang
+AND error is actionable, not technical jargon
+
+# 1Password integration scenario
+GIVEN user needs access to secrets during development
+WHEN user runs /start-coding
+THEN 1Password integration is checked automatically
+AND user is prompted to sign in if needed
+AND secrets are available for development
+AND no manual credential hunting required
+
+# Project context loading scenario
+GIVEN user is working on multiple projects
+WHEN user runs /start-coding in a specific project
+THEN system loads context for THAT project
+AND shows tasks relevant to current project
+AND doesn't mix up tasks from other projects
+
+# No current tasks scenario
+GIVEN user has no active tasks in Archon
+WHEN user runs /start-coding
+THEN system gracefully handles empty task list
+AND suggests creating new tasks
+AND user isn't confused about what to do next
+
+# Environment validation scenario
+GIVEN user's development environment has issues
+WHEN user runs /start-coding
+THEN environment problems are detected
+AND user gets specific fix instructions
+AND development gate prevents broken work
+
+# Task prioritization scenario
+GIVEN user has multiple tasks available
+WHEN user runs /start-coding
+THEN tasks are shown in priority order
+AND user can see which task to tackle first
+AND context helps user make good decisions

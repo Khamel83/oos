@@ -1,46 +1,18 @@
 #!/usr/bin/env bash
 
-# Command Interceptor for pip3 - Requires Development Gate
+# Command Interceptor - Requires Development Gate
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-
-# Check for emergency bypass
-if [[ "${DEV_GATE_BYPASS:-}" == "true" ]]; then
-    # Find the real pip3 (not our interceptor)
-real_command=$(which -a pip3 | grep -v interceptors | head -1)
-if [[ -z "$real_command" ]]; then
-    case pip3 in
-        python|python3) real_command="/usr/bin/python3" ;;
-        uv) real_command="/usr/local/bin/uv" ;;
-        *) real_command="/usr/bin/pip3" ;;
-    esac
-fi
-exec "$real_command" "$@"
-fi
 
 # Check if gate has been passed recently
 if [[ -f "$PROJECT_ROOT/.dev-gate-passed" ]]; then
     # Check if gate is recent (within last hour)
-    if command -v stat >/dev/null 2>&1; then
-        gate_time=$(stat -c %Y "$PROJECT_ROOT/.dev-gate-passed" 2>/dev/null || stat -f %m "$PROJECT_ROOT/.dev-gate-passed" 2>/dev/null)
-        current_time=$(date +%s)
-        age=$((current_time - gate_time))
+    gate_time=$(stat -c %Y "$PROJECT_ROOT/.dev-gate-passed" 2>/dev/null || stat -f %m "$PROJECT_ROOT/.dev-gate-passed" 2>/dev/null)
+    current_time=$(date +%s)
+    age=$((current_time - gate_time))
 
-        if [[ $age -lt 3600 ]]; then
-            # Gate is recent, allow command
-            # Find the real pip3 (not our interceptor)
-real_command=$(which -a pip3 | grep -v interceptors | head -1)
-if [[ -z "$real_command" ]]; then
-    case pip3 in
-        python|python3) real_command="/usr/bin/python3" ;;
-        uv) real_command="/usr/local/bin/uv" ;;
-        *) real_command="/usr/bin/pip3" ;;
-    esac
-fi
-exec "$real_command" "$@"
-        fi
-    else
-        # No stat command, just check if file exists
+    if [[ $age -lt 3600 ]]; then
+        # Gate is recent, allow command
         # Find the real pip3 (not our interceptor)
 real_command=$(which -a pip3 | grep -v interceptors | head -1)
 if [[ -z "$real_command" ]]; then
@@ -58,6 +30,6 @@ fi
 echo -e "\033[0;31m❌ Development environment not ready\033[0m"
 echo -e "\033[0;33mRun: ./bin/dev-gate.sh\033[0m"
 echo
-echo "This command (pip3) is blocked until development environment is validated."
+echo "This command is blocked until development environment is validated."
 echo "Emergency bypass: DEV_GATE_BYPASS=true pip3"
 exit 1

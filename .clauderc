@@ -24,6 +24,41 @@
       "command": "./bin/provision-infrastructure.sh --preview",
       "description": "Preview infrastructure without deploying",
       "category": "Deployment"
+    },
+    "validate": {
+      "command": "./bin/validate-oos",
+      "description": "Run comprehensive OOS validation",
+      "category": "Validation"
+    },
+    "validate-report": {
+      "command": "./bin/validate-oos --report",
+      "description": "Generate validation report",
+      "category": "Validation"
+    },
+    "test-user-scenarios": {
+      "command": "./bin/test-user-scenarios",
+      "description": "Run user acceptance testing (RUAT)",
+      "category": "Validation"
+    },
+    "ruat": {
+      "command": "./bin/test-user-scenarios",
+      "description": "Alias for user scenario testing",
+      "category": "Validation"
+    },
+    "test-commands": {
+      "command": "./bin/test-all-commands",
+      "description": "Test all documented commands",
+      "category": "Validation"
+    },
+    "complete-workflow": {
+      "command": "./bin/complete-workflow.sh",
+      "description": "Run complete idea-to-completion workflow",
+      "category": "Workflow"
+    },
+    "idea-to-done": {
+      "command": "./bin/complete-workflow.sh",
+      "description": "Complete project workflow A→B→C→D",
+      "category": "Workflow"
     }
   }
 }

@@ -18,9 +18,9 @@ dev_gate_check() {
     fi
 
     # Check if gate is recent (within last hour)
-    local gate_time=$(stat -f %m "$PROJECT_ROOT/.dev-gate-passed" 2>/dev/null || stat -c %Y "$PROJECT_ROOT/.dev-gate-passed" 2>/dev/null)
-    local current_time=$(date +%s)
-    local age=$((current_time - gate_time))
+    gate_time=$(stat -c %Y "$PROJECT_ROOT/.dev-gate-passed" 2>/dev/null || stat -f %m "$PROJECT_ROOT/.dev-gate-passed" 2>/dev/null)
+    current_time=$(date +%s)
+    age=$((current_time - gate_time))
 
     if [[ $age -gt 3600 ]]; then
         echo "⚠️  Development gate is stale. Run: ./bin/dev-gate.sh"

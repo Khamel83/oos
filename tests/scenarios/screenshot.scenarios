@@ -1,0 +1,53 @@
+# User Scenarios for: screenshot
+# ==============================
+# Real-world user workflows for screenshot analysis feature
+
+# Design review scenario
+GIVEN user wants feedback on interface design
+WHEN user runs /screenshot with design review request
+THEN screenshot is captured successfully
+AND sent to Claude for analysis
+AND user gets actionable design feedback
+AND suggestions are specific and helpful
+
+# Cross-platform scenario
+GIVEN user is on different operating system
+WHEN user runs /screenshot
+THEN appropriate screenshot tool is used for their OS
+AND capture works seamlessly regardless of platform
+AND no manual tool installation required
+
+# Accessibility audit scenario
+GIVEN user wants to check accessibility of interface
+WHEN user runs /screenshot "check accessibility"
+THEN Claude analyzes screenshot for a11y issues
+AND provides specific accessibility recommendations
+AND identifies concrete problems to fix
+
+# Error detection scenario
+GIVEN user sees visual bug but can't describe it
+WHEN user takes screenshot and asks for analysis
+THEN Claude identifies visual issues in screenshot
+AND provides technical explanation of problems
+AND suggests debugging approaches
+
+# Discovery scenario
+GIVEN user doesn't know screenshot analysis exists
+WHEN user mentions visual problem
+THEN documentation shows /screenshot as solution
+AND examples demonstrate how to use it
+AND user learns about this capability
+
+# Quality analysis scenario
+GIVEN user captures screenshot successfully
+WHEN Claude analyzes the image
+THEN analysis is thorough and insightful
+AND feedback is actionable
+AND user learns something useful
+
+# File management scenario
+GIVEN user takes multiple screenshots
+WHEN screenshot files are saved
+THEN files are organized logically
+AND easy to find later
+AND don't clutter file system

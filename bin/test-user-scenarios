@@ -1,0 +1,412 @@
+#!/bin/bash
+
+# OOS RECURSIVE USER-ACCEPTANCE TESTING FRAMEWORK
+# ===============================================
+# Tests features from real-world user perspective, not just technical functionality
+# Ensures everything works the way users ACTUALLY use it
+
+set -euo pipefail
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Configuration
+FEATURE="${1:-}"
+SCENARIO_DIR="$PROJECT_ROOT/tests/scenarios"
+FAILURES_LOG="$PROJECT_ROOT/ruat_failures.log"
+PASSED=0
+FAILED=0
+SKIPPED=0
+
+# Help function
+show_help() {
+    cat << EOF
+🧪 OOS Recursive User-Acceptance Testing (RUAT)
+
+USAGE:
+    $0 [feature-name]           Test specific feature scenarios
+    $0 --all                    Test all features
+    $0 --create [feature]       Create scenario template for feature
+    $0 --help                   Show this help
+
+EXAMPLES:
+    $0 start-coding             Test /start-coding user scenarios
+    $0 help-me                  Test /help-me user scenarios
+    $0 --all                    Test ALL user scenarios
+    $0 --create new-feature     Create template for new feature
+
+DESCRIPTION:
+    RUAT validates that features work from a REAL USER perspective:
+
+    ✅ Does it work how users actually use it?
+    ✅ Are edge cases handled gracefully?
+    ✅ Is the user experience intuitive?
+    ✅ Do integrations feel seamless?
+    ✅ Are error messages helpful?
+
+    This is MANDATORY before marking any task "done" in Archon.
+
+SCENARIO FORMAT:
+    # Comment explaining the scenario
+    GIVEN [initial state]
+    WHEN [user action]
+    THEN [expected outcome]
+    AND [additional validations]
+
+EOF
+}
+
+# Create scenario template
+create_scenario_template() {
+    local feature="$1"
+    local scenario_file="$SCENARIO_DIR/${feature}.scenarios"
+
+    if [ -f "$scenario_file" ]; then
+        echo -e "${YELLOW}⚠️  Scenario file already exists: $scenario_file${NC}"
+        echo "Edit manually or delete to recreate."
+        return 1
+    fi
+
+    cat > "$scenario_file" << EOF
+# User Scenarios for: $feature
+# ============================
+# Real-world user workflows that must work perfectly
+
+# Basic usage scenario
+GIVEN user wants to use $feature
+WHEN user runs the feature
+THEN feature works as documented
+AND user gets expected output
+AND no confusing errors appear
+
+# Discovery scenario
+GIVEN user doesn't know $feature exists
+WHEN user looks for help
+THEN feature is discoverable
+AND help clearly explains how to use it
+
+# Error handling scenario
+GIVEN user makes common mistake with $feature
+WHEN error occurs
+THEN error message is helpful and actionable
+AND user knows exactly how to fix it
+
+# Integration scenario
+GIVEN user is in normal workflow
+WHEN user runs $feature
+THEN feature integrates seamlessly
+AND doesn't break other tools
+AND feels like natural part of OOS
+
+# Edge case scenario
+GIVEN [describe edge case condition]
+WHEN user encounters edge case
+THEN system handles it gracefully
+AND user isn't confused or stuck
+
+# Add more scenarios based on real usage patterns
+EOF
+
+    echo -e "${GREEN}✅ Created scenario template: $scenario_file${NC}"
+    echo ""
+    echo "Next steps:"
+    echo "1. Edit $scenario_file with real user scenarios"
+    echo "2. Run: $0 $feature"
+    echo "3. Iteratively improve scenarios based on actual usage"
+}
+
+# Parse scenario line
+parse_scenario() {
+    local line="$1"
+
+    # Remove leading/trailing whitespace
+    line=$(echo "$line" | xargs)
+
+    case "$line" in
+        GIVEN*)
+            echo "GIVEN: ${line#GIVEN }"
+            ;;
+        WHEN*)
+            echo "WHEN: ${line#WHEN }"
+            ;;
+        THEN*)
+            echo "THEN: ${line#THEN }"
+            ;;
+        AND*)
+            echo "AND: ${line#AND }"
+            ;;
+        *)
+            echo "INFO: $line"
+            ;;
+    esac
+}
+
+# Interactive user validation
+validate_scenario_step() {
+    local step="$1"
+    local feature="$2"
+
+    echo -e "${BLUE}$step${NC}"
+
+    # For WHEN steps, suggest actual command to run
+    if [[ "$step" =~ ^WHEN.* ]]; then
+        echo -e "${CYAN}💡 Try running the actual command now and observe the behavior${NC}"
+
+        # Auto-suggest command based on step content
+        if [[ "$step" =~ /[a-zA-Z-]+ ]]; then
+            local suggested_cmd=$(echo "$step" | grep -o '/[a-zA-Z-]*' | head -1)
+            echo -e "${CYAN}   Suggested: $suggested_cmd${NC}"
+        fi
+
+        echo -e "${CYAN}   Press ENTER when you've tested this step...${NC}"
+        read -r
+    fi
+
+    # For THEN/AND steps, validate outcome
+    if [[ "$step" =~ ^THEN.*|^AND.* ]]; then
+        echo -e "${YELLOW}Did this expectation match reality? (y/n/skip)${NC}"
+        echo -e "${YELLOW}Expected: ${step#THEN }${step#AND }${NC}"
+
+        local response
+        while true; do
+            read -r response
+            case "$response" in
+                y|Y|yes|YES)
+                    echo -e "  ${GREEN}✅ Validated${NC}"
+                    return 0
+                    ;;
+                n|N|no|NO)
+                    echo -e "  ${RED}❌ Failed validation${NC}"
+                    echo -e "  ${YELLOW}What actually happened?${NC}"
+                    read -r actual_behavior
+                    echo "$(date): FEATURE=$feature EXPECTED='$step' ACTUAL='$actual_behavior'" >> "$FAILURES_LOG"
+                    return 1
+                    ;;
+                s|skip|SKIP)
+                    echo -e "  ${YELLOW}⏭️  Skipped${NC}"
+                    return 2
+                    ;;
+                *)
+                    echo -e "${YELLOW}Please answer: y (yes), n (no), or skip${NC}"
+                    ;;
+            esac
+        done
+    fi
+
+    return 0
+}
+
+# Run scenarios for a feature
+run_feature_scenarios() {
+    local feature="$1"
+    local scenario_file="$SCENARIO_DIR/${feature}.scenarios"
+
+    if [ ! -f "$scenario_file" ]; then
+        echo -e "${RED}❌ No scenarios found for: $feature${NC}"
+        echo -e "${CYAN}Create scenarios with: $0 --create $feature${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}🧪 Testing User Scenarios: $feature${NC}"
+    echo "=================================="
+    echo ""
+
+    local scenario_name=""
+    local scenario_steps=()
+    local in_scenario=false
+    local scenario_count=0
+    local line_num=0
+
+    while IFS= read -r line; do
+        line_num=$((line_num + 1))
+
+        # Skip empty lines and comments at start of line
+        if [[ -z "$line" ]] || [[ "$line" =~ ^#.*$ ]]; then
+            continue
+        fi
+
+        # Check if this is a scenario separator (comment describing scenario)
+        if [[ "$line" =~ ^#.*$ ]] && [[ "$in_scenario" == true ]]; then
+            # Process previous scenario
+            if [ ${#scenario_steps[@]} -gt 0 ]; then
+                run_single_scenario "$scenario_name" "${scenario_steps[@]}"
+                scenario_count=$((scenario_count + 1))
+            fi
+
+            # Start new scenario
+            scenario_name="${line#\# }"
+            scenario_steps=()
+            in_scenario=true
+            continue
+        fi
+
+        # Add step to current scenario
+        if [[ "$line" =~ ^(GIVEN|WHEN|THEN|AND).* ]]; then
+            scenario_steps+=("$line")
+            in_scenario=true
+        fi
+
+    done < "$scenario_file"
+
+    # Process final scenario
+    if [ ${#scenario_steps[@]} -gt 0 ]; then
+        run_single_scenario "$scenario_name" "${scenario_steps[@]}"
+        scenario_count=$((scenario_count + 1))
+    fi
+
+    if [ $scenario_count -eq 0 ]; then
+        echo -e "${YELLOW}⚠️  No valid scenarios found in $scenario_file${NC}"
+        echo "Check scenario format and syntax."
+        return 1
+    fi
+}
+
+# Run a single scenario
+run_single_scenario() {
+    local scenario_name="$1"
+    shift
+    local steps=("$@")
+
+    echo -e "${BLUE}📋 Scenario: $scenario_name${NC}"
+    echo "----------------------------------------"
+
+    local scenario_passed=true
+    local step_count=0
+
+    for step in "${steps[@]}"; do
+        step_count=$((step_count + 1))
+        echo ""
+        echo "Step $step_count:"
+
+        validate_scenario_step "$step" "$FEATURE"
+        local result=$?
+
+        case $result in
+            0) # Passed
+                ;;
+            1) # Failed
+                scenario_passed=false
+                ;;
+            2) # Skipped
+                SKIPPED=$((SKIPPED + 1))
+                ;;
+        esac
+    done
+
+    echo ""
+    if [ "$scenario_passed" = true ]; then
+        echo -e "${GREEN}✅ SCENARIO PASSED: $scenario_name${NC}"
+        PASSED=$((PASSED + 1))
+    else
+        echo -e "${RED}❌ SCENARIO FAILED: $scenario_name${NC}"
+        FAILED=$((FAILED + 1))
+    fi
+
+    echo ""
+    echo "=========================================="
+    echo ""
+}
+
+# Run all feature scenarios
+run_all_scenarios() {
+    echo -e "${CYAN}🧪 Running ALL User Scenarios${NC}"
+    echo "============================="
+    echo ""
+
+    if [ ! -d "$SCENARIO_DIR" ] || [ -z "$(ls -A "$SCENARIO_DIR" 2>/dev/null)" ]; then
+        echo -e "${RED}❌ No scenario files found in $SCENARIO_DIR${NC}"
+        echo "Create scenarios with: $0 --create [feature-name]"
+        return 1
+    fi
+
+    for scenario_file in "$SCENARIO_DIR"/*.scenarios; do
+        if [ -f "$scenario_file" ]; then
+            local feature=$(basename "$scenario_file" .scenarios)
+            echo -e "${BLUE}Testing feature: $feature${NC}"
+            FEATURE="$feature"
+            run_feature_scenarios "$feature"
+            echo ""
+        fi
+    done
+}
+
+# Generate report
+generate_report() {
+    local total=$((PASSED + FAILED))
+
+    echo -e "${CYAN}📊 RUAT RESULTS${NC}"
+    echo "================"
+    echo ""
+    echo "✅ Scenarios Passed: $PASSED"
+    echo "❌ Scenarios Failed: $FAILED"
+    echo "⏭️  Steps Skipped: $SKIPPED"
+    echo "📊 Success Rate: $(( total > 0 ? (PASSED * 100) / total : 0 ))%"
+    echo ""
+
+    if [ $FAILED -gt 0 ]; then
+        echo -e "${RED}🚨 RUAT VALIDATION FAILED${NC}"
+        echo ""
+        echo "Issues logged in: $FAILURES_LOG"
+        echo ""
+        echo "Required actions:"
+        echo "1. Review failed scenarios"
+        echo "2. Fix user experience issues"
+        echo "3. Re-run RUAT until all scenarios pass"
+        echo "4. Do NOT mark tasks 'done' until RUAT passes"
+        echo ""
+        return 1
+    else
+        echo -e "${GREEN}🎉 RUAT VALIDATION PASSED${NC}"
+        echo ""
+        echo "All user scenarios validated successfully!"
+        echo "Feature(s) ready for user consumption."
+        echo ""
+        return 0
+    fi
+}
+
+# Main execution
+main() {
+    case "${1:-}" in
+        --help|-h)
+            show_help
+            exit 0
+            ;;
+        --create)
+            if [ -z "${2:-}" ]; then
+                echo -e "${RED}❌ Feature name required${NC}"
+                echo "Usage: $0 --create [feature-name]"
+                exit 1
+            fi
+            create_scenario_template "$2"
+            exit 0
+            ;;
+        --all)
+            run_all_scenarios
+            ;;
+        "")
+            echo -e "${RED}❌ Feature name required${NC}"
+            show_help
+            exit 1
+            ;;
+        *)
+            FEATURE="$1"
+            run_feature_scenarios "$FEATURE"
+            ;;
+    esac
+
+    generate_report
+}
+
+# Initialize failure log
+echo "# RUAT Failure Log - $(date)" > "$FAILURES_LOG"
+
+main "$@"

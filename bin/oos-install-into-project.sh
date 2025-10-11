@@ -47,6 +47,56 @@ else
     exit 1
 fi
 
+# Step 2.5: Ensure complete workflow is included in slash commands
+echo -e "${BLUE}🔧 Ensuring complete workflow integration...${NC}"
+if ! grep -q "complete-workflow" .claude/slash_commands.json 2>/dev/null; then
+    echo "• Adding complete workflow commands..."
+    # Backup original and add workflow commands
+    cp .claude/slash_commands.json .claude/slash_commands.json.backup
+    cat > .claude/slash_commands.json << 'EOF'
+{
+  "commands": {
+    "screenshot": {
+      "command": "./bin/take-screenshot.sh",
+      "description": "Take screenshot and analyze with Claude",
+      "category": "Analysis"
+    },
+    "provision": {
+      "command": "./bin/provision-infrastructure.sh",
+      "description": "AI-powered infrastructure provisioning",
+      "category": "Deployment"
+    },
+    "validate": {
+      "command": "./bin/validate-oos",
+      "description": "Run comprehensive OOS validation",
+      "category": "Validation"
+    },
+    "test-user-scenarios": {
+      "command": "./bin/test-user-scenarios",
+      "description": "Run user acceptance testing (RUAT)",
+      "category": "Validation"
+    },
+    "ruat": {
+      "command": "./bin/test-user-scenarios",
+      "description": "Alias for user scenario testing",
+      "category": "Validation"
+    },
+    "complete-workflow": {
+      "command": "./bin/complete-workflow.sh",
+      "description": "Run complete idea-to-completion workflow",
+      "category": "Workflow"
+    },
+    "idea-to-done": {
+      "command": "./bin/complete-workflow.sh",
+      "description": "Complete project workflow A→B→C→D",
+      "category": "Workflow"
+    }
+  }
+}
+EOF
+    echo -e "${GREEN}✅ Complete workflow commands added${NC}"
+fi
+
 # Step 3: Copy essential OOS scripts to project
 echo -e "\n${BLUE}🔧 Installing OOS tools...${NC}"
 mkdir -p bin

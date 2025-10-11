@@ -21,12 +21,14 @@ bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 
 ```bash
 /start-coding          # Start systematic development session
-/modules list          # See available thinking tools
-/dev-setup             # Validate your brain environment
-/pre-commit            # Run systematic checks before committing
+/complete-workflow     # Complete idea-to-completion workflow A→B→C→D
+/idea-to-done          # Alias for complete workflow
+/validate              # Run comprehensive OOS validation
+/ruat                  # Recursive User-Acceptance Testing
+/provision             # AI-powered infrastructure provisioning
+/screenshot            # Take screenshot and analyze with Claude
 /help-me               # Smart context engineering help
-/optimize              # Optimize current context for token efficiency
-/auto-fix              # Automatically fix code consistency issues
+/pre-commit            # Run systematic checks before committing
 /smart-commit          # Generate intelligent commit messages
 ```
 

@@ -1,0 +1,76 @@
+# User Scenarios for: test-user-scenarios (RUAT Framework)
+# ========================================================
+# Meta-testing: RUAT framework testing itself
+
+# Framework discovery scenario
+GIVEN developer needs to validate user experience of new feature
+WHEN developer looks for testing framework
+THEN RUAT framework is documented clearly
+AND developer understands its purpose and importance
+AND examples show how to use it effectively
+
+# Creating new scenarios scenario
+GIVEN developer builds new feature that needs user testing
+WHEN developer runs ./bin/test-user-scenarios --create new-feature
+THEN scenario template file is created
+AND template includes realistic scenario examples
+AND developer understands scenario format
+AND file is ready to edit with specific scenarios
+
+# Running scenarios scenario
+GIVEN developer has created scenarios for their feature
+WHEN developer runs ./bin/test-user-scenarios feature-name
+THEN scenarios execute interactively
+AND developer can validate each expectation
+AND pass/fail/skip options work clearly
+AND experience is smooth and not confusing
+
+# Failure handling scenario
+GIVEN scenario validation fails during testing
+WHEN developer marks expectation as failed
+THEN failure is logged with useful details
+AND developer knows exactly what UX issue to fix
+AND can iterate on improvement and re-test
+
+# Integration with workflows scenario
+GIVEN RUAT is part of development workflow
+WHEN developer completes feature implementation
+THEN RUAT runs as mandatory step
+AND blocks task completion if scenarios fail
+AND integrates naturally with Archon workflow
+
+# Framework reliability scenario
+GIVEN developer runs RUAT on various features
+WHEN RUAT executes across different scenario types
+THEN framework handles all scenario formats correctly
+AND doesn't crash or hang on edge cases
+AND provides consistent user experience
+
+# Documentation scenario
+GIVEN developer is new to RUAT concept
+WHEN developer reads RUAT documentation
+THEN purpose and benefits are clear
+AND examples are realistic and helpful
+AND developer can immediately start using RUAT
+AND understands how it fits into OOS philosophy
+
+# Help and discoverability scenario
+GIVEN developer encounters RUAT script
+WHEN developer runs ./bin/test-user-scenarios --help
+THEN comprehensive help is displayed
+AND usage examples are clear and practical
+AND developer understands all available options
+
+# All-features testing scenario
+GIVEN developer wants to validate entire project
+WHEN developer runs ./bin/test-user-scenarios --all
+THEN all scenario files are executed systematically
+AND developer can validate complete user experience
+AND process is manageable and not overwhelming
+
+# Recursive meta-testing scenario
+GIVEN RUAT framework exists to test user scenarios
+WHEN RUAT framework is itself tested with user scenarios
+THEN meta-testing validates that testing framework works
+AND developer confidence in RUAT methodology increases
+AND framework dogfoods its own principles
