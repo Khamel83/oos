@@ -47,7 +47,15 @@ else
     exit 1
 fi
 
-# Step 2.5: Ensure complete workflow is included in slash commands
+# Step 2.5: Copy markdown commands (new format)
+echo -e "${BLUE}📋 Installing markdown commands...${NC}"
+if [[ -d "$OOS_ROOT/.claude/commands" ]]; then
+    mkdir -p .claude/commands
+    cp -r "$OOS_ROOT/.claude/commands"/*.md .claude/commands/ 2>/dev/null || true
+    echo -e "${GREEN}✅ Markdown commands installed${NC}"
+fi
+
+# Step 2.6: Ensure complete workflow is included in slash commands
 echo -e "${BLUE}🔧 Ensuring complete workflow integration...${NC}"
 if ! grep -q "complete-workflow" .claude/slash_commands.json 2>/dev/null; then
     echo "• Adding complete workflow commands..."
