@@ -6,11 +6,11 @@ Generated: $(date)
 
 | Metric | Value |
 |--------|-------|
-| Code Files | 6092 |
-| Executable Files | 125 |
+| Code Files | 6108 |
+| Executable Files | 135 |
 | Documentation Files | 65 |
 | Commands in CLAUDE.md | 1 |
 | Commands in README.md | 12 |
-| Missing Documentation | 118 |
+| Missing Documentation | 128 |
 | Missing Implementation | 1 |
 | Orphaned Files | 4 |

@@ -19,22 +19,38 @@ bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 
 **After restarting, run:**
 ```bash
-/startup-check         # Validate and refresh commands automatically
-/complete-workflow plan # See the systematic A→B→C→D workflow
+/dev check             # Validate and refresh commands automatically
+/workflow complete plan # See the systematic A→B→C→D workflow
 ```
 
-## Use
+## Use - 10 Consolidated Commands
 
 ```bash
-/start-coding          # Start systematic development session
-/complete-workflow     # Complete idea-to-completion workflow A→B→C→D
-/idea-to-done          # Alias for complete workflow
+# Core Development
+/dev setup             # Start systematic development session
+/dev check             # Validate development environment
+/test scenarios        # Recursive User-Acceptance Testing
+
+# Workflows & Quality
+/workflow complete     # Complete idea-to-completion workflow A→B→C→D
+/workflow idea         # Alias for complete workflow
+/fix auto              # Automatically fix code issues
+/fix optimize          # Optimize for performance/tokens
+
+# Infrastructure & Security
+/project provision     # AI-powered infrastructure provisioning
+/project update        # Update OOS system from GitHub
+/check security        # Run comprehensive security audit
+/op status             # 1Password authentication status
+
+# Cognitive & Task Management
+/think clarify         # Clarify vague requirements
+/archon research       # Search knowledge base
+/task start            # Start working on Archon tasks
+
+# Legacy commands still work (see /migrate-commands for mapping)
 /validate              # Run comprehensive OOS validation
-/ruat                  # Recursive User-Acceptance Testing
-/provision             # AI-powered infrastructure provisioning
 /screenshot            # Take screenshot and analyze with Claude
-/oos-refresh           # Auto-refresh slash commands and validate
-/startup-check         # Startup health check (run automatically)
 /help-me               # Smart context engineering help
 /pre-commit            # Run systematic checks before committing
 /smart-commit          # Generate intelligent commit messages
@@ -44,7 +60,7 @@ bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
 
 **Your Systematic Brain Environment:**
 - **Consistent Mental Models** - Same thinking approach for every project
-- **20+ slash commands** - Complete systematic workflow integration in Claude Code
+- **10 consolidated slash commands** - Complete systematic workflow integration in Claude Code
 - **Auto-Refresh System** - Commands stay current and validate themselves automatically
 - **Project Management Layer** - Archon integration for structured work tracking
 - **Quality Assurance** - Automated validation that supports your thinking

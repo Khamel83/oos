@@ -1,12 +1,14 @@
 ---
-description: "Start structured workflow for complex tasks"
-argument-hint: <arguments>
+description: "🔄 Complete structured workflows"
+argument-hint: [agentic | complete | idea-to-done] [additional-args]
 allowed-tools: Bash
 model: claude-3-5-sonnet-20241022
 ---
 
 
-Start structured workflow for complex tasks
+🔄 Complete structured workflows
+
+Consolidates: /agentic-workflow, /complete-workflow, /idea-to-done
 
 ```bash
 ./bin/claude-workflow.sh "$ARGUMENTS"

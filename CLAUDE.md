@@ -91,3 +91,43 @@ todo → doing → technical-complete → ruat-validation → review → done
 **New status: "technical-complete"** means code works but user scenarios not validated yet.
 
 Task only moves to "review" after RUAT passes completely.
+
+## 🚀 Consolidated Command Structure
+
+**OOS now uses 10 consolidated commands instead of 45 individual commands.**
+
+### Core Commands (Use These)
+
+| Command | Purpose | Consolidates |
+|---------|---------|--------------|
+| `/dev` | Development environment | /dev-setup, /startup-check, /modules, /reload-commands |
+| `/test` | Testing & validation | /test-debug, /test-connection, /test-user-scenarios |
+| `/fix` | Code quality | /auto-fix, /optimize, /doc-check |
+| `/think` | Problem solving | /brain-dump, /clarify, /solve, /meta-ai |
+| `/workflow` | Process orchestration | /agentic-workflow, /complete-workflow, /idea-to-done |
+| `/project` | Infrastructure | /create-project, /provision, /update-oos, /oos-refresh |
+| `/op` | 1Password operations | All /op-* commands |
+| `/archon` | Knowledge base | /archon-research, /archon-status |
+| `/task` | Task management | /archon-task-start, /archon-complete |
+| `/check` | System validation | /security-review, /context-stats |
+
+### Command Usage
+
+Each command has subcommands. Use `help` to discover them:
+
+```bash
+/dev help          # Shows: setup, check, modules, refresh
+/test help         # Shows: debug, connection, scenarios
+/fix help          # Shows: auto, optimize, docs
+/think help        # Shows: dump, clarify, solve, meta
+```
+
+### Migration Guide
+
+Run `/migrate-commands` or `./bin/migrate-commands.sh` for complete migration mapping.
+
+**Benefits:**
+- 78% fewer commands to remember (45 → 10)
+- Logical grouping by function
+- Consistent interface
+- Better discoverability
