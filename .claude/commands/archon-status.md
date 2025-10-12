@@ -1,7 +1,9 @@
 ---
 description: "Show current Archon project status and active tasks"
-tools: ["mcp__archon__get_project", "mcp__archon__list_tasks"]
+allowed-tools: mcp__archon__get_project, mcp__archon__list_tasks
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Show current Archon project status and active tasks
 

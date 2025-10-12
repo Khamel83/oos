@@ -1,7 +1,10 @@
 ---
 description: "Start working on an Archon task or create a new one"
-tools: ["mcp__archon__list_tasks", "mcp__archon__update_task", "mcp__archon__create_task"]
+argument-hint: <arguments>
+allowed-tools: mcp__archon__list_tasks, mcp__archon__update_task, mcp__archon__create_task
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Start working on an Archon task or create a new one
 

@@ -1,7 +1,10 @@
 ---
 description: "Complete project workflow A→B→C→D (alias for complete-workflow)"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Complete project workflow A→B→C→D (alias for complete-workflow)
 

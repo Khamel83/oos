@@ -1,7 +1,10 @@
 ---
 description: "Start clarification workflow to refine vague requests"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Start clarification workflow to refine vague requests
 

@@ -1,3 +1,8 @@
+---
+argument-hint: <arguments>
+model: claude-3-5-sonnet-20241022
+---
+
 # 1Password Session Management
 
 Manage persistent 1Password CLI sessions for OCI VM environments

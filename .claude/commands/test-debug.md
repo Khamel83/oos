@@ -1,7 +1,10 @@
 ---
 description: "Test command for debugging slash command issues"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Debug command to test slash command functionality
 

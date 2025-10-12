@@ -1,7 +1,10 @@
 ---
 description: "Smart context engineering help - automatically optimizes your request and guides you through clarification"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Smart context engineering help - automatically optimizes your request and guides you through clarification
 

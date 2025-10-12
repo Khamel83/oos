@@ -1,7 +1,10 @@
 ---
 description: "Optimize current context for token efficiency"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Optimize current context for token efficiency
 

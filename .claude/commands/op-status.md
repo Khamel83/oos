@@ -1,3 +1,8 @@
+---
+argument-hint: <arguments>
+model: claude-3-5-sonnet-20241022
+---
+
 # /op-status
 
 Check 1Password CLI authentication status and session info

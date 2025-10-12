@@ -1,7 +1,10 @@
 ---
 description: "🧩 Unix Philosophy: run/compose focused modules (security, python, git)"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 🧩 Unix Philosophy: run/compose focused modules (security, python, git)
 

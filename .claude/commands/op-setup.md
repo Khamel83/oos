@@ -1,3 +1,8 @@
+---
+argument-hint: <command-specific-args>
+model: claude-3-5-sonnet-20241022
+---
+
 # op-setup
 
 ## Description

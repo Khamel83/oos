@@ -1,7 +1,9 @@
 ---
 description: "Reload Claude Code slash commands from .claude/commands/ directory"
-tools: ["Bash"]
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Reload Claude Code slash commands
 

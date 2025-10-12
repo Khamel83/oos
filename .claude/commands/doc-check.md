@@ -1,7 +1,10 @@
 ---
 description: "Check documentation completeness and code consistency"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Check documentation completeness and code consistency
 

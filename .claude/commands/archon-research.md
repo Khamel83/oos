@@ -1,7 +1,10 @@
 ---
 description: "Search Archon knowledge base and code examples"
-tools: ["mcp__archon__perform_rag_query", "mcp__archon__search_code_examples", "mcp__archon__list_tasks"]
+argument-hint: <arguments>
+allowed-tools: mcp__archon__perform_rag_query, mcp__archon__search_code_examples, mcp__archon__list_tasks
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Search Archon knowledge base and code examples
 

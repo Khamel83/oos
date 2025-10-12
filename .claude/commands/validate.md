@@ -1,7 +1,10 @@
 ---
 description: "Run comprehensive OOS validation - code-documentation alignment and quality checks"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Run comprehensive OOS validation
 

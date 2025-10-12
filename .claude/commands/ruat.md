@@ -1,7 +1,10 @@
 ---
 description: "Run user acceptance testing (RUAT) - mandatory user experience validation"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Run user acceptance testing (RUAT) - Recursive User-Acceptance Testing
 

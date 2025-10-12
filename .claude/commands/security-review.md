@@ -1,7 +1,10 @@
 ---
 description: "🔒 Run comprehensive security audit and review"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Run a comprehensive security audit and review of your OOS project
 

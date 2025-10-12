@@ -1,7 +1,10 @@
 ---
 description: "Take screenshot and analyze with Claude"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Take screenshot and analyze with Claude
 

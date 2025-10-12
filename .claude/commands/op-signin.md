@@ -1,3 +1,8 @@
+---
+argument-hint: <arguments>
+model: claude-3-5-sonnet-20241022
+---
+
 # /op-signin
 
 Sign into 1Password CLI with extended session duration

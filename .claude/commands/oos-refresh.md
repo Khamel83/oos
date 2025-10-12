@@ -1,7 +1,9 @@
 ---
 description: "Auto-refresh OOS slash commands and validate functionality"
-tools: ["Bash"]
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Auto-refresh OOS slash commands from latest version and validate they work correctly.
 

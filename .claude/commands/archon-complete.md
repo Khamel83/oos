@@ -1,7 +1,10 @@
 ---
 description: "Mark current Archon task as complete and move to next task"
-tools: ["mcp__archon__list_tasks", "mcp__archon__update_task"]
+argument-hint: <arguments>
+allowed-tools: mcp__archon__list_tasks, mcp__archon__update_task
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Mark current Archon task as complete and move to next task
 

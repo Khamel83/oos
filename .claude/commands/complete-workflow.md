@@ -1,7 +1,10 @@
 ---
 description: "Run complete idea-to-completion workflow A→B→C→D systematic process"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 Run complete idea-to-completion workflow A→B→C→D
 

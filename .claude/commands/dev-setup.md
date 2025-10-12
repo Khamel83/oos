@@ -1,7 +1,10 @@
 ---
 description: "🚀 Complete development environment validation (security + python + git)"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 🚀 Complete development environment validation (security + python + git)
 

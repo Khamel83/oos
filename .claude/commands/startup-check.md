@@ -1,7 +1,10 @@
 ---
 description: "Startup health check and command refresh - runs automatically to ensure OOS is ready"
-tools: ["Bash"]
+argument-hint: <arguments>
+allowed-tools: Bash
+model: claude-3-5-sonnet-20241022
 ---
+
 
 OOS Startup Health Check - ensures slash commands are fresh and working
 
