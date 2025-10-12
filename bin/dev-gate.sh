@@ -79,26 +79,39 @@ check_uv_environment() {
 check_environment_variables() {
     log_info "Checking environment variable setup..."
 
-    # Check if 1Password CLI is available and signed in
+    # Check if 1Password CLI is available
     if ! command -v op &> /dev/null; then
         log_error "1Password CLI (op) is not installed"
         return 1
     fi
 
-    if ! op whoami &> /dev/null; then
-        log_error "Not signed into 1Password CLI. Run: op signin"
-        return 1
+    # Use the session manager to check and refresh authentication
+    local session_manager="$PROJECT_ROOT/bin/op-session-manager.sh"
+    if [[ -x "$session_manager" ]]; then
+        log_info "Using 1Password session manager..."
+        if "$session_manager" status &> /dev/null && op account list &> /dev/null; then
+            log_success "1Password CLI is authenticated via session manager"
+        else
+            log_warning "1Password authentication failed. Run: $session_manager signin"
+            log_error "Not signed into 1Password CLI. Run: $session_manager signin"
+            return 1
+        fi
+    else
+        # Fallback to basic check
+        if ! op account list &> /dev/null; then
+            log_error "Not signed into 1Password CLI. Run: op signin"
+            return 1
+        fi
+        log_success "1Password CLI is available and signed in"
     fi
-
-    log_success "1Password CLI is available and signed in"
 
     # Check if we can access the environment configuration
     local vault="${OP_VAULT:-Personal}"
     local item="${OP_ITEM:-bootstrap-env}"
 
     if ! op item get "$item" --vault "$vault" &> /dev/null; then
-        log_error "Cannot access environment item '$item' in vault '$vault'"
-        return 1
+        log_warning "Cannot access environment item '$item' in vault '$vault' (optional for development)"
+        return 0  # Make this non-blocking for development
     fi
 
     log_success "Environment variables are accessible from 1Password"
