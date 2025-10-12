@@ -76,6 +76,9 @@ dev-dependencies = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
     "PyGithub>=1.58.0",
     "scikit-learn>=1.0.0",
     "PyYAML>=6.0",
@@ -87,7 +90,11 @@ line-length = 88
 
 [tool.ruff]
 line-length = 88
-select = ["E", "F", "W", "I"]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
+ignore = []
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -95,8 +102,21 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short --strict-markers"
+addopts = ["--cov=src", "--cov-report=html", "--cov-report=term-missing", "--cov-fail-under=80", "-v", "--tb=short", "--strict-markers"]
 markers = [
     "asyncio: marks tests as async",
     "slow: marks tests as slow",
 ]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "def __repr__", "raise NotImplementedError", "if __name__ == .__main__.:"]

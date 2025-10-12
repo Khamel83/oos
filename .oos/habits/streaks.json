@@ -1,0 +1,18 @@
+{
+  "morning_startup": {
+    "streak": 0,
+    "last_date": "",
+    "total_days": 0
+  },
+  "evening_capture": {
+    "streak": 0,
+    "last_date": "",
+    "total_days": 0
+  },
+  "agentic_usage": {
+    "daily_goal": 3,
+    "today_count": 0,
+    "streak": 0,
+    "last_date": ""
+  }
+}

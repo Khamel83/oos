@@ -104,6 +104,45 @@ This ensures your slash commands always work or you get clear error messages abo
 
 OOS includes automatic setup for development tools:
 
+### Python Development Environment
+Complete agentic Python development setup with modern tooling:
+
+**Package Management:**
+- **uv** - Unified Python package manager for fast, reliable dependency management
+- **Python 3.12** with automatic environment management
+- **Lock files** for reproducible builds across all environments
+
+**Code Quality:**
+- **Ruff** - Lightning-fast linting and formatting (replaces Black, isort, Flake8)
+- **MyPy** - Static type checking for Python
+- **Pre-commit hooks** - Automated quality checks before every commit
+
+**Development Experience:**
+- **VS Code Dev Containers** - Consistent development environment with Docker
+- **GitHub Actions CI/CD** - Automated testing on Python 3.10, 3.11, 3.12
+- **Pytest** with async support and coverage reporting
+- **GitHub Copilot ready** configuration
+
+**Quick Setup:**
+```bash
+# Complete agentic Python environment setup (paste entire block)
+curl -LsSf https://astral.sh/uv/install.sh | sh && \
+source $HOME/.cargo/env && \
+uv init --python 3.12 . && \
+uv add --dev pytest pytest-cov pytest-xdist ruff mypy pre-commit && \
+uv sync && uv run pre-commit install
+```
+
+**Key Commands:**
+```bash
+uv sync                    # Install/update dependencies
+uv run pytest            # Run tests with coverage
+uv run ruff check .       # Lint code
+uv run ruff format .      # Format code
+uv run mypy src/          # Type check
+uv run pre-commit run --all-files  # Run all quality checks
+```
+
 ### 1Password Integration
 Long-term authentication without repeated signins:
 

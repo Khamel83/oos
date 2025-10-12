@@ -94,25 +94,38 @@ user_confirmation() {
     echo -e "${YELLOW}Continue? (y/n/skip)${NC}"
 
     local response
-    while true; do
-        read -r response
-        case "$response" in
-            y|Y|yes|YES)
-                return 0
-                ;;
-            n|N|no|NO)
-                echo -e "${RED}Workflow stopped by user${NC}"
-                exit 1
-                ;;
-            s|skip|SKIP)
-                echo -e "${YELLOW}⏭️  Step skipped${NC}"
-                return 1
-                ;;
-            *)
-                echo -e "${YELLOW}Please answer: y (yes), n (no), or skip${NC}"
-                ;;
-        esac
+    local attempts=0
+    local max_attempts=3
+
+    while [ $attempts -lt $max_attempts ]; do
+        if read -r -t 5 response 2>/dev/null; then
+            case "$response" in
+                y|Y|yes|YES)
+                    return 0
+                    ;;
+                n|N|no|NO)
+                    echo -e "${RED}Workflow stopped by user${NC}"
+                    exit 1
+                    ;;
+                s|skip|SKIP)
+                    echo -e "${YELLOW}⏭️  Step skipped${NC}"
+                    return 1
+                    ;;
+                *)
+                    echo -e "${YELLOW}Please answer: y (yes), n (no), or skip${NC}"
+                    attempts=$((attempts + 1))
+                    ;;
+            esac
+        else
+            # Timeout or non-interactive mode - default to yes for automation
+            echo -e "${BLUE}[NON-INTERACTIVE] Defaulting to 'yes'${NC}"
+            return 0
+        fi
     done
+
+    # Max attempts reached - default to no for safety
+    echo -e "${RED}Too many invalid responses. Stopping workflow.${NC}"
+    exit 1
 }
 
 # ==============================================================================

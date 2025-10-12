@@ -1,0 +1,16 @@
+{
+  "name": "Python Dev Container",
+  "build": {"dockerfile": "Dockerfile"},
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "ms-python.vscode-pylance", "charliermarsh.ruff", "GitHub.copilot"],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "[python]": {"editor.defaultFormatter": "charliermarsh.ruff", "editor.formatOnSave": true, "editor.codeActionsOnSave": {"source.organizeImports": "explicit"}},
+        "python.testing.pytestEnabled": true
+      }
+    }
+  },
+  "postCreateCommand": "uv sync",
+  "remoteUser": "vscode"
+}
