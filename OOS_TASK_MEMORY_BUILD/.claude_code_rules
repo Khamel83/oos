@@ -1,0 +1,479 @@
+# Rules for Autonomous Development - OOS Task Memory System
+
+## NEVER DO
+
+### 1. Write Placeholder Code
+❌ **NEVER:**
+```python
+def create_task(title: str):
+    # TODO: implement this
+    pass
+```
+
+✅ **ALWAYS:**
+```python
+def create_task(title: str) -> str:
+    """Create a new task with the given title."""
+    if len(title) < 5:
+        raise ValueError(f"Title too short: need 5+ chars, got {len(title)}")
+    task_id = str(uuid.uuid4())
+    # ... complete implementation
+    return task_id
+```
+
+**Why:** Placeholder code fails tests, breaks the build. Implement it fully or don't add it.
+
+---
+
+### 2. Leave TODO Comments
+❌ **NEVER:**
+```python
+def validate_title(title: str):
+    # TODO: add length check
+    # TODO: check for newlines
+    return True
+```
+
+✅ **ALWAYS:**
+```python
+def validate_title(title: str) -> tuple[bool, str]:
+    """Validate task title meets PRD requirements."""
+    if len(title) < 5:
+        return (False, f"Title too short: {len(title)} chars, need 5+")
+    if len(title) > 200:
+        return (False, f"Title too long: {len(title)} chars, max 200")
+    if "\n" in title:
+        return (False, "Title cannot contain newlines")
+    return (True, "")
+```
+
+**Why:** TODO means incomplete. Complete it now or don't add it.
+
+---
+
+### 3. Exceed Module Size Limit
+
+❌ **NEVER:**
+- `cli.py` with 500 lines
+- `database.py` with 600 lines
+
+✅ **ALWAYS:**
+- Each module < 300 lines
+- If approaching limit, refactor:
+  ```
+  cli.py (280 lines)
+  ├── cli_create.py (100 lines)
+  ├── cli_list.py (90 lines)
+  └── cli_update.py (90 lines)
+  ```
+
+**Why:** Small modules are testable, understandable, maintainable.
+
+---
+
+### 4. Skip Tests
+
+❌ **NEVER:**
+```python
+# Implement feature
+def create_task(title: str):
+    # ... implementation ...
+    return task_id
+
+# Move to next feature without testing
+```
+
+✅ **ALWAYS:**
+```python
+# Implement feature
+def create_task(title: str):
+    # ... implementation ...
+    return task_id
+
+# Write test immediately
+def test_create_task():
+    task_id = create_task("Valid title")
+    assert task_id is not None
+
+def test_create_task_short_title():
+    with pytest.raises(ValueError):
+        create_task("Bad")
+```
+
+**Why:** Test as you build. Don't accumulate testing debt.
+
+---
+
+### 5. Violate Core Philosophy
+
+❌ **NEVER:**
+- Use PostgreSQL (requires server, violates "simplicity")
+- Store tasks in external service (violates "project-embedded")
+- Binary-only format for git (violates "git-syncable")
+- Ambiguous error messages (violates "agent-friendly")
+- Break core OOS if tasks disabled (violates "modular and optional")
+
+✅ **ALWAYS:**
+- Check each decision against 5 principles:
+  1. Simplicity over Complexity
+  2. Project-Embedded Memory
+  3. Git-Syncable by Design
+  4. Agent-Friendly CLI
+  5. Modular and Optional
+
+**Why:** These principles are non-negotiable. They define the system.
+
+---
+
+### 6. Use Absolute Paths
+
+❌ **NEVER:**
+```python
+DB_PATH = "/home/user/.oos/tasks.db"
+EXPORT_PATH = "/home/user/.oos/tasks/export.jsonl"
+```
+
+✅ **ALWAYS:**
+```python
+from pathlib import Path
+
+def get_db_path() -> Path:
+    """Get database path relative to project root."""
+    return Path.cwd() / ".oos" / "tasks.db"
+
+def get_export_path() -> Path:
+    """Get export path relative to project root."""
+    return Path.cwd() / ".oos" / "tasks" / "export.jsonl"
+```
+
+**Why:** Absolute paths break project-embedded philosophy. Use relative paths.
+
+---
+
+### 7. Silent Failures
+
+❌ **NEVER:**
+```python
+try:
+    task = get_task(task_id)
+except Exception:
+    pass  # Silent failure
+```
+
+✅ **ALWAYS:**
+```python
+try:
+    task = get_task(task_id)
+except TaskNotFoundError as e:
+    logger.error(f"Task not found: {task_id}")
+    raise  # Re-raise with context
+```
+
+**Why:** Silent failures hide bugs. Explicit errors help debugging.
+
+---
+
+### 8. Break Existing OOS
+
+❌ **NEVER:**
+- Modify core bootstrap without backward compatibility
+- Change `.oos/config.yaml` schema without defaults
+- Break slash commands that don't use tasks
+- Require tasks to be enabled
+
+✅ **ALWAYS:**
+- Task system is completely optional
+- All new code in `src/oos_task_system/` subdirectory
+- Existing OOS works if `tasks.enabled: false`
+- Graceful degradation
+
+**Why:** Not everyone needs tasks. Don't break what works.
+
+---
+
+## ALWAYS DO
+
+### 1. Write Complete, Working Code
+
+Every function must:
+- Have type hints
+- Have docstring
+- Handle errors explicitly
+- Return meaningful values
+- Be fully implemented
+
+**Example:**
+```python
+def validate_task_status(status: str) -> tuple[bool, str]:
+    """
+    Validate task status is one of allowed values.
+
+    Args:
+        status: Status string to validate
+
+    Returns:
+        Tuple of (is_valid, error_message)
+
+    Example:
+        >>> validate_task_status("doing")
+        (True, "")
+        >>> validate_task_status("invalid")
+        (False, "Invalid status 'invalid', must be one of: todo, doing, done, blocked")
+    """
+    VALID_STATUSES = {"todo", "doing", "done", "blocked"}
+
+    if status not in VALID_STATUSES:
+        return (False, f"Invalid status '{status}', must be one of: {', '.join(VALID_STATUSES)}")
+
+    return (True, "")
+```
+
+---
+
+### 2. Test Alongside Implementation
+
+For every function:
+1. Write the function
+2. Write tests for that function
+3. Run tests
+4. Move to next function
+
+**Don't:** Implement 10 functions, then write tests
+**Do:** Implement 1 function, test it, implement next
+
+---
+
+### 3. Follow OOS Philosophy
+
+Before writing code, ask:
+1. **Is this simple?** (not complex)
+2. **Is this project-embedded?** (not external)
+3. **Is this git-syncable?** (not binary-only)
+4. **Is this agent-friendly?** (clear, parseable)
+5. **Is this modular?** (optional, no breaking changes)
+
+**If answer is "no" to any → rethink approach.**
+
+---
+
+### 4. Keep Modules Small and Focused
+
+Target: 150-250 lines per module
+Maximum: 300 lines per module
+
+If approaching 300 lines:
+```python
+# Before: cli.py (350 lines)
+# After:
+cli/
+├── __init__.py
+├── commands_create.py (100 lines)
+├── commands_list.py (90 lines)
+├── commands_update.py (80 lines)
+└── commands_delete.py (80 lines)
+```
+
+---
+
+### 5. Use Concrete Examples from PRD
+
+PRD has explicit examples for everything. **Use them.**
+
+**From PRD:**
+```yaml
+# Example task from PRD Section 2
+id: "550e8400-e29b-41d4-a716-446655440000"
+title: "Implement user authentication"
+status: "doing"
+created: "2024-10-21T10:00:00Z"
+```
+
+**In Tests:**
+```python
+def test_task_creation():
+    task = Task(
+        id="550e8400-e29b-41d4-a716-446655440000",
+        title="Implement user authentication",
+        status="doing",
+        created="2024-10-21T10:00:00Z"
+    )
+    assert task.id == "550e8400-e29b-41d4-a716-446655440000"
+```
+
+---
+
+### 6. Update Checkpoints Every 5 Tasks
+
+After completing 5 tasks, show:
+```
+✅ Tasks 1-5 complete
+
+Directory tree:
+src/oos_task_system/
+├── models.py (142 lines)
+├── database.py (198 lines)
+├── validation.py (87 lines)
+
+Test results:
+✅ 27/27 tests passing
+- test_models.py: 12/12 ✅
+- test_database.py: 15/15 ✅
+
+What works:
+- Task models ✅
+- SQLite CRUD ✅
+- Validation rules ✅
+
+Progress: 12% (5/42 tasks)
+
+Next 3 tasks:
+1. Implement JSONL export
+2. Add timestamp merge logic
+3. Write export tests
+
+Continuing autonomously...
+```
+
+---
+
+### 7. Match PRD Specifications Exactly
+
+If PRD says:
+- "Title: 5-200 chars" → Implement exactly that, not 10-200
+- "Status enum: todo, doing, done, blocked" → Exactly those 4, no more
+- "Exit code 0=success, 1=user error, 2=system error" → Exactly those codes
+
+**Why:** PRD is the contract. Deviating creates confusion.
+
+---
+
+### 8. Provide Actionable Error Messages
+
+❌ **BAD:**
+```
+Error: Invalid input
+```
+
+✅ **GOOD:**
+```
+Error: Title too short
+   Title must be 5-200 characters
+   Provided: "Auth" (4 characters)
+```
+
+**Format:**
+```
+Error: <what's wrong>
+   <why it's wrong>
+   <what was provided>
+   <what's expected>
+```
+
+---
+
+## When to Ask vs Proceed
+
+### Proceed Autonomously:
+
+✅ Requirements clear in PRD
+✅ Solution follows established patterns
+✅ No security implications
+✅ Within defined architecture
+✅ Tests can verify correctness
+
+### Ask User:
+
+❌ PRD ambiguous for this specific case
+❌ Security decision needed
+❌ External credentials required
+❌ Trade-off decision not specified in PRD
+❌ Blocked by unavoidable issue
+❌ Philosophy principles conflict
+
+**Example Ask:**
+```
+Question: Should failed imports (invalid JSON lines) fail the entire import
+or skip and continue?
+
+PRD says: "Skip line, log warning, continue"
+
+Proceeding with: Skip and continue (as specified in PRD Section 3, FR-7)
+```
+
+---
+
+## Code Quality Standards
+
+### Python Style
+- Follow PEP 8
+- Use type hints (Python 3.9+ syntax)
+- Use pathlib for paths (not os.path)
+- Use f-strings for formatting (not % or .format())
+
+### Documentation
+- Docstrings on all public functions (Google style)
+- Comments explain "why", not "what"
+- Examples in docstrings where helpful
+
+### Testing
+- pytest for all tests
+- 90%+ coverage minimum
+- Test edge cases explicitly
+- Performance tests where specified
+
+### Error Handling
+- Specific exceptions (not bare `except:`)
+- Log before raising
+- Include context in error messages
+- Exit codes match specification
+
+---
+
+## Philosophy Enforcement Checklist
+
+Every code review should check:
+
+**1. Simplicity**
+- [ ] Could this be simpler?
+- [ ] Are we adding complexity for theoretical future needs?
+- [ ] Is this the simplest solution that works?
+
+**2. Project-Embedded**
+- [ ] Does this require external services?
+- [ ] Are paths relative (not absolute)?
+- [ ] Will this work offline?
+
+**3. Git-Syncable**
+- [ ] Is JSONL regenerated after this operation?
+- [ ] Can humans resolve JSONL merge conflicts?
+- [ ] Is timestamp-based merge correct?
+
+**4. Agent-Friendly**
+- [ ] Can an AI parse this output?
+- [ ] Are exit codes consistent?
+- [ ] Are error messages actionable?
+
+**5. Modular**
+- [ ] Does this break OOS if tasks disabled?
+- [ ] Can users opt out?
+- [ ] Is this in `src/oos_task_system/` subdirectory?
+
+**If any answer is "no" → refactor before committing.**
+
+---
+
+## Success Criteria
+
+Code is done when:
+- ✅ Fully implemented (no TODOs, no placeholders)
+- ✅ Tested (unit tests pass, edge cases covered)
+- ✅ Documented (docstrings, README updated)
+- ✅ Small (< 300 lines per module)
+- ✅ Philosophy-compliant (passes checklist)
+- ✅ Matches PRD exactly (no deviations)
+
+If code doesn't meet all criteria → not done, keep working.
+
+---
+
+*These rules are not suggestions. They are requirements. Code that violates these rules must be refactored before merging. When in doubt, err on the side of simplicity.*
