@@ -1637,7 +1637,394 @@ Any code that violates these principles must be refactored before merging.
 
 **Things we might add later but are explicitly out of scope for v1.0:**
 
-**Advanced Dependencies (v1.1):**
+### Phase 2: Preferences & Patterns System (v2.0)
+
+**Vision:** Expand from "task memory" to "complete project brain" that captures not just WHAT to do (tasks) but HOW you like to do things (preferences and patterns).
+
+**Problem Phase 2 Solves:**
+After Phase 1, you'll have task management. But each new project still requires you to remember and re-apply your coding preferences, patterns, and past decisions. Phase 2 captures "all my ways of thinking" beyond just tasks.
+
+**FR-13: Project Preferences Storage**
+
+Store and apply your coding preferences automatically during project setup.
+
+**Data Model:**
+```yaml
+# .oos/preferences.yaml
+coding_standards:
+  python:
+    formatter: "black"
+    line_length: 100
+    linter: "ruff"
+    type_checker: "mypy"
+    test_framework: "pytest"
+    docstring_style: "google"
+
+  git:
+    commit_style: "conventional"  # feat:, fix:, etc.
+    branch_naming: "type/description"  # feature/*, bugfix/*
+    require_sign_off: true
+
+  ci_cd:
+    provider: "github_actions"
+    test_on_pr: true
+    auto_format: true
+    require_tests: true
+
+directory_structure:
+  preferred_layout: "src-layout"  # src/, tests/, docs/
+  test_directory: "tests"
+  config_directory: "config"
+
+environment:
+  python_version: "3.9+"
+  use_uv: true  # Use uv for package management
+  use_venv: true
+  secrets_provider: "1password"
+
+documentation:
+  readme_template: "comprehensive"  # minimal, standard, comprehensive
+  include_contributing: true
+  include_license: true
+  license_type: "MIT"
+```
+
+**CLI Commands:**
+```bash
+oos prefs show                    # Show current project preferences
+oos prefs set python.formatter black
+oos prefs import ~/my-prefs.yaml  # Import your preferences
+oos prefs export my-prefs.yaml    # Export to reuse elsewhere
+oos prefs validate                # Check preferences are valid
+
+# Apply preferences to current project
+oos prefs apply                   # Setup linters, formatters, etc.
+```
+
+**Bootstrap Integration:**
+```bash
+# New project with your preferences
+oos bootstrap my-project --apply-prefs
+
+# Automatically sets up:
+# - Black formatter config
+# - Ruff linter config
+# - Pytest config
+# - GitHub Actions with your CI/CD preferences
+# - Directory structure you like
+# - Git hooks for commit style
+```
+
+**FR-14: Pattern Library**
+
+Capture and reuse architectural patterns from past projects.
+
+**Data Model:**
+```yaml
+# .oos/patterns/authentication-jwt.yaml
+name: "JWT Authentication Pattern"
+category: "authentication"
+description: "Standard JWT authentication with refresh tokens"
+tags: ["auth", "jwt", "security"]
+
+components:
+  - name: "auth.py"
+    purpose: "JWT token generation and validation"
+    code_template: |
+      import jwt
+      from datetime import datetime, timedelta
+
+      def generate_token(user_id: str, expires_minutes: int = 15):
+          payload = {
+              "user_id": user_id,
+              "exp": datetime.utcnow() + timedelta(minutes=expires_minutes)
+          }
+          return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+      def validate_token(token: str):
+          try:
+              payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+              return payload["user_id"]
+          except jwt.ExpiredSignatureError:
+              raise AuthError("Token expired")
+          except jwt.InvalidTokenError:
+              raise AuthError("Invalid token")
+
+  - name: "middleware.py"
+    purpose: "Authentication middleware"
+    code_template: |
+      def require_auth(func):
+          def wrapper(*args, **kwargs):
+              token = request.headers.get("Authorization", "").replace("Bearer ", "")
+              user_id = validate_token(token)
+              return func(user_id, *args, **kwargs)
+          return wrapper
+
+dependencies:
+  - "pyjwt==2.8.0"
+  - "python-dotenv==1.0.0"
+
+environment_vars:
+  - name: "JWT_SECRET"
+    description: "Secret key for JWT signing"
+    required: true
+    example: "your-secret-key-here"
+
+configuration:
+  - file: "config/auth.yaml"
+    content: |
+      jwt:
+        access_token_expires_minutes: 15
+        refresh_token_expires_days: 30
+        algorithm: "HS256"
+
+tests:
+  - name: "test_auth.py"
+    purpose: "Test JWT generation and validation"
+    code_template: |
+      def test_generate_token():
+          token = generate_token("user123")
+          assert token is not None
+
+      def test_validate_token():
+          token = generate_token("user123")
+          user_id = validate_token(token)
+          assert user_id == "user123"
+
+      def test_expired_token():
+          # Token that expires in 1 second
+          token = generate_token("user123", expires_minutes=0.017)
+          time.sleep(2)
+          with pytest.raises(AuthError):
+              validate_token(token)
+
+usage_notes: |
+  This pattern implements JWT authentication with:
+  - Access tokens (short-lived, 15 min)
+  - Refresh tokens (long-lived, 30 days)
+  - Token validation middleware
+  - Proper error handling
+
+  To use:
+  1. Add dependencies to requirements.txt
+  2. Set JWT_SECRET in .env
+  3. Copy auth.py and middleware.py
+  4. Add config/auth.yaml
+  5. Use @require_auth decorator on protected routes
+
+related_patterns:
+  - "oauth2-integration.yaml"
+  - "api-rate-limiting.yaml"
+```
+
+**CLI Commands:**
+```bash
+oos pattern list                           # Show all patterns
+oos pattern search "authentication"        # Search patterns
+oos pattern show jwt-auth                  # Show pattern details
+oos pattern apply jwt-auth                 # Apply pattern to project
+oos pattern create                         # Create new pattern
+oos pattern export jwt-auth my-jwt.yaml    # Export for sharing
+oos pattern import ~/patterns/oauth.yaml   # Import pattern
+```
+
+**Pattern Application:**
+```bash
+# Apply pattern to current project
+oos pattern apply jwt-auth
+
+# Creates:
+# - src/auth.py (from template)
+# - src/middleware.py (from template)
+# - tests/test_auth.py (from template)
+# - config/auth.yaml (from template)
+# - Adds dependencies to requirements.txt
+# - Adds JWT_SECRET to .env template
+# - Creates tasks: "Implement auth", "Test auth", "Document auth endpoints"
+```
+
+**FR-15: Decision Log**
+
+Capture WHY you made architectural decisions.
+
+**Data Model:**
+```markdown
+# .oos/decisions.md
+
+## Decision Log
+
+### 2024-10-21: Use SQLite instead of PostgreSQL for tasks
+
+**Context:**
+Need local task storage that syncs via git.
+
+**Options Considered:**
+1. PostgreSQL - Full-featured, but requires server
+2. SQLite - Simple, serverless, file-based
+3. JSON files - Simple but no querying
+4. YAML files - Human-readable but slow for large datasets
+
+**Decision:** SQLite
+
+**Rationale:**
+- No server required (matches project-embedded philosophy)
+- Fast queries (better than JSON/YAML parsing)
+- Built into Python (no installation)
+- JSONL export for git sync (best of both worlds)
+- Proven reliability
+- Small file size (~1KB per 1000 tasks)
+
+**Consequences:**
+- ✅ Pro: Fast, simple, no server
+- ✅ Pro: SQLite built into Python
+- ✅ Pro: Can rebuild from JSONL if corrupted
+- ⚠️ Con: Binary format (can't directly git diff)
+  - Mitigated: JSONL export is text, git-friendly
+- ⚠️ Con: Concurrent writes need handling
+  - Mitigated: Single-user tool, rare conflicts
+
+**Status:** Implemented
+
+---
+
+### 2024-10-21: Hybrid Archon integration (not replacement)
+
+**Context:**
+Archon provides RAG and cross-project views, but tasks aren't portable.
+
+**Options Considered:**
+1. Replace Archon completely - Lose RAG functionality
+2. Archon-only - Tasks not portable, agent amnesia continues
+3. Hybrid approach - Local for tasks, Archon for RAG
+
+**Decision:** Hybrid (option 3)
+
+**Rationale:**
+- Archon RAG is valuable (don't throw away)
+- Local tasks solve portability problem
+- Best of both worlds
+- One-way sync option for backup
+
+**Consequences:**
+- ✅ Pro: Keep RAG functionality
+- ✅ Pro: Tasks portable via git
+- ✅ Pro: Fast local operations
+- ⚠️ Con: Two systems to maintain
+  - Mitigated: Optional, can use just local if preferred
+
+**Status:** Implemented (v1.0)
+
+---
+```
+
+**CLI Commands:**
+```bash
+oos decision add "Use SQLite"      # Add new decision
+oos decision list                   # Show all decisions
+oos decision search "database"      # Search decisions
+oos decision show <id>              # Show decision details
+```
+
+**FR-16: Bootstrap Templates with Full Brain**
+
+Bootstrap that applies tasks, preferences, patterns, AND decisions.
+
+**Enhanced Bootstrap:**
+```bash
+# Create project with everything
+oos bootstrap my-api-project --template python-api
+
+# Automatically:
+# 1. Creates directory structure (from preferences)
+# 2. Sets up Python environment (from preferences)
+# 3. Configures linters/formatters (from preferences)
+# 4. Applies "API starter" pattern
+#    - Basic FastAPI structure
+#    - JWT auth pattern
+#    - Database connection pattern
+# 5. Creates initial tasks
+#    - "Setup database schema"
+#    - "Implement health check endpoint"
+#    - "Configure CI/CD"
+# 6. Adds relevant decisions
+#    - "Why FastAPI over Flask"
+#    - "Why PostgreSQL over MySQL"
+# 7. Sets up git hooks (from preferences)
+# 8. Creates GitHub Actions (from preferences)
+# 9. Generates README (from preferences)
+
+# Result: Fully configured project matching YOUR way of doing things
+```
+
+**Available Templates:**
+```bash
+oos bootstrap --list-templates
+
+Available templates:
+  python-api       - FastAPI REST API with auth
+  python-cli       - Click-based CLI tool
+  python-lib       - Reusable Python library
+  node-api         - Express.js REST API
+  node-cli         - Node.js CLI tool
+  static-site      - Static website with Tailwind
+  data-pipeline    - Python data processing pipeline
+```
+
+**Custom Templates:**
+```bash
+# Create your own templates
+oos template create my-custom-template
+oos template save-current my-custom-template  # Save current project as template
+oos template list
+oos template apply my-custom-template
+```
+
+### Phase 2 Implementation Timeline
+
+**After Phase 1 is live (1-2 weeks of usage):**
+
+**Week 1-2: Requirements Gathering**
+- Use Phase 1 task system
+- Note what preferences you wish were captured
+- Identify patterns you repeat across projects
+- Track decisions you make repeatedly
+
+**Week 3-4: Phase 2 PRD**
+- Design preferences schema based on real usage
+- Design pattern storage based on actual patterns
+- Design decision log based on real decisions
+- Validate with self-assessment checklist
+
+**Week 5-8: Phase 2 Implementation**
+- Build preferences system
+- Build pattern library
+- Build decision log
+- Enhance bootstrap with templates
+
+**Week 9-10: Integration & Testing**
+- Test full workflow: bootstrap → preferences → patterns → tasks
+- Validate "complete project brain" vision
+- User acceptance testing
+
+### Why Phase 2 Waits
+
+1. **Validate Phase 1 First** - Ensure task system works as expected
+2. **Real Usage Data** - Design preferences based on what you actually need
+3. **Avoid Over-Engineering** - Don't build features you won't use
+4. **Iterative Learning** - Each phase informs the next
+
+### Phase 2 Success Criteria
+
+When Phase 2 is done:
+- ✅ New project: `oos bootstrap my-project` creates fully-configured environment matching your preferences
+- ✅ AI agent: Can see tasks, preferences, patterns, and decisions
+- ✅ Repeatability: Every project follows your standards automatically
+- ✅ Learning: Patterns from Project A automatically available in Project B
+- ✅ Context: Full "why" captured, not just "what"
+
+---
+
+### Advanced Dependencies (v1.1):**
 - Parent-child relationships (epics and subtasks)
 - Related tasks (associated but not blocking)
 - Discovered-from (tasks found during other work)
