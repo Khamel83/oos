@@ -5,14 +5,20 @@
 ### Problem Statement
 
 **Current Problem:**
-OOS manages HOW you like to work (environment setup, secrets, preferences) but doesn't manage WHAT you're working on within each project. Task management lives in Archon (external server, not portable) or doesn't exist at all. When you start a project with OOS, your ideas and tasks aren't embedded in that project - they're either external or lost.
+OOS manages HOW you like to work (environment setup, secrets, preferences) but doesn't manage WHAT you're working on within each project. Task management either lives in Archon (external server, excellent for RAG and cross-project views but not portable with git) or doesn't exist at all. When you start a project with OOS, your day-to-day tasks and context aren't embedded in that project.
 
 **Specific Pain Points:**
 1. **Agent Amnesia**: AI agents lose context between sessions, can't remember what was being worked on
-2. **Non-Portable Tasks**: Archon requires server, tasks don't travel with git repo
+2. **Non-Portable Tasks**: Tasks don't travel with git repo, lost when cloning/sharing
 3. **Missing Project Brain**: No embedded memory of what needs to be done, what's blocked, what's ready
 4. **Scattered Ideas**: Your vision is "all my ideas within OOS" but currently they're external or nowhere
 5. **Context Loss**: Can't pick up where you left off when switching projects
+6. **Supabase Downtime**: Archon's Supabase instance goes down if not accessed regularly
+
+**What We're NOT Replacing:**
+- **Archon RAG** - Keep using for knowledge base search, document retrieval
+- **Archon Web UI** - Keep for visual task management across all projects
+- **Archon Project Registry** - Keep as central registry of all your projects
 
 **Why It Matters:**
 You want to "start a project, start OOS within that project, and have it manage my keys, environments, and all my ways of thinking." Currently only keys and environments are managed - thinking/tasks are missing.
@@ -41,6 +47,47 @@ This project follows OOS philosophy with beads-inspired additions:
 - Optional Archon sync (best of both worlds)
 - Secrets management for task-related credentials
 - Learning system integration (patterns captured)
+- Archon keep-alive system (prevent Supabase downtime)
+
+### Three-Tier Architecture
+
+This system creates a hybrid approach, using the best of each tier:
+
+**Tier 1: Archon (Cloud) - KEEP & ENHANCE**
+- **RAG/Knowledge Base**: Search uploaded docs, crawled websites (`/archon-research`)
+- **Cross-Project View**: See tasks across all your projects
+- **Web UI**: Visual interface at archon.khamel.com
+- **Project Registry**: Central registry of all projects
+- **Keep-Alive**: Automated pings every 2 days to prevent Supabase downtime
+
+**Tier 2: Local Tasks (Git) - NEW**
+- **Project-Embedded**: Tasks live in `.oos/tasks.db` within each project
+- **Git-Syncable**: Export to `.oos/tasks/export.jsonl`, commit to git
+- **Fast & Offline**: No network latency, works without internet
+- **Agent Context**: AI agents see tasks when starting work
+
+**Tier 3: Optional Sync (Bridge) - NEW**
+- **One-Way Sync**: Local → Archon (backup and global visibility)
+- **Conflict-Free**: Local is source of truth, Archon is copy
+- **Best of Both**: Day-to-day work local, overview in Archon
+
+**Workflow Example:**
+```bash
+# Day-to-day work (local, fast)
+oos task create "Implement OAuth"
+oos task ready
+oos task complete <id>
+git push  # Tasks sync via JSONL
+
+# Knowledge search (Archon, RAG)
+/archon-research "JWT best practices"
+
+# Global view (Archon, cross-project)
+# Visit archon.khamel.com to see all projects
+
+# Optional: Sync local tasks to Archon
+oos task sync --to-archon  # v1.1 feature
+```
 
 ### Scope
 
@@ -51,7 +98,8 @@ This project follows OOS philosophy with beads-inspired additions:
 - CLI commands for task CRUD
 - Slash commands for Claude Code integration
 - Bootstrap integration (auto-creates .oos/ on project setup)
-- Migration from Archon (optional, one-way import)
+- Integration with Archon (optional one-way import, keep RAG/UI)
+- Archon keep-alive system (GitHub Actions + cron to prevent Supabase downtime)
 - Ready work detection (show unblocked tasks)
 - Basic task metadata (title, description, status, created, updated)
 
@@ -68,7 +116,8 @@ This project follows OOS philosophy with beads-inspired additions:
 ### Non-Goals
 
 **What This Is NOT:**
-- Not a replacement for Archon (can coexist)
+- Not a replacement for Archon (complementary, Archon keeps RAG/UI/cross-project views)
+- Not a replacement for Archon's knowledge base (use `/archon-research` for RAG)
 - Not a full project management system (focused on developer tasks)
 - Not a time tracker
 - Not a Jira clone
@@ -577,6 +626,132 @@ Importing tasks from .oos/tasks/export.jsonl...
 - Conflicts resolved by timestamp
 - Database consistent after import
 - Export regenerated
+
+### FR-8: Archon Keep-Alive System
+
+**Description:** Prevent Archon's Supabase instance from going down due to inactivity
+
+**Problem:**
+Supabase free tier pauses databases after periods of inactivity. Archon requires regular pings to stay alive and maintain access to RAG knowledge base and cross-project task views.
+
+**Solution:**
+Automated keep-alive system using GitHub Actions and optional local cron job.
+
+**GitHub Actions Workflow:**
+
+Create `.github/workflows/archon-keepalive.yml`:
+
+```yaml
+name: Keep Archon/Supabase Alive
+
+on:
+  schedule:
+    # Run every 2 days at 2:00 AM UTC
+    - cron: '0 2 */2 * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Archon Health Endpoint
+        run: |
+          echo "Pinging Archon at $(date)"
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://archon.khamel.com/health || echo "000")
+          if [ "$response" = "200" ]; then
+            echo "✅ Archon is alive (HTTP $response)"
+          else
+            echo "⚠️  Archon returned HTTP $response"
+          fi
+
+      - name: Ping Archon MCP Endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://100.103.45.61:8051/mcp || echo "000")
+          if [ "$response" = "200" ]; then
+            echo "✅ Archon MCP is alive (HTTP $response)"
+          else
+            echo "⚠️  Archon MCP returned HTTP $response"
+          fi
+
+      - name: Log Keep-Alive Success
+        run: echo "Keep-alive ping completed at $(date)"
+```
+
+**Local Cron Job (Optional Backup):**
+
+Create `bin/archon-keepalive.sh`:
+
+```bash
+#!/bin/bash
+# Ping Archon every 2 days to keep Supabase alive
+
+LOG_FILE="${HOME}/.oos/logs/archon-keepalive.log"
+mkdir -p "$(dirname "$LOG_FILE")"
+
+echo "$(date): Pinging Archon..." >> "$LOG_FILE"
+
+# Ping health endpoint
+response=$(curl -s -o /dev/null -w "%{http_code}" https://archon.khamel.com/health || echo "000")
+echo "$(date): Archon health response: HTTP $response" >> "$LOG_FILE"
+
+# Ping MCP endpoint
+response=$(curl -s -o /dev/null -w "%{http_code}" http://100.103.45.61:8051/mcp || echo "000")
+echo "$(date): Archon MCP response: HTTP $response" >> "$LOG_FILE"
+
+echo "$(date): Keep-alive ping completed" >> "$LOG_FILE"
+```
+
+**Setup Cron Job:**
+```bash
+# Add to crontab (run every 2 days at 2am)
+crontab -e
+
+# Add line:
+0 2 */2 * * /path/to/oos/bin/archon-keepalive.sh
+```
+
+**Process:**
+1. GitHub Actions runs every 2 days (primary)
+2. Local cron job runs every 2 days (backup, optional)
+3. Both ping Archon health and MCP endpoints
+4. Keeps Supabase active and accessible
+5. Logs pings for monitoring
+
+**Output (GitHub Actions):**
+```
+Pinging Archon at Mon Oct 21 02:00:00 UTC 2024
+✅ Archon is alive (HTTP 200)
+✅ Archon MCP is alive (HTTP 200)
+Keep-alive ping completed at Mon Oct 21 02:00:01 UTC 2024
+```
+
+**Output (Local Cron):**
+```bash
+$ cat ~/.oos/logs/archon-keepalive.log
+Mon Oct 21 02:00:00 PDT 2024: Pinging Archon...
+Mon Oct 21 02:00:00 PDT 2024: Archon health response: HTTP 200
+Mon Oct 21 02:00:01 PDT 2024: Archon MCP response: HTTP 200
+Mon Oct 21 02:00:01 PDT 2024: Keep-alive ping completed
+```
+
+**Edge Cases:**
+- Archon down → Log warning, continue (don't fail build)
+- Network timeout → Log warning, retry next scheduled time
+- Both health and MCP down → Alert in logs but don't alert user
+- Manual trigger → Allow via GitHub Actions `workflow_dispatch`
+
+**Success Criteria:**
+- GitHub Actions workflow runs every 2 days
+- Archon responds with HTTP 200
+- Supabase stays active (no downtime)
+- Logs show successful pings
+- Can manually trigger workflow if needed
+
+**Integration with OOS:**
+- Add workflow file during `oos bootstrap` if GitHub repo detected
+- Add script to `bin/archon-keepalive.sh`
+- Document in README
+- Optional: Alert user if Archon hasn't been pinged in 3+ days
 
 ---
 
@@ -1307,18 +1482,24 @@ export PATH="$PATH:$(pwd)/bin"
 - [ ] Export file created at `.oos/tasks/export.jsonl`
 - [ ] `.gitignore` includes `.oos/tasks.db`
 
-### Migration from Archon (Optional)
+### Integration with Archon (Hybrid Approach)
 
-**For Users with Existing Archon Tasks:**
+**Archon Remains Active for:**
+- **RAG/Knowledge Base**: Continue using `/archon-research` for document search
+- **Cross-Project Views**: View all project tasks in Archon web UI
+- **Project Registry**: Central catalog of all your projects
+
+**Optional: Import Existing Archon Tasks to Local**
 
 ```bash
+# One-time import of Archon tasks to local database (optional)
 # Export Archon tasks to JSONL (requires Archon MCP)
 # In Claude Code:
 # mcp__archon__list_tasks(project_id="<id>")
 # Save output to archon_tasks.json
 
 # Convert Archon format to OOS task format
-oos task migrate-archon archon_tasks.json
+oos task import-archon archon_tasks.json
 
 # Or manually import if already in JSONL format
 oos task import archon_tasks.jsonl
@@ -1327,15 +1508,23 @@ oos task import archon_tasks.jsonl
 oos task list
 ```
 
-**Migration Notes:**
-- One-time migration (not continuous sync)
-- Archon fields map to OOS metadata
+**Integration Notes:**
+- Archon keeps RAG and cross-project views (NOT replaced)
+- Local tasks for day-to-day work (fast, offline, git-synced)
+- Optional one-time import from Archon to local
+- Future: Optional one-way sync local → Archon (v1.1)
 - Archon status → OOS status mapping:
   - `todo` → `todo`
   - `doing` → `doing`
   - `done` → `done`
   - `review` → `done` (OOS doesn't have review status)
   - `blocked` → `blocked`
+
+**Archon Keep-Alive (Automatic):**
+- GitHub Actions pings Archon every 2 days (see FR-8)
+- Prevents Supabase from pausing
+- Ensures RAG and cross-project views always accessible
+- No manual intervention required
 
 ---
 
