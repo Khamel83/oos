@@ -8,7 +8,7 @@ model: claude-3-5-sonnet-20241022
 
 🔧 Complete development environment management
 
-Consolidates: /dev-setup, /startup-check, /modules, /reload-commands
+**Setup, validate, and manage your development environment**
 
 ```bash
 ./bin/claude-dev.sh "$ARGUMENTS"

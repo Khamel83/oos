@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-10-14T10:46:13-07:00",
+  "scan_type": "comprehensive",
+  "fix_mode": false,
+  "results": {
+    "secret_issues": 1,"permission_issues": 0,"dependency_issues": 0,"network_issues": 0
+  },
+  "total_issues": 1,
+  "recommendations": [
+    "Regularly rotate API keys and secrets",
+    "Use environment encryption for production",
+    "Monitor file permission changes",
+    "Keep dependencies updated",
+    "Review network service exposure"
+  ]
+}

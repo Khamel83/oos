@@ -23,6 +23,24 @@ Key rules:
 4. **Test-Driven**: If you can't test it automatically, reconsider the approach
 5. **User-Centric**: Ask "will users understand this?" before adding features
 
+## 👥 Dual-User Documentation Philosophy
+
+**OOS serves TWO distinct users:**
+- **Humans**: Need simplicity, quick references, and forgetful-friendly guides
+- **AI Claude**: Needs detailed technical documentation for precise implementation
+
+### Documentation Structure:
+- **GUIDES/**: Human-friendly documentation (simple, copy-paste, emergency-first)
+- **docs/**: AI-friendly technical documentation (detailed, comprehensive, complete)
+- **AI_REFERENCE.md**: Specific AI Claude documentation (see below)
+
+### For All Features:
+1. **Create simple human guide** in GUIDES/ folder
+2. **Create detailed AI documentation** in docs/ folder
+3. **Update AI_REFERENCE.md** with implementation details
+4. **Update main README.md** with user paths
+5. **Claude reads AI docs, humans read simple guides**
+
 ## 🧪 Recursive User-Acceptance Testing (RUAT)
 
 **MANDATORY: Every feature must pass real-world user scenarios before marking tasks "done".**
@@ -131,3 +149,39 @@ Run `/migrate-commands` or `./bin/migrate-commands.sh` for complete migration ma
 - Logical grouping by function
 - Consistent interface
 - Better discoverability
+
+## 📋 Task System Integration
+
+**OOS includes a complete Task Memory System for project-embedded task management.**
+
+### For Claude (AI):
+- **READ [AI_REFERENCE.md](AI_REFERENCE.md)** - Complete AI technical reference
+- **READ [docs/TASK_SYSTEM_GUIDE.md](docs/TASK_SYSTEM_GUIDE.md)** - Complete technical reference
+- **READ [docs/JSONL_EXPORT_IMPORT_GUIDE.md](docs/JSONL_EXPORT_IMPORT_GUIDE.md)** - Export/import implementation
+- **READ [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md)** - CLI command reference
+- **READ [src/oos_task_system/__init__.py](src/oos_task_system/__init__.py)** - API reference
+
+### For Humans (when they ask):
+- **Start with [GUIDES/5MinuteQuickStart.md](GUIDES/5MinuteQuickStart.md)** - Quick setup
+- **Use [GUIDES/EmergencyRefresher.md](GUIDES/EmergencyRefresher.md)** - When they forget
+- **Reference [GUIDES/QuickReference.md](GUIDES/QuickReference.md)** - Daily commands
+
+### Key Task System Features:
+- **SQLite database** in `.oos/tasks/tasks.db` (gitignored)
+- **JSONL export** in `.oos/tasks/export.jsonl` (git-syncable)
+- **16 CLI commands** for complete task management
+- **Dependency tracking** with ready/blocked identification
+- **Priority ordering** with visual indicators
+- **Export/import** with conflict resolution
+
+### Claude's Task System Responsibilities:
+1. **Use detailed docs** for implementation decisions
+2. **Read API reference** for code patterns
+3. **Validate functionality** with test scenarios
+4. **Guide humans** to simple guides when needed
+
+### Integration Points:
+- **Bootstrap**: Tasks initialized with `oos bootstrap project --enable-tasks`
+- **CLI**: Access via `/task` commands and `python -m src.oos_task_system.cli`
+- **Git**: JSONL format for version control integration
+- **Archon**: Task insights and knowledge integration

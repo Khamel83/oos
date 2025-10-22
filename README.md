@@ -7,60 +7,95 @@ OOS transforms how you approach any coding work, project, or idea by providing a
 - **Archon Integration** - Systematic project management
 - **Agentic Thinking** - Future-ready for AI-powered workflows
 
-## Install
+---
 
-Run this in **any project directory** (new or existing):
+## 🆘 New to OOS or Forgot How It Works?
+
+**[📖 Start Here → Documentation Hub](DOCUMENTATION_HUB.md)**
+
+**Quick links for forgetful humans:**
+- **[What Even Is OOS?](GUIDES/WHAT_IS_OOS.md)** - The simple explanation
+- **[5-Minute Quick Start](GUIDES/QUICK_START.md)** - Copy-paste setup
+- **[Emergency Refresher](GUIDES/EMERGENCY_REFRESHER.md)** - "I haven't used this in weeks"
+- **[Quick Reference](QUICK_REFERENCE.md)** - One-page cheat sheet
+
+**Quick links for AI Claude:**
+- **[AI Reference](AI_REFERENCE.md)** - Technical implementation details
+
+---
+
+## Install - Universal Solution
+
+**Works for both NEW and EXISTING projects** - one command fits all:
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/Khamel83/oos/master/install.sh)
+# NEW PROJECT: Create and setup in one step
+cd ~/Documents  # or anywhere you want projects
+oos create my-new-project
+
+# EXISTING PROJECT: Add OOS to any current project
+cd ~/path/to/existing/project
+curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | bash
 ```
 
-**Then restart Claude Code** to activate all slash commands.
+**That's it. OOS is now ready.** 🎯
 
-**After restarting, run:**
+**Next steps (after restarting Claude Code):**
 ```bash
 /dev check             # Validate and refresh commands automatically
-/workflow complete plan # See the systematic A→B→C→D workflow
+/workflow complete     # See the systematic A→B→C→D workflow
 ```
 
-## Use - 10 Consolidated Commands
+### ✅ Update Compatibility
+**OOS updates work seamlessly from any older version:**
+```bash
+# From any OOS installation, run:
+/project update        # Auto-updates while preserving your work
+```
+
+**Guaranteed compatibility** - updates never break existing projects or configurations.
+
+## Use - 11 Perfect Commands
+
+**Your complete systematic development environment:**
 
 ```bash
-# Core Development
-/dev setup             # Start systematic development session
-/dev check             # Validate development environment
-/test scenarios        # Recursive User-Acceptance Testing
+# 🚀 Development Environment
+/dev setup              # Start systematic development session
+/dev check              # Validate development environment
 
-# Workflows & Quality
-/workflow complete     # Complete idea-to-completion workflow A→B→C→D
-/workflow idea         # Alias for complete workflow
-/fix auto              # Automatically fix code issues
-/fix optimize          # Optimize for performance/tokens
+# 🧪 Testing & Quality
+/test scenarios         # Run user-acceptance testing
+/fix auto               # Automatically fix code issues
+/fix optimize           # Optimize for performance/tokens
 
-# Infrastructure & Security
-/project provision     # AI-powered infrastructure provisioning
-/project update        # Update OOS system from GitHub
-/check security        # Run comprehensive security audit
-/op status             # 1Password authentication status
+# 🔄 Workflows & AI
+/workflow complete      # Complete idea-to-completion workflow
+/think clarify          # Clarify vague requirements and solve problems
 
-# Cognitive & Task Management
-/think clarify         # Clarify vague requirements
-/archon research       # Search knowledge base
-/task start            # Start working on Archon tasks
+# 🏗️ Projects & Infrastructure
+/project create         # Create new systematic projects
+/project update         # Update OOS from GitHub
 
-# Legacy commands still work (see /migrate-commands for mapping)
-/validate              # Run comprehensive OOS validation
-/screenshot            # Take screenshot and analyze with Claude
-/help-me               # Smart context engineering help
-/pre-commit            # Run systematic checks before committing
-/smart-commit          # Generate intelligent commit messages
+# 🔐 Security & Authentication
+/check security         # Run comprehensive security audit
+/op status              # 1Password authentication
+
+# 📚 Knowledge & Tasks
+/archon research        # Search your knowledge base
+/task start             # Start working on tasks
+
+# ❓ Help & Discovery
+/help                   # Get help and discover all commands
 ```
+
+**That's it! 11 commands for everything you need.**
 
 ## What You Get
 
 **Your Systematic Brain Environment:**
 - **Consistent Mental Models** - Same thinking approach for every project
-- **10 consolidated slash commands** - Complete systematic workflow integration in Claude Code
+- **11 perfect slash commands** - Complete systematic workflow integration in Claude Code
 - **Auto-Refresh System** - Commands stay current and validate themselves automatically
 - **Project Management Layer** - Archon integration for structured work tracking
 - **Quality Assurance** - Automated validation that supports your thinking
@@ -186,13 +221,30 @@ Task tracking and project coordination:
 
 Both tools are automatically detected and configured when you run `/start-coding`.
 
-## Documentation
+## 📚 Documentation
 
-- [Quick Start](QUICK_START.md) - 2 minute setup for your systematic environment
-- [User Guide](USER_READY_SETUP.md) - What works right now
-- [System Vision](OOS_2.0_VISION.md) - Brain extension capabilities
-- [Personal Ops](docs/PERSONAL_OPS_VISION.md) - Systematic thinking workflows
-- [Development Ethos](HUMAN_AI_DEVELOPMENT_ETHOS.md) - Human+AI partnership
+**🚀 NEW & IMPROVED - Start Here:**
+
+**[📖 Documentation Hub](DOCUMENTATION_HUB.md)** - **START HERE** - Your complete guide to all documentation
+
+**👋 For Beginners & Forgetful Users:**
+- [**What Even Is OOS?**](GUIDES/WHAT_IS_OOS.md) - Simple explanation
+- [**5-Minute Quick Start**](GUIDES/QUICK_START.md) - Copy-paste setup
+- [**Emergency Refresher**](GUIDES/EMERGENCY_REFRESHER.md) - "I forgot everything"
+- [**Quick Reference**](QUICK_REFERENCE.md) - One-page cheat sheet
+
+**📋 Task System Guides:**
+- [**Task System Basics**](GUIDES/TASK_SYSTEM_SIMPLE.md) - Just the essentials
+- [**First Project Walkthrough**](GUIDES/FIRST_PROJECT.md) - Learn by doing
+- [**Complete Task System**](GUIDES/TASK_SYSTEM_COMPLETE.md) - Become an expert
+- [**Simple Troubleshooting**](GUIDES/TROUBLESHOOTING_SIMPLE.md) - When stuff breaks
+
+**🛠️ Advanced Documentation:**
+- [Complete Task System Guide](docs/TASK_SYSTEM_GUIDE.md) - Technical details
+- [CLI Reference](docs/CLI_REFERENCE.md) - All commands
+- [JSONL Import/Export](docs/JSONL_EXPORT_IMPORT_GUIDE.md) - Data management
+- [Advanced Usage](docs/ADVANCED_USAGE_GUIDE.md) - Power user features
+- [System Overview](docs/SYSTEM_OVERVIEW.md) - Architecture details
 
 ## Why This Exists
 

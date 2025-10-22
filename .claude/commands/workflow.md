@@ -8,7 +8,7 @@ model: claude-3-5-sonnet-20241022
 
 🔄 Complete structured workflows
 
-Consolidates: /agentic-workflow, /complete-workflow, /idea-to-done
+**Systematic development workflows from idea to completion**
 
 ```bash
 ./bin/claude-workflow.sh "$ARGUMENTS"

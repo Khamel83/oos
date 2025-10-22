@@ -1,0 +1,37 @@
+# User Scenarios for: install
+# ================================
+# Real-world user workflows for OOS installation
+
+# Fresh installation in new project scenario
+GIVEN user wants to start a new project with OOS
+WHEN user creates new directory and runs installation command
+THEN installation completes without errors
+AND Claude commands are installed in .claude/commands/
+AND success message includes restart instructions
+AND clear next steps are provided
+AND user can immediately use OOS features
+
+# Adding OOS to existing project scenario
+GIVEN user has an existing project without OOS
+WHEN user runs installation in project directory
+THEN no conflicts occur with existing files
+AND .claude/ directory is created with commands
+AND existing project structure is preserved
+AND integration message confirms OOS was added
+AND user can continue existing work seamlessly
+
+# Installation error handling scenario
+GIVEN user encounters network or permission issues during installation
+WHEN installation fails or shows errors
+THEN clear error message indicates the specific problem
+AND helpful troubleshooting steps are provided
+AND no partial broken installation is left behind
+AND user can retry installation after fixing issues
+
+# Verification after installation scenario
+GIVEN user has completed OOS installation
+WHEN user restarts Claude Code and runs validation
+THEN all slash commands are available and working
+AND environment validation passes completely
+AND system shows ready-to-use confirmation
+AND user can immediately start productive work

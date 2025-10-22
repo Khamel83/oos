@@ -1,0 +1,54 @@
+# OOS New Project Creation User Scenarios
+
+## Scenario 1: New Project with oos create Command
+
+**GIVEN** user wants to create a new project with OOS
+**WHEN** user runs oos create command
+**THEN** system should create project with full OOS integration
+
+Steps:
+1. User navigates to desired location: cd ~/Documents
+2. User runs: oos create my-awesome-project
+3. EXPECT: Project directory created successfully
+4. EXPECT: OOS automatically installed and configured
+5. EXPECT: Success message with next steps
+6. EXPECT: User can immediately start using slash commands
+
+## Scenario 2: New Project Creation with Different Templates
+
+**GIVEN** user wants to create a project with specific template
+**WHEN** user runs oos create with template option
+**THEN** system should create project with appropriate template
+
+Steps:
+1. User runs: oos create my-python-project --template python
+2. EXPECT: Python project structure created
+3. EXPECT: OOS integrated with Python-specific tools
+4. EXPECT: Development environment ready
+5. EXPECT: Clear instructions for Python development workflow
+
+## Scenario 3: Project Creation Error Handling
+
+**GIVEN** user encounters issues during project creation
+**WHEN** project creation fails or has conflicts
+**THEN** system should provide helpful error messages
+
+Steps:
+1. User tries to create project in existing directory
+2. EXPECT: Clear error about directory exists
+3. EXPECT: Suggestion to use different name or location
+4. EXPECT: No partial broken project left behind
+
+## Scenario 4: Verify New Project Functionality
+
+**GIVEN** user has created new project with OOS
+**WHEN** user navigates to project and tests features
+**THEN** all OOS features should work immediately
+
+Steps:
+1. User navigates to new project: cd my-awesome-project
+2. User runs: /workflow complete
+3. EXPECT: Workflow system initializes
+4. EXPECT: Task system available
+5. EXPECT: All slash commands working
+6. EXPECT: Project ready for development

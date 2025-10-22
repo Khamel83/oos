@@ -8,7 +8,7 @@ model: claude-3-5-sonnet-20241022
 
 🏗️ Project creation and management
 
-Consolidates: /create-project, /provision, /update-oos, /oos-refresh
+**Create projects, provision infrastructure, and manage OOS updates**
 
 ```bash
 ./bin/claude-project.sh "$ARGUMENTS"
