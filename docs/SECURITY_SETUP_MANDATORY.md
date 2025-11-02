@@ -80,7 +80,7 @@ grep -o ".{10}$" .env | head -1
 OPENROUTER_API_KEY="sk-or-v1-FAKE0000000000000000000000000000000000000000000000000000"
 
 # ❌ WRONG - Never use real keys
-OPENROUTER_API_KEY="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"
+# OPENROUTER_API_KEY="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"
 
 # ✅ CORRECT - Use environment reference
 export OPENROUTER_API_KEY  # Loaded from .env

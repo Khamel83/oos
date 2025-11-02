@@ -120,7 +120,7 @@ is_safe_key() {
     done
 
     # Additional heuristics for safe keys
-    if [[ "$key" =~ (example|placeholder|demo|test|fake|dummy|YOUR_KEY|REPLACE) ]]; then
+    if [[ "$key" =~ (example|placeholder|demo|test|fake|dummy|YOUR_KEY|REPLACE|FAKE|EXAMPLE|DEMO) ]]; then
         return 0  # Safe
     fi
 
@@ -306,7 +306,7 @@ Dangerous patterns (blocked):
 Examples:
   ✅ OPENAI_API_KEY="your_api_key_here"           # Safe placeholder
   ✅ API_KEY="sk-test-example"                    # Obviously fake
-  ❌ OPENAI_API_KEY="sk-proj-abc123def456..."     # Real OpenAI key (example)
+  ❌ OPENAI_API_KEY="sk-proj-abc123def456..."     # Real OpenAI key pattern (DON'T COMMIT)
   ❌ GITHUB_TOKEN="ghp_1234567890abcdef..."       # Real GitHub token
 
 Security Philosophy:
