@@ -30,6 +30,28 @@
 - Updated README.md with simple secrets management section
 - GitHub project template for easy future project setup
 
+### 🤖 AI SDK Integration
+- **Multi-provider AI abstraction** - OpenRouter, OpenAI, Anthropic support
+- **Automatic fallback system** - If one provider fails, tries others automatically
+- **Cost estimation and tracking** - Monitor usage across providers
+- **Health monitoring** - Real-time provider status checking
+- **Model presets** - Fast, balanced, and quality configurations
+- **Supported models** - Including free tier options and premium models
+
+### 🏗️ RelayQ Architecture
+- **Distributed computing system** - MacMini, RPi4, and cloud node support
+- **Intelligent node selection** - Auto-selects best node based on capabilities
+- **Health monitoring** - Real-time node status and load tracking
+- **Distributed task execution** - Run tasks across multiple nodes
+- **SSH management** - Secure remote execution with key-based auth
+- **Load balancing** - Distributes work based on node capabilities and load
+
+### 🔄 Full Stack Integration
+- **Complete workflow** - AI + RelayQ + Archon working together
+- **Command-line interface** - `./bin/oos-full-stack` for easy access
+- **Intelligent routing** - Automatically selects best resources for tasks
+- **Real-time synchronization** - Results sync to Archon automatically
+
 ### 🔧 Bug Fixes
 - **Fixed deprecation warnings** - Removed deprecated model references from slash commands
 - **Clean command execution** - All `/fix` commands now work without warnings

@@ -21,8 +21,9 @@ OOS transforms how you approach any coding work, project, or idea by providing a
 
 **🚀 NEW: Full Stack AI Integration:**
 - **[Current Status](CURRENT_STATUS.md)** - What's working now
-- **[Next Steps](NEXT_STEPS.md)** - Future development roadmap
 - **[Full Stack Guide](docs/FULL_STACK_INTEGRATION.md)** - AI + RelayQ + Archon integration
+- **[AI SDK](src/ai_provider.py)** - Multi-provider AI abstraction layer
+- **[RelayQ Architecture](src/relayq_architecture.py)** - Distributed computing system
 
 **🔐 NEW: Simple Secrets Management:**
 - **[Final Simple Solution](docs/FINAL_SIMPLE_SOLUTION.md)** - Complete guide to the working security system
@@ -100,11 +101,20 @@ curl -fsSL https://raw.githubusercontent.com/Khamel83/oos/master/install.sh | ba
 
 **That's it! 11 commands for everything you need.**
 
+**🚀 Bonus: Full Stack AI Commands**
+```bash
+./bin/oos-full-stack "Your AI question here"                    # AI analysis
+./bin/oos-full-stack "Analyze system" --command "df -h"         # AI + command execution
+./bin/oos-full-stack "test" --test                             # Full integration demo
+```
+
 ## What You Get
 
 **Your Systematic Brain Environment:**
 - **Consistent Mental Models** - Same thinking approach for every project
 - **11 perfect slash commands** - Complete systematic workflow integration in Claude Code
+- **AI SDK Integration** - Multi-provider AI with automatic fallback and cost tracking
+- **RelayQ Architecture** - Distributed computing across MacMini, RPi4, and cloud nodes
 - **Auto-Refresh System** - Commands stay current and validate themselves automatically
 - **Project Management Layer** - Archon integration for structured work tracking
 - **Quality Assurance** - Automated validation that supports your thinking
@@ -254,6 +264,79 @@ Long-term authentication without repeated signins:
 - ✅ Works across all OOS installations
 - ✅ Integrated with `/start-coding`
 
+### 🤖 AI SDK Integration (NEW!)
+**Multi-provider AI abstraction layer with fallback and load balancing:**
+
+```bash
+# Test AI integration
+python3 src/ai_provider.py
+
+# Use in your code
+from src.ai_provider import ask_ai, get_ai_manager
+
+response = await ask_ai("Your question here")
+print(response)
+```
+
+**Features:**
+- ✅ **Multiple Providers**: OpenRouter, OpenAI, Anthropic support
+- ✅ **Automatic Fallback**: If one provider fails, tries others
+- ✅ **Cost Estimation**: Track usage and costs across providers
+- ✅ **Health Monitoring**: Real-time provider status checking
+- ✅ **Model Presets**: Fast, balanced, and quality configurations
+
+**Supported Models:**
+- `nvidia/nemotron-nano-12b-v2-vl:free` - Free tier
+- `amazon/nova-premier-v1` - Balanced performance
+- `perplexity/sonar-pro-search` - Quality with search
+
+### 🏗️ RelayQ Architecture (NEW!)
+**Distributed computing system for MacMini, RPi4, and cloud nodes:**
+
+```bash
+# Test RelayQ functionality
+python3 src/relayq_architecture.py
+
+# Deploy tasks to nodes
+from src.relayq_architecture import get_relayq_manager, DeploymentTask
+
+manager = get_relayq_manager()
+task = DeploymentTask(
+    task_id="ai-training",
+    command="python train_model.py",
+    target_nodes=["macmini-server"],
+    requirements=["ai-training", "compute"]
+)
+result = await manager.deploy_task(task)
+```
+
+**Node Types:**
+- **MacMini**: Heavy compute, storage, AI training
+- **RPi4**: Edge processing, IoT, sensor data
+- **OCIVM**: Development, testing, orchestration
+
+**Features:**
+- ✅ **Auto Node Selection**: Chooses best node based on capabilities
+- ✅ **Health Monitoring**: Real-time node status tracking
+- ✅ **Distributed Tasks**: Run tasks across multiple nodes
+- ✅ **SSH Management**: Secure remote execution
+- ✅ **Load Balancing**: Distributes work based on node load
+
+### 🔄 Full Stack Integration
+**Complete AI + RelayQ + Archon workflow:**
+
+```bash
+# Run the full stack demo
+./bin/oos-full-stack "Analyze system performance" --command "htop"
+./bin/oos-full-stack "test" --test
+```
+
+**What It Does:**
+1. **AI Analysis**: Processes your request with multiple AI providers
+2. **Command Execution**: Runs system commands via RelayQ nodes
+3. **Archon Sync**: Records results and updates project status
+4. **Intelligent Routing**: Automatically selects best resources
+
 ### Archon Project Management
 Task tracking and project coordination:
 
@@ -267,7 +350,7 @@ Task tracking and project coordination:
 - ✅ Knowledge base search
 - ✅ Integrated with `/start-coding`
 
-Both tools are automatically detected and configured when you run `/start-coding`.
+All tools are automatically detected and configured when you run `/start-coding`.
 
 ## 📚 Documentation
 
