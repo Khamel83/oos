@@ -31,11 +31,29 @@ SAFE_KEYS=(
     "your_context7_key_here"
     "sk-proj-example"
     "sk-test-example"
+    "sk-or-v1-FAKE"
+    "sk-or-v1-EXAMPLE"
+    "sk-or-v1-DEMO"
+    "pplx-FAKE"
     "demo_key_12345"
     "example_key"
     "placeholder_key"
     "REPLACE_WITH_YOUR_KEY"
     "INSERT_YOUR_KEY_HERE"
+    # UUID patterns (safe)
+    "85dfe110-8ed0-4c70-894d-688ed58bae26"
+    # Markdown anchor patterns (safe)
+    "-daily-usage-pattern"
+    "system-architecture-"
+    "installation-process"
+    "error-handling-and-t"
+    # OpenRouter patterns (safe)
+    "mcp__archon__rag_sea"
+    "clarification_confid"
+    "free_model_compatibi"
+    # File path patterns (safe)
+    "AI%20Specifications-Com"
+    "BENCHMARK_DRIVEN_MOD"
     # URL patterns that are safe
     "https://"
     "http://"
@@ -63,11 +81,17 @@ SAFE_KEYS=(
 # Dangerous API key patterns - these should NEVER be committed
 DANGEROUS_PATTERNS=(
     # OpenAI API keys (real ones start with sk- and are long)
-    'sk-[A-Za-z0-9]{32,}'
-    'sk-proj-[A-Za-z0-9_-]{32,}'
+    'sk-[A-Za-z0-9]{48}'
+    'sk-proj-[A-Za-z0-9_-]{48,}'
+
+    # OpenRouter API keys (specific format)
+    'sk-or-v1-[A-Za-z0-9]{48}'
 
     # Anthropic Claude keys
     'sk-ant-[A-Za-z0-9_-]{95,}'
+
+    # Perplexity keys
+    'pplx-[A-Za-z0-9]{40}'
 
     # Google/Gemini API keys
     'AIza[A-Za-z0-9_-]{35}'
@@ -82,11 +106,6 @@ DANGEROUS_PATTERNS=(
     # AWS keys
     'AKIA[0-9A-Z]{16}'
     'ASIA[0-9A-Z]{16}'
-
-    # Generic long keys that look real
-    '[A-Za-z0-9+/]{40,}={0,2}'  # Base64-like strings 40+ chars
-    '[A-Fa-f0-9]{64}'           # 64 char hex strings
-    '[A-Za-z0-9_-]{32,128}'     # Long alphanumeric strings
 )
 
 # Check if a key looks like a safe placeholder

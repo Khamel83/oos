@@ -88,8 +88,8 @@ def select_model(task_type, importance_level):
 
 ### **Environment Setup:**
 ```bash
-# Already saved in .env
-OPENROUTER_PROJECT_KEY="<YOUR_OPENROUTER_API_KEY_HERE>"
+# Load from .env file (never hardcode keys!)
+export OPENROUTER_API_KEY  # Loaded from .env
 ```
 
 ### **Model Config:**
