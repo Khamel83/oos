@@ -6,6 +6,23 @@
 .ssh/
 demo_results_*.json
 
+# API keys and credentials - NEVER commit these
+*api_key*
+*_key.txt
+*_token.txt
+*credentials*
+*.key
+*.pem
+*.p12
+*.pfx
+working_ai_credentials.json
+openrouter_credentials.json
+perplexity_credentials.json
+
+# Test files that might contain keys
+test_*_access.py
+*_key_test.py
+
 # local
 .env.export
 .DS_Store

@@ -89,7 +89,7 @@ def select_model(task_type, importance_level):
 ### **Environment Setup:**
 ```bash
 # Already saved in .env
-OPENROUTER_PROJECT_KEY="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"
+OPENROUTER_PROJECT_KEY="<YOUR_OPENROUTER_API_KEY_HERE>"
 ```
 
 ### **Model Config:**
