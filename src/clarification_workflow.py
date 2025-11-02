@@ -7,14 +7,13 @@ detailed planning → execution confirmation → automated documentation
 """
 
 import json
-import asyncio
-from typing import Dict, List, Any, Optional, Tuple, Union
-from dataclasses import dataclass, asdict
-from datetime import datetime
-from pathlib import Path
 import logging
-from enum import Enum
 import re
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any
 
 
 class WorkflowStage(Enum):
@@ -42,10 +41,10 @@ class CleanedInput:
     original_text: str
     cleaned_text: str
     extracted_intent: str
-    key_entities: List[str]
+    key_entities: list[str]
     confidence: float
-    ambiguities: List[str]
-    context_hints: Dict[str, Any]
+    ambiguities: list[str]
+    context_hints: dict[str, Any]
 
 
 @dataclass
@@ -54,10 +53,10 @@ class ClarificationQuestion:
     id: str
     question_type: QuestionType
     text: str
-    options: Optional[List[str]] = None
-    default_answer: Optional[str] = None
+    options: list[str] | None = None
+    default_answer: str | None = None
     importance: float = 1.0
-    context: Dict[str, Any] = None
+    context: dict[str, Any] = None
 
 
 @dataclass
@@ -66,7 +65,7 @@ class ClarificationResponse:
     question_id: str
     answer: str
     confidence: float
-    additional_context: Optional[str] = None
+    additional_context: str | None = None
 
 
 @dataclass
@@ -74,13 +73,13 @@ class DetailedPlan:
     """Detailed execution plan"""
     plan_id: str
     summary: str
-    steps: List[Dict[str, Any]]
+    steps: list[dict[str, Any]]
     estimated_duration: int  # minutes
-    required_tools: List[str]
-    prerequisites: List[str]
-    success_criteria: List[str]
-    risks: List[str]
-    fallback_options: List[str]
+    required_tools: list[str]
+    prerequisites: list[str]
+    success_criteria: list[str]
+    risks: list[str]
+    fallback_options: list[str]
 
 
 @dataclass
@@ -91,12 +90,12 @@ class WorkflowSession:
     created_at: datetime
     updated_at: datetime
     original_input: str
-    cleaned_input: Optional[CleanedInput] = None
-    questions: List[ClarificationQuestion] = None
-    responses: List[ClarificationResponse] = None
-    plan: Optional[DetailedPlan] = None
+    cleaned_input: CleanedInput | None = None
+    questions: list[ClarificationQuestion] = None
+    responses: list[ClarificationResponse] = None
+    plan: DetailedPlan | None = None
     execution_approved: bool = False
-    execution_results: Optional[Dict[str, Any]] = None
+    execution_results: dict[str, Any] | None = None
     documentation_generated: bool = False
     completed: bool = False
 
@@ -108,7 +107,7 @@ class InputProcessor:
         self.logger = logging.getLogger(__name__)
         self.intent_patterns = self._load_intent_patterns()
 
-    def _load_intent_patterns(self) -> Dict[str, List[str]]:
+    def _load_intent_patterns(self) -> dict[str, list[str]]:
         """Load intent recognition patterns"""
         return {
             "analysis": [
@@ -199,7 +198,7 @@ class InputProcessor:
 
         return max(intent_scores, key=intent_scores.get)
 
-    def _extract_entities(self, text: str) -> List[str]:
+    def _extract_entities(self, text: str) -> list[str]:
         """Extract key entities from text"""
         entities = []
 
@@ -222,7 +221,7 @@ class InputProcessor:
 
         return list(set(entities))
 
-    def _identify_ambiguities(self, text: str) -> List[str]:
+    def _identify_ambiguities(self, text: str) -> list[str]:
         """Identify ambiguous parts of the input"""
         ambiguities = []
 
@@ -247,7 +246,7 @@ class InputProcessor:
 
         return ambiguities
 
-    def _calculate_confidence(self, text: str, intent: str, ambiguities: List[str]) -> float:
+    def _calculate_confidence(self, text: str, intent: str, ambiguities: list[str]) -> float:
         """Calculate confidence in understanding the input"""
         base_confidence = 0.5
 
@@ -268,7 +267,7 @@ class InputProcessor:
 
         return max(0.1, min(1.0, base_confidence))
 
-    def _extract_context_hints(self, text: str) -> Dict[str, Any]:
+    def _extract_context_hints(self, text: str) -> dict[str, Any]:
         """Extract context hints from input"""
         hints = {}
 
@@ -309,7 +308,7 @@ class ClarificationEngine:
         self.question_templates = self._load_question_templates()
         self.meta_clarification_enabled = True
 
-    def _load_question_templates(self) -> Dict[str, List[str]]:
+    def _load_question_templates(self) -> dict[str, list[str]]:
         """Load question templates for different scenarios"""
         return {
             "intent_unclear": [
@@ -334,7 +333,7 @@ class ClarificationEngine:
             ]
         }
 
-    async def generate_questions(self, cleaned_input: CleanedInput) -> List[ClarificationQuestion]:
+    async def generate_questions(self, cleaned_input: CleanedInput) -> list[ClarificationQuestion]:
         """Generate clarification questions based on cleaned input"""
         questions = []
 
@@ -353,7 +352,7 @@ class ClarificationEngine:
         questions.sort(key=lambda q: q.importance, reverse=True)
         return questions[:3]
 
-    async def generate_meta_clarification_prompt(self, questions: List[ClarificationQuestion], context: Dict[str, Any]) -> str:
+    async def generate_meta_clarification_prompt(self, questions: list[ClarificationQuestion], context: dict[str, Any]) -> str:
         """Generate prompt for external AI to help user craft detailed responses back to Claude"""
 
         prompt = f"""I'm working with Claude Code and need help crafting a detailed, structured response to these clarification questions.
@@ -367,7 +366,7 @@ class ClarificationEngine:
             prompt += f"\n{i}. {question.text}"
             if question.options:
                 prompt += "\n   Options to choose from:"
-                for j, option in enumerate(question.options, 1):
+                for _j, option in enumerate(question.options, 1):
                     prompt += f"\n   • {option}"
             prompt += "\n"
 
@@ -387,7 +386,7 @@ Please provide a well-structured response that will help Claude understand exact
 
         return prompt
 
-    def parse_meta_clarification_response(self, ai_response: str, questions: List[ClarificationQuestion]) -> List[ClarificationResponse]:
+    def parse_meta_clarification_response(self, ai_response: str, questions: list[ClarificationQuestion]) -> list[ClarificationResponse]:
         """Parse AI response into structured clarification responses"""
         responses = []
 
@@ -433,7 +432,7 @@ Please provide a well-structured response that will help Claude understand exact
 
         return responses
 
-    def _generate_confirmation_questions(self, cleaned_input: CleanedInput) -> List[ClarificationQuestion]:
+    def _generate_confirmation_questions(self, cleaned_input: CleanedInput) -> list[ClarificationQuestion]:
         """Generate simple confirmation questions for high-confidence inputs"""
         return [
             ClarificationQuestion(
@@ -445,7 +444,7 @@ Please provide a well-structured response that will help Claude understand exact
             )
         ]
 
-    def _generate_intent_questions(self, cleaned_input: CleanedInput) -> List[ClarificationQuestion]:
+    def _generate_intent_questions(self, cleaned_input: CleanedInput) -> list[ClarificationQuestion]:
         """Generate intent clarification questions"""
         questions = []
 
@@ -467,7 +466,7 @@ Please provide a well-structured response that will help Claude understand exact
 
         return questions
 
-    def _generate_context_questions(self, cleaned_input: CleanedInput) -> List[ClarificationQuestion]:
+    def _generate_context_questions(self, cleaned_input: CleanedInput) -> list[ClarificationQuestion]:
         """Generate context-related questions"""
         questions = []
 
@@ -482,7 +481,7 @@ Please provide a well-structured response that will help Claude understand exact
 
         return questions
 
-    def _generate_scope_questions(self, cleaned_input: CleanedInput) -> List[ClarificationQuestion]:
+    def _generate_scope_questions(self, cleaned_input: CleanedInput) -> list[ClarificationQuestion]:
         """Generate scope-related questions"""
         questions = []
 
@@ -509,7 +508,7 @@ class PlanningEngine:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-    async def create_plan(self, cleaned_input: CleanedInput, responses: List[ClarificationResponse]) -> DetailedPlan:
+    async def create_plan(self, cleaned_input: CleanedInput, responses: list[ClarificationResponse]) -> DetailedPlan:
         """Create detailed execution plan based on input and clarifications"""
 
         # Analyze responses to refine understanding
@@ -542,7 +541,7 @@ class PlanningEngine:
             fallback_options=fallbacks
         )
 
-    def _refine_intent(self, cleaned_input: CleanedInput, responses: List[ClarificationResponse]) -> str:
+    def _refine_intent(self, cleaned_input: CleanedInput, responses: list[ClarificationResponse]) -> str:
         """Refine intent based on clarification responses"""
         base_intent = cleaned_input.extracted_intent
 
@@ -562,7 +561,7 @@ class PlanningEngine:
 
         return base_intent
 
-    def _determine_scope(self, responses: List[ClarificationResponse]) -> str:
+    def _determine_scope(self, responses: list[ClarificationResponse]) -> str:
         """Determine scope from responses"""
         for response in responses:
             if response.question_id == "scope_preference":
@@ -575,7 +574,7 @@ class PlanningEngine:
 
         return "balanced"
 
-    def _build_context(self, cleaned_input: CleanedInput, responses: List[ClarificationResponse]) -> Dict[str, Any]:
+    def _build_context(self, cleaned_input: CleanedInput, responses: list[ClarificationResponse]) -> dict[str, Any]:
         """Build execution context from input and responses"""
         context = cleaned_input.context_hints.copy()
 
@@ -587,7 +586,7 @@ class PlanningEngine:
 
         return context
 
-    async def _generate_steps(self, intent: str, scope: str, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def _generate_steps(self, intent: str, scope: str, context: dict[str, Any]) -> list[dict[str, Any]]:
         """Generate execution steps based on intent and scope"""
 
         step_templates = {
@@ -626,7 +625,7 @@ class PlanningEngine:
 
         return base_steps
 
-    def _estimate_duration(self, steps: List[Dict[str, Any]]) -> int:
+    def _estimate_duration(self, steps: list[dict[str, Any]]) -> int:
         """Estimate duration in minutes"""
         duration_mapping = {
             "investigation": 15,
@@ -642,14 +641,14 @@ class PlanningEngine:
         total = sum(duration_mapping.get(step.get("type", "analysis"), 15) for step in steps)
         return total
 
-    def _identify_required_tools(self, steps: List[Dict[str, Any]]) -> List[str]:
+    def _identify_required_tools(self, steps: list[dict[str, Any]]) -> list[str]:
         """Identify required tools from steps"""
         tools = set()
         for step in steps:
             tools.update(step.get("tools", []))
         return list(tools)
 
-    def _identify_prerequisites(self, steps: List[Dict[str, Any]], context: Dict[str, Any]) -> List[str]:
+    def _identify_prerequisites(self, steps: list[dict[str, Any]], context: dict[str, Any]) -> list[str]:
         """Identify prerequisites for execution"""
         prerequisites = ["Access to codebase", "Appropriate permissions"]
 
@@ -661,7 +660,7 @@ class PlanningEngine:
 
         return prerequisites
 
-    def _define_success_criteria(self, intent: str, scope: str) -> List[str]:
+    def _define_success_criteria(self, intent: str, scope: str) -> list[str]:
         """Define success criteria"""
         criteria_mapping = {
             "analysis": [
@@ -689,7 +688,7 @@ class PlanningEngine:
 
         return base_criteria
 
-    def _identify_risks(self, steps: List[Dict[str, Any]], context: Dict[str, Any]) -> List[str]:
+    def _identify_risks(self, steps: list[dict[str, Any]], context: dict[str, Any]) -> list[str]:
         """Identify potential risks"""
         risks = []
 
@@ -705,7 +704,7 @@ class PlanningEngine:
 
         return risks
 
-    def _generate_fallback_options(self, steps: List[Dict[str, Any]]) -> List[str]:
+    def _generate_fallback_options(self, steps: list[dict[str, Any]]) -> list[str]:
         """Generate fallback options"""
         fallbacks = [
             "Break down into smaller incremental changes",
@@ -726,7 +725,7 @@ class PlanningEngine:
 class ClarificationWorkflow:
     """Main clarification workflow orchestrator"""
 
-    def __init__(self, storage_path: Optional[str] = None):
+    def __init__(self, storage_path: str | None = None):
         self.storage_path = Path(storage_path or Path.home() / ".oos" / "workflows")
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
@@ -737,7 +736,7 @@ class ClarificationWorkflow:
         self.logger = logging.getLogger(__name__)
 
         # Active sessions
-        self.active_sessions: Dict[str, WorkflowSession] = {}
+        self.active_sessions: dict[str, WorkflowSession] = {}
 
     async def start_workflow(self, user_input: str) -> WorkflowSession:
         """Start new clarification workflow"""
@@ -769,7 +768,7 @@ class ClarificationWorkflow:
 
         return session
 
-    async def submit_responses(self, session_id: str, responses: List[ClarificationResponse]) -> WorkflowSession:
+    async def submit_responses(self, session_id: str, responses: list[ClarificationResponse]) -> WorkflowSession:
         """Submit responses to clarification questions"""
 
         if session_id not in self.active_sessions:
@@ -778,7 +777,7 @@ class ClarificationWorkflow:
         session = self.active_sessions[session_id]
 
         if session.stage != WorkflowStage.CLARIFICATION:
-            raise ValueError(f"Session not in clarification stage")
+            raise ValueError("Session not in clarification stage")
 
         # Store responses
         session.responses = responses
@@ -804,7 +803,7 @@ class ClarificationWorkflow:
         session = self.active_sessions[session_id]
 
         if session.stage != WorkflowStage.CONFIRMATION:
-            raise ValueError(f"Session not in confirmation stage")
+            raise ValueError("Session not in confirmation stage")
 
         session.execution_approved = approved
         session.updated_at = datetime.now()
@@ -828,7 +827,7 @@ class ClarificationWorkflow:
         session = self.active_sessions[session_id]
 
         if session.stage != WorkflowStage.EXECUTION or not session.execution_approved:
-            raise ValueError(f"Session not ready for execution")
+            raise ValueError("Session not ready for execution")
 
         # This would integrate with actual execution systems
         # For now, we'll simulate execution
@@ -857,7 +856,7 @@ class ClarificationWorkflow:
         session = self.active_sessions[session_id]
 
         if session.stage != WorkflowStage.DOCUMENTATION:
-            raise ValueError(f"Session not in documentation stage")
+            raise ValueError("Session not in documentation stage")
 
         # Generate documentation
         doc_content = self._generate_workflow_documentation(session)
@@ -896,7 +895,7 @@ class ClarificationWorkflow:
             for i, step in enumerate(session.plan.steps, 1):
                 doc += f"{i}. **{step['name']}** ({step['type']})\n"
 
-        doc += f"""
+        doc += """
 ## Clarifications Made
 """
 
@@ -906,7 +905,7 @@ class ClarificationWorkflow:
                 if question:
                     doc += f"- **{question.text}**: {response.answer}\n"
 
-        doc += f"""
+        doc += """
 ## Results
 """
 
@@ -949,7 +948,7 @@ class ClarificationWorkflow:
 
         session_file.write_text(json.dumps(session_data, indent=2))
 
-    async def load_session(self, session_id: str) -> Optional[WorkflowSession]:
+    async def load_session(self, session_id: str) -> WorkflowSession | None:
         """Load session from storage"""
         session_file = self.storage_path / f"{session_id}.json"
 
@@ -967,7 +966,7 @@ class ClarificationWorkflow:
 
         return session
 
-    def get_session_status(self, session_id: str) -> Optional[Dict[str, Any]]:
+    def get_session_status(self, session_id: str) -> dict[str, Any] | None:
         """Get current session status"""
         session = self.active_sessions.get(session_id)
 
@@ -1006,7 +1005,7 @@ async def start_clarification(user_input: str) -> WorkflowSession:
     return await workflow.start_workflow(user_input)
 
 
-async def submit_clarification_responses(session_id: str, responses: List[ClarificationResponse]) -> WorkflowSession:
+async def submit_clarification_responses(session_id: str, responses: list[ClarificationResponse]) -> WorkflowSession:
     """Submit clarification responses"""
     workflow = get_clarification_workflow()
     return await workflow.submit_responses(session_id, responses)

@@ -4,13 +4,13 @@ SOLO CREATOR MECHA SUIT - Implementation Ready System
 Based on systematic testing of 7 working models
 """
 
-import os
-import requests
 import json
+import os
 import time
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
+from datetime import datetime
+
+import requests
 from dotenv import load_dotenv
 
 load_dotenv('/home/ubuntu/dev/oos/.env')
@@ -66,10 +66,10 @@ class SoloCreatorMechaSuit:
     def __init__(self):
         self.api_key = os.getenv('OPENROUTER_PROJECT_KEY')
         self.session_id = f"scms_{int(time.time())}"
-        self.task_history: List[TaskResult] = []
+        self.task_history: list[TaskResult] = []
         self.total_cost = 0.0
 
-    def call_model(self, model_id: str, prompt: str, task_type: str) -> Dict:
+    def call_model(self, model_id: str, prompt: str, task_type: str) -> dict:
         """Make API call to OpenRouter model"""
 
         headers = {
@@ -267,7 +267,7 @@ Provide: Constructive feedback, quality scores, improvement suggestions."""
 
         return contexts.get(agent, "You are a helpful AI assistant.")
 
-    def coordinate_agents(self, main_task: str, task_type: str, importance: str = "normal") -> Dict:
+    def coordinate_agents(self, main_task: str, task_type: str, importance: str = "normal") -> dict:
         """Coordinate multiple agents for complex tasks"""
 
         print(f"🎯 Coordinating agents for: {main_task}")
@@ -312,13 +312,13 @@ Provide: Constructive feedback, quality scores, improvement suggestions."""
             "total_tokens": executive_result.tokens_used + operations_result.tokens_used + quality_result.tokens_used
         }
 
-        print(f"\n✅ Task coordination complete")
+        print("\n✅ Task coordination complete")
         print(f"💰 Total cost: ${coordination_result['cost_breakdown']['total']:.4f}")
         print(f"📊 Average quality: {sum(coordination_result['quality_scores'].values())/3:.1f}/10")
 
         return coordination_result
 
-    def get_usage_summary(self) -> Dict:
+    def get_usage_summary(self) -> dict:
         """Get summary of usage and costs"""
 
         if not self.task_history:
@@ -370,7 +370,7 @@ def main():
     scms = SoloCreatorMechaSuit()
 
     # Example task coordination
-    result = scms.coordinate_agents(
+    scms.coordinate_agents(
         main_task="Create a project plan for developing a todo list application",
         task_type="planning",
         importance="normal"

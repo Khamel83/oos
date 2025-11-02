@@ -53,7 +53,6 @@ SAFE_KEYS=(
     "free_model_compatibi"
     # Documentation example patterns (safe)
     "sk-proj-abc123def456"
-    "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"
     # File path patterns (safe)
     "AI%20Specifications-Com"
     "BENCHMARK_DRIVEN_MOD"
@@ -309,7 +308,7 @@ Dangerous patterns (blocked):
 Examples:
   ✅ OPENAI_API_KEY="your_api_key_here"           # Safe placeholder
   ✅ API_KEY="sk-test-example"                    # Obviously fake
-  ❌ OPENAI_API_KEY="sk-proj-abc123def456..."     # Real OpenAI key pattern (DON'T COMMIT)
+  ❌ OPENAI_API_KEY="sk-proj-[real_key]"           # Real OpenAI key pattern (DON'T COMMIT)
   ❌ GITHUB_TOKEN="ghp_1234567890abcdef..."       # Real GitHub token
 
 Security Philosophy:

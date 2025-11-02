@@ -3,14 +3,14 @@
 Check CPU throttling status and recommendations
 """
 
-import json
-import time
 import sys
+import time
 from pathlib import Path
 
 # Add helpers to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from helpers.resource_manager import ResourceManager
+
 
 def main():
     """Check throttling status"""

@@ -4,17 +4,18 @@ Resource management and auto-scaling module
 Implements intelligent resource allocation based on load patterns
 """
 
-import psutil
-import time
+import builtins
+import contextlib
+import gc
 import json
 import logging
-import shutil
-import gc
 import os
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
+
+import psutil
+
 
 @dataclass
 class ResourceMetrics:
@@ -23,7 +24,7 @@ class ResourceMetrics:
     cpu_percent: float
     memory_percent: float
     disk_percent: float
-    load_avg: Tuple[float, float, float]
+    load_avg: tuple[float, float, float]
     queue_depth: int = 0
     worker_count: int = 0
 
@@ -32,7 +33,7 @@ class ResourceManager:
 
     def __init__(self, config_path: str = "data/resource_config.json"):
         self.config_path = config_path
-        self.metrics_history: List[ResourceMetrics] = []
+        self.metrics_history: list[ResourceMetrics] = []
         self.max_history = 1000
         self.logger = self._setup_logging()
         self.config = self._load_config()
@@ -52,7 +53,7 @@ class ResourceManager:
 
         return logger
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """Load resource management configuration"""
         default_config = {
             "worker_scaling": {
@@ -103,7 +104,7 @@ class ResourceManager:
             self.logger.error(f"Error loading config: {e}")
             return default_config
 
-    def _save_config(self, config: Dict):
+    def _save_config(self, config: dict):
         """Save configuration to file"""
         try:
             os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
@@ -149,7 +150,7 @@ class ResourceManager:
                 worker_count=worker_count
             )
 
-    def check_memory_pressure(self) -> Dict:
+    def check_memory_pressure(self) -> dict:
         """Check memory pressure and trigger GC if needed"""
         memory = psutil.virtual_memory()
         memory_percent = memory.percent
@@ -199,7 +200,7 @@ class ResourceManager:
 
         return recommended
 
-    def cleanup_disk_space(self, force: bool = False) -> Dict:
+    def cleanup_disk_space(self, force: bool = False) -> dict:
         """Cleanup disk space when threshold exceeded"""
         disk = psutil.disk_usage('/')
         disk_percent = (disk.used / disk.total) * 100
@@ -260,7 +261,7 @@ class ResourceManager:
         """Count files in directory recursively"""
         try:
             count = 0
-            for root, dirs, files in os.walk(path):
+            for _root, _dirs, files in os.walk(path):
                 count += len(files)
             return count
         except:
@@ -270,13 +271,11 @@ class ResourceManager:
         """Get total size of directory in bytes"""
         try:
             total_size = 0
-            for dirpath, dirnames, filenames in os.walk(path):
+            for dirpath, _dirnames, filenames in os.walk(path):
                 for f in filenames:
                     fp = os.path.join(dirpath, f)
-                    try:
+                    with contextlib.suppress(builtins.BaseException):
                         total_size += os.path.getsize(fp)
-                    except:
-                        pass
             return total_size
         except:
             return 0
@@ -284,7 +283,7 @@ class ResourceManager:
     def _cleanup_old_files(self, path: str, cutoff: datetime):
         """Remove files older than cutoff date"""
         try:
-            for root, dirs, files in os.walk(path):
+            for root, _dirs, files in os.walk(path):
                 for file in files:
                     file_path = os.path.join(root, file)
                     try:
@@ -296,7 +295,7 @@ class ResourceManager:
         except Exception as e:
             self.logger.error(f"Error in cleanup_old_files: {e}")
 
-    def check_cpu_throttling(self) -> Dict:
+    def check_cpu_throttling(self) -> dict:
         """Check if CPU throttling should be applied"""
         load_avg = os.getloadavg()
         current_load = load_avg[0]  # 1-minute load average
@@ -318,7 +317,7 @@ class ResourceManager:
 
         return result
 
-    def get_resource_recommendations(self) -> List[str]:
+    def get_resource_recommendations(self) -> list[str]:
         """Generate performance optimization recommendations"""
         recommendations = []
 
@@ -358,7 +357,7 @@ class ResourceManager:
 
         return recommendations
 
-    def get_metrics_summary(self) -> Dict:
+    def get_metrics_summary(self) -> dict:
         """Get summary of recent metrics"""
         if not self.metrics_history:
             return {"error": "No metrics available"}
@@ -376,18 +375,18 @@ class ResourceManager:
         }
 
 # Convenience functions for external use
-def check_memory_pressure() -> Dict:
+def check_memory_pressure() -> dict:
     """Quick memory pressure check"""
     rm = ResourceManager()
     return rm.check_memory_pressure()
 
-def get_resource_status() -> Dict:
+def get_resource_status() -> dict:
     """Get current resource status"""
     rm = ResourceManager()
-    metrics = rm.collect_metrics()
+    rm.collect_metrics()
     return rm.get_metrics_summary()
 
-def cleanup_disk() -> Dict:
+def cleanup_disk() -> dict:
     """Force disk cleanup"""
     rm = ResourceManager()
     return rm.cleanup_disk_space(force=True)

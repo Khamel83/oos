@@ -4,7 +4,6 @@ Example: How to integrate OOS search into your existing Python project
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add OOS to your Python path
@@ -12,9 +11,10 @@ oos_path = Path(__file__).parent.parent / 'src'
 sys.path.insert(0, str(oos_path))
 
 # Import OOS search
+import asyncio
+
 from free_search_alternatives import search_free
 from perplexity_usage_manager import safe_perplexity_search
-import asyncio
 
 
 class MyProjectSearchHelper:

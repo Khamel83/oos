@@ -3,19 +3,18 @@
 SQLite database configuration with durability and corruption prevention
 """
 
-import sqlite3
-import os
-import time
+import builtins
 import json
-import shutil
 import logging
+import os
+import shutil
+import sqlite3
 import threading
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
-from contextlib import contextmanager
-import hashlib
-from queue import Queue, Empty
+import time
+from contextlib import contextmanager, suppress
+from datetime import datetime
+from queue import Empty, Queue
+
 
 class DatabasePool:
     """Connection pool for SQLite with WAL mode and durability settings"""
@@ -145,10 +144,8 @@ class DatabasePool:
         except sqlite3.Error as e:
             if conn:
                 # Connection might be corrupted, create new one
-                try:
+                with suppress(builtins.BaseException):
                     conn.close()
-                except:
-                    pass
 
                 # Create replacement connection
                 try:
@@ -177,20 +174,16 @@ class DatabasePool:
                     self.pool.put(conn, block=False)
                 except:
                     # Pool might be full or connection invalid
-                    try:
+                    with suppress(builtins.BaseException):
                         conn.close()
-                    except:
-                        pass
 
     def close_all(self):
         """Close all connections in pool"""
         with self.lock:
             # Close active connections
             for conn in list(self.active_connections):
-                try:
+                with suppress(builtins.BaseException):
                     conn.close()
-                except:
-                    pass
 
             # Close pooled connections
             while not self.pool.empty():
@@ -200,7 +193,7 @@ class DatabasePool:
                 except:
                     pass
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """Get pool statistics"""
         return {
             'db_path': self.db_path,
@@ -245,7 +238,7 @@ class DatabaseManager:
 
         return logger
 
-    def check_integrity(self) -> Dict:
+    def check_integrity(self) -> dict:
         """Perform database integrity check"""
         start_time = time.time()
         result = {
@@ -332,7 +325,7 @@ class DatabaseManager:
         except Exception as e:
             self.logger.error(f"Failed to log health check: {e}")
 
-    def create_backup(self, backup_name: Optional[str] = None) -> Dict:
+    def create_backup(self, backup_name: str | None = None) -> dict:
         """Create database backup"""
         if backup_name is None:
             backup_name = f"oos_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
@@ -412,7 +405,7 @@ class DatabaseManager:
         except Exception as e:
             self.logger.error(f"Failed to cleanup old backups: {e}")
 
-    def restore_from_backup(self, backup_name: str) -> Dict:
+    def restore_from_backup(self, backup_name: str) -> dict:
         """Restore database from backup"""
         backup_path = os.path.join(self.backup_dir, backup_name)
 
@@ -459,7 +452,7 @@ class DatabaseManager:
 
         return result
 
-    def vacuum_database(self, check_fragmentation: bool = True) -> Dict:
+    def vacuum_database(self, check_fragmentation: bool = True) -> dict:
         """Vacuum database if fragmentation exceeds threshold"""
         result = {
             'timestamp': datetime.now().isoformat(),
@@ -571,7 +564,7 @@ class DatabaseManager:
                 if self.shutdown_flag.wait(3600):
                     break
 
-    def list_backups(self) -> List[Dict]:
+    def list_backups(self) -> list[dict]:
         """List available backup files"""
         backups = []
 
@@ -597,7 +590,7 @@ class DatabaseManager:
 
         return backups
 
-    def get_status(self) -> Dict:
+    def get_status(self) -> dict:
         """Get database manager status"""
         return {
             'db_path': self.db_path,

@@ -9,18 +9,17 @@ Implements context engineering strategies to minimize token usage:
 - Efficient retrieval patterns
 """
 
-import json
 import asyncio
 import hashlib
-import pickle
-import time
-from typing import Dict, List, Any, Optional, Tuple, Union
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
-from pathlib import Path
+import json
 import logging
+import pickle
 import re
 from collections import defaultdict
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -44,7 +43,7 @@ class ContextChunk:
     created_at: datetime
     last_accessed: datetime
     access_count: int = 0
-    tags: List[str] = None
+    tags: list[str] = None
 
 
 @dataclass
@@ -53,7 +52,7 @@ class OptimizationResult:
     original_tokens: int
     optimized_tokens: int
     reduction_percentage: float
-    techniques_used: List[str]
+    techniques_used: list[str]
     chunks_offloaded: int
     chunks_compressed: int
     cache_hits: int
@@ -212,7 +211,7 @@ class ContextCompressor:
 class ContextCache:
     """Intelligent caching system for context chunks"""
 
-    def __init__(self, cache_dir: Optional[str] = None):
+    def __init__(self, cache_dir: str | None = None):
         self.cache_dir = Path(cache_dir or Path.home() / ".oos" / "context_cache")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -227,7 +226,7 @@ class ContextCache:
         content_hash = hashlib.sha256(f"{content}{context_type}".encode()).hexdigest()
         return f"{context_type}_{content_hash[:16]}"
 
-    async def get(self, cache_key: str) -> Optional[ContextChunk]:
+    async def get(self, cache_key: str) -> ContextChunk | None:
         """Get cached context chunk"""
 
         # Check memory cache first
@@ -313,7 +312,7 @@ class ContextCache:
                 except Exception as e:
                     self.logger.error(f"Failed to remove cache file {file_path}: {e}")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics"""
         total_requests = self.cache_stats["hits"] + self.cache_stats["misses"]
         hit_rate = self.cache_stats["hits"] / total_requests if total_requests > 0 else 0
@@ -331,14 +330,14 @@ class ContextCache:
 class FilesystemOffloader:
     """Offloads context to filesystem for retrieval"""
 
-    def __init__(self, storage_dir: Optional[str] = None):
+    def __init__(self, storage_dir: str | None = None):
         self.storage_dir = Path(storage_dir or Path.home() / ".oos" / "context_offload")
         self.storage_dir.mkdir(parents=True, exist_ok=True)
         self.index_file = self.storage_dir / "index.json"
         self.index = self._load_index()
         self.logger = logging.getLogger(__name__)
 
-    def _load_index(self) -> Dict[str, Any]:
+    def _load_index(self) -> dict[str, Any]:
         """Load offload index from disk"""
         if self.index_file.exists():
             try:
@@ -383,7 +382,7 @@ class FilesystemOffloader:
         self._save_index()
         return filename
 
-    async def retrieve_chunk(self, chunk_id: str) -> Optional[ContextChunk]:
+    async def retrieve_chunk(self, chunk_id: str) -> ContextChunk | None:
         """Retrieve offloaded context chunk"""
 
         if chunk_id not in self.index["chunks"]:
@@ -429,7 +428,7 @@ class FilesystemOffloader:
             self.logger.error(f"Failed to retrieve chunk {chunk_id}: {e}")
             return None
 
-    async def search_chunks(self, query: str, limit: int = 10) -> List[ContextChunk]:
+    async def search_chunks(self, query: str, limit: int = 10) -> list[ContextChunk]:
         """Search offloaded chunks by content or tags"""
 
         matching_chunks = []
@@ -463,7 +462,7 @@ class FilesystemOffloader:
 
         return matching_chunks[:limit]
 
-    def get_offload_stats(self) -> Dict[str, Any]:
+    def get_offload_stats(self) -> dict[str, Any]:
         """Get offload statistics"""
         return {
             "total_chunks": len(self.index["chunks"]),
@@ -489,7 +488,7 @@ class TokenOptimizer:
         self.offloader = FilesystemOffloader()
         self.logger = logging.getLogger(__name__)
 
-    async def optimize_context(self, context: Dict[str, Any], budget: TokenBudget) -> Tuple[Dict[str, Any], OptimizationResult]:
+    async def optimize_context(self, context: dict[str, Any], budget: TokenBudget) -> tuple[dict[str, Any], OptimizationResult]:
         """Optimize context to fit within token budget"""
 
         original_tokens = self._calculate_total_tokens(context)
@@ -613,11 +612,11 @@ class TokenOptimizer:
 
         return optimized_context, result
 
-    def _calculate_total_tokens(self, context: Dict[str, Any]) -> int:
+    def _calculate_total_tokens(self, context: dict[str, Any]) -> int:
         """Calculate total token count for context"""
         total = 0
 
-        for key, value in context.items():
+        for _key, value in context.items():
             if isinstance(value, str):
                 total += self.token_estimator.estimate_tokens(value)
             elif isinstance(value, dict):
@@ -629,7 +628,7 @@ class TokenOptimizer:
 
         return total
 
-    def _identify_chunks(self, context: Dict[str, Any]) -> List[ContextChunk]:
+    def _identify_chunks(self, context: dict[str, Any]) -> list[ContextChunk]:
         """Identify chunks within context for optimization"""
         chunks = []
 
@@ -744,18 +743,18 @@ class TokenOptimizer:
 
         return 0.3
 
-    def _replace_chunk_with_reference(self, context: Dict[str, Any], chunk: ContextChunk) -> Dict[str, Any]:
+    def _replace_chunk_with_reference(self, context: dict[str, Any], chunk: ContextChunk) -> dict[str, Any]:
         """Replace chunk content with filesystem reference"""
 
         # Find and replace the chunk content
-        for key, value in context.items():
+        for key, _value in context.items():
             if chunk.chunk_id == f"chunk_{key}":
                 context[key] = f"[OFFLOADED: {chunk.chunk_id} - {chunk.content_type} - {chunk.token_count} tokens]"
                 break
 
         return context
 
-    async def _truncate_to_budget(self, context: Dict[str, Any], budget: int) -> Dict[str, Any]:
+    async def _truncate_to_budget(self, context: dict[str, Any], budget: int) -> dict[str, Any]:
         """Aggressively truncate context to fit budget"""
 
         # Calculate importance-weighted truncation
@@ -787,7 +786,7 @@ class TokenOptimizer:
 
         return truncated_context
 
-    async def retrieve_offloaded_context(self, reference: str) -> Optional[str]:
+    async def retrieve_offloaded_context(self, reference: str) -> str | None:
         """Retrieve offloaded context by reference"""
 
         # Parse reference format: [OFFLOADED: chunk_id - content_type - token_count tokens]
@@ -805,7 +804,7 @@ class TokenOptimizer:
             self.logger.error(f"Failed to parse offloaded reference: {e}")
             return None
 
-    def get_optimization_stats(self) -> Dict[str, Any]:
+    def get_optimization_stats(self) -> dict[str, Any]:
         """Get optimization statistics"""
         cache_stats = self.cache.get_stats()
         offload_stats = self.offloader.get_offload_stats()
@@ -830,7 +829,7 @@ def get_token_optimizer() -> TokenOptimizer:
 
 
 # Convenience functions
-async def optimize_for_budget(context: Dict[str, Any], budget: int = 4000) -> Tuple[Dict[str, Any], OptimizationResult]:
+async def optimize_for_budget(context: dict[str, Any], budget: int = 4000) -> tuple[dict[str, Any], OptimizationResult]:
     """Optimize context for token budget"""
     optimizer = get_token_optimizer()
     token_budget = TokenBudget(
@@ -840,7 +839,7 @@ async def optimize_for_budget(context: Dict[str, Any], budget: int = 4000) -> Tu
     return await optimizer.optimize_context(context, token_budget)
 
 
-async def estimate_context_tokens(context: Dict[str, Any]) -> int:
+async def estimate_context_tokens(context: dict[str, Any]) -> int:
     """Estimate token count for context"""
     optimizer = get_token_optimizer()
     return optimizer._calculate_total_tokens(context)

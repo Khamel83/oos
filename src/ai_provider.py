@@ -4,15 +4,13 @@ OOS AI Provider Abstraction Layer
 Supports OpenRouter, OpenAI, and future AI providers with fallback and load balancing
 """
 
-import os
-import json
-import httpx
 import asyncio
-from typing import Dict, List, Any, Optional, Union
+import logging
+import os
 from dataclasses import dataclass
 from enum import Enum
-import logging
-from pathlib import Path
+
+import httpx
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -39,8 +37,8 @@ class AIResponse:
     content: str
     model_used: str
     provider: ProviderType
-    tokens_used: Optional[int] = None
-    cost_estimate: Optional[float] = None
+    tokens_used: int | None = None
+    cost_estimate: float | None = None
 
 
 class AIProvider:
@@ -51,7 +49,7 @@ class AIProvider:
         self.base_url = base_url
         self.client = httpx.AsyncClient(timeout=30.0)
 
-    async def chat_completion(self, messages: List[Dict], model: str, **kwargs) -> AIResponse:
+    async def chat_completion(self, messages: list[dict], model: str, **kwargs) -> AIResponse:
         raise NotImplementedError
 
     async def health_check(self) -> bool:
@@ -67,7 +65,7 @@ class OpenRouterProvider(AIProvider):
     def __init__(self, api_key: str):
         super().__init__(api_key, "https://openrouter.ai/api/v1")
 
-    async def chat_completion(self, messages: List[Dict], model: str = "openrouter/andromeda-alpha", **kwargs) -> AIResponse:
+    async def chat_completion(self, messages: list[dict], model: str = "openrouter/andromeda-alpha", **kwargs) -> AIResponse:
         """Make chat completion request to OpenRouter"""
         try:
             payload = {
@@ -117,7 +115,7 @@ class OpenRouterProvider(AIProvider):
             logger.error(f"OpenRouter health check failed: {e}")
             return False
 
-    def _estimate_cost(self, model: str, usage: Dict) -> float:
+    def _estimate_cost(self, model: str, usage: dict) -> float:
         """Estimate cost based on model and usage"""
         # Simplified cost estimation - could be enhanced with actual pricing
         cost_per_1k_tokens = {
@@ -135,7 +133,7 @@ class OOSAIManager:
     """Main AI manager with provider fallback and load balancing"""
 
     def __init__(self):
-        self.providers: List[AIProvider] = []
+        self.providers: list[AIProvider] = []
         self.current_provider_index = 0
         self.fallback_enabled = True
 
@@ -157,8 +155,8 @@ class OOSAIManager:
     async def chat_completion(
         self,
         prompt: str,
-        model: Optional[str] = None,
-        system_prompt: Optional[str] = None,
+        model: str | None = None,
+        system_prompt: str | None = None,
         **kwargs
     ) -> AIResponse:
         """Send chat completion request with automatic fallback"""
@@ -197,10 +195,10 @@ class OOSAIManager:
 
         raise Exception("No AI providers available")
 
-    async def health_check_all(self) -> Dict[str, bool]:
+    async def health_check_all(self) -> dict[str, bool]:
         """Check health of all configured providers"""
         results = {}
-        for i, provider in enumerate(self.providers):
+        for _i, provider in enumerate(self.providers):
             provider_name = provider.__class__.__name__
             results[provider_name] = await provider.health_check()
         return results
@@ -225,8 +223,8 @@ def get_ai_manager() -> OOSAIManager:
 
 async def ask_ai(
     prompt: str,
-    system_prompt: Optional[str] = None,
-    model: Optional[str] = None,
+    system_prompt: str | None = None,
+    model: str | None = None,
     **kwargs
 ) -> str:
     """Convenience function for AI requests"""

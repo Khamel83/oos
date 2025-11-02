@@ -6,19 +6,17 @@ Provides basic command handling functionality for slash commands.
 This is a simplified version that replaces the overly complex command_generator.py.
 """
 
-import json
-import os
 import asyncio
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 # Add src to Python path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from commands.capabilities_command import CapabilitiesCommand
 from commands.actions_command import ActionsCommand
+from commands.capabilities_command import CapabilitiesCommand
 from commands.consultant_command import ConsultantCommand, register_consultant_command
 from renderers import render_help
 
@@ -50,7 +48,7 @@ class SimpleCommandHandler:
         self.consultant_cmd = ConsultantCommand()
         register_consultant_command(self)
 
-    def _load_commands(self) -> Dict[str, CommandInfo]:
+    def _load_commands(self) -> dict[str, CommandInfo]:
         """Load command definitions from markdown files"""
         commands = {}
 
@@ -99,15 +97,15 @@ class SimpleCommandHandler:
             category='general'
         )
 
-    def get_command(self, name: str) -> Optional[CommandInfo]:
+    def get_command(self, name: str) -> CommandInfo | None:
         """Get a command by name"""
         return self.commands.get(name)
 
-    def list_commands(self) -> List[CommandInfo]:
+    def list_commands(self) -> list[CommandInfo]:
         """List all available commands"""
         return list(self.commands.values())
 
-    async def execute_command(self, name: str, args: str = "") -> Dict[str, Any]:
+    async def execute_command(self, name: str, args: str = "") -> dict[str, Any]:
         """Execute a command (returns info about how to execute it)"""
 
         # Handle built-in capability commands
@@ -135,7 +133,7 @@ class SimpleCommandHandler:
             "category": cmd.category
         }
 
-    async def _execute_capabilities(self, args: str) -> Dict[str, Any]:
+    async def _execute_capabilities(self, args: str) -> dict[str, Any]:
         """Execute capabilities command"""
         try:
             # Parse args
@@ -145,7 +143,7 @@ class SimpleCommandHandler:
         except Exception as e:
             return {"error": f"Error executing capabilities command: {str(e)}"}
 
-    async def _execute_actions(self, args: str) -> Dict[str, Any]:
+    async def _execute_actions(self, args: str) -> dict[str, Any]:
         """Execute actions command"""
         try:
             # Parse args
@@ -155,7 +153,7 @@ class SimpleCommandHandler:
         except Exception as e:
             return {"error": f"Error executing actions command: {str(e)}"}
 
-    async def _execute_act(self, args: str) -> Dict[str, Any]:
+    async def _execute_act(self, args: str) -> dict[str, Any]:
         """Execute act command"""
         try:
             # Parse args
@@ -165,7 +163,7 @@ class SimpleCommandHandler:
         except Exception as e:
             return {"error": f"Error executing act command: {str(e)}"}
 
-    async def _execute_consultant(self, args: str) -> Dict[str, Any]:
+    async def _execute_consultant(self, args: str) -> dict[str, Any]:
         """Execute consultant command"""
         try:
             # Parse args
@@ -177,7 +175,7 @@ class SimpleCommandHandler:
 
 
 # For backward compatibility
-def execute_command(name: str, args: str = "") -> Dict[str, Any]:
+def execute_command(name: str, args: str = "") -> dict[str, Any]:
     """Synchronous wrapper for execute_command"""
     handler = SimpleCommandHandler()
     return asyncio.run(handler.execute_command(name, args))

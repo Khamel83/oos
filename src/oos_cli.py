@@ -4,23 +4,22 @@ OOS Main CLI Interface
 Natural language command processing for non-coders
 """
 
-import sys
-import os
-import json
-import argparse
-from pathlib import Path
-from typing import List, Optional, Dict, Any
 import asyncio
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
 import httpx
-from datetime import datetime
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
+from actions_gateway import list_available_tools
 from capability_router import route_request
 from knowledge_resolver import resolve_knowledge
-from renderers import render_help, render_knowledge, render_tools
-from actions_gateway import list_available_tools, execute_action
+from renderers import render_knowledge, render_tools
+
 
 # Colors for terminal output
 class Colors:
@@ -67,22 +66,22 @@ def print_error(message: str):
     """Print error message"""
     print(f"{Colors.RED}❌ {message}{Colors.END}")
 
-def load_config() -> Dict[str, Any]:
+def load_config() -> dict[str, Any]:
     """Load OOS configuration"""
     config_path = Path.home() / '.oos' / 'config.json'
     if not config_path.exists():
         print_error("OOS not set up. Please run: curl setup.oos.dev | bash")
         sys.exit(1)
 
-    with open(config_path, 'r') as f:
+    with open(config_path) as f:
         return json.load(f)
 
-def load_env_config() -> Dict[str, str]:
+def load_env_config() -> dict[str, str]:
     """Load environment configuration from .env file"""
     env_config = {}
     env_path = Path('.env')
     if env_path.exists():
-        with open(env_path, 'r') as f:
+        with open(env_path) as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith('#') and '=' in line:
@@ -93,7 +92,7 @@ def load_env_config() -> Dict[str, str]:
 class ArchonIntegration:
     """Helper class for Archon MCP integration"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.env_config = load_env_config()
         self.archon_url = self.env_config.get('ARCHON_URL', 'http://localhost:8051/mcp')
@@ -103,7 +102,7 @@ class ArchonIntegration:
         """Check if Archon integration is available"""
         return bool(self.project_id and self.archon_url)
 
-    async def call_mcp(self, method: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def call_mcp(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
         """Make MCP call to Archon server"""
         if not self.is_available():
             raise Exception("Archon integration not configured. Set ARCHON_PROJECT_ID and ARCHON_URL in .env")
@@ -130,7 +129,7 @@ class ArchonIntegration:
         except httpx.RequestError as e:
             raise Exception(f"Failed to connect to Archon server: {e}")
 
-    async def list_tasks(self, status: Optional[str] = None, feature: Optional[str] = None) -> List[Dict[str, Any]]:
+    async def list_tasks(self, status: str | None = None, feature: str | None = None) -> list[dict[str, Any]]:
         """List tasks for current project"""
         params = {"project_id": self.project_id}
         if status:
@@ -145,18 +144,18 @@ class ArchonIntegration:
 
         return tasks
 
-    async def get_task(self, task_id: str) -> Dict[str, Any]:
+    async def get_task(self, task_id: str) -> dict[str, Any]:
         """Get task details"""
         result = await self.call_mcp("get_task", {"task_id": task_id})
         return result.get("task", {})
 
-    async def update_task(self, task_id: str, **updates) -> Dict[str, Any]:
+    async def update_task(self, task_id: str, **updates) -> dict[str, Any]:
         """Update task"""
         params = {"task_id": task_id, **updates}
         result = await self.call_mcp("update_task", params)
         return result.get("task", {})
 
-    async def create_task(self, title: str, description: str, **kwargs) -> Dict[str, Any]:
+    async def create_task(self, title: str, description: str, **kwargs) -> dict[str, Any]:
         """Create new task"""
         params = {
             "project_id": self.project_id,
@@ -167,7 +166,7 @@ class ArchonIntegration:
         result = await self.call_mcp("create_task", params)
         return result.get("task", {})
 
-    async def get_project(self) -> Dict[str, Any]:
+    async def get_project(self) -> dict[str, Any]:
         """Get current project details"""
         result = await self.call_mcp("get_project", {"project_id": self.project_id})
         return result.get("project", {})
@@ -175,11 +174,11 @@ class ArchonIntegration:
 class OOSCommandProcessor:
     """Process natural language commands"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.archon = ArchonIntegration(config)
 
-    async def process_command(self, args: List[str]) -> int:
+    async def process_command(self, args: list[str]) -> int:
         """Process a natural language command"""
         if not args:
             self.show_help()
@@ -192,13 +191,7 @@ class OOSCommandProcessor:
             self.show_help()
             return 0
 
-        elif command.startswith('create'):
-            return await self.handle_create(command)
-
-        elif command.startswith('new'):
-            return await self.handle_create(command)
-
-        elif command.startswith('build'):
+        elif command.startswith('create') or command.startswith('new') or command.startswith('build'):
             return await self.handle_create(command)
 
         elif command.startswith('help me'):
@@ -575,7 +568,10 @@ Type: oos help me <your question>
 
     async def handle_sheets_command(self, command: str) -> int:
         """Handle Google Sheets commands"""
-        from google_sheets_integration import get_sheets_integration, setup_google_sheets, list_sheets_projects
+        from google_sheets_integration import (
+            list_sheets_projects,
+            setup_google_sheets,
+        )
 
         subcommand = command.replace('sheets', '').strip()
 
@@ -749,7 +745,7 @@ Type: oos help me <your question>
             print_error(f"Project command failed: {e}")
             return 1
 
-    async def handle_task_list(self, args: List[str]) -> int:
+    async def handle_task_list(self, args: list[str]) -> int:
         """Handle task list command"""
         print_step("Task List", "Your project tasks")
 
@@ -813,7 +809,7 @@ Type: oos help me <your question>
         print_info(f"\nTotal: {len(tasks)} tasks")
         return 0
 
-    async def handle_task_start(self, args: List[str]) -> int:
+    async def handle_task_start(self, args: list[str]) -> int:
         """Handle task start command"""
         if not args:
             print_error("Please provide a task ID")
@@ -837,7 +833,7 @@ Type: oos help me <your question>
         print_info(f"Status: {task['status']}")
         return 0
 
-    async def handle_task_complete(self, args: List[str]) -> int:
+    async def handle_task_complete(self, args: list[str]) -> int:
         """Handle task complete command"""
         if not args:
             print_error("Please provide a task ID")
@@ -861,7 +857,7 @@ Type: oos help me <your question>
         print_info(f"Status: {task['status']}")
         return 0
 
-    async def handle_task_create(self, args: List[str]) -> int:
+    async def handle_task_create(self, args: list[str]) -> int:
         """Handle task create command"""
         if len(args) < 2:
             print_error("Please provide title and description")
@@ -884,7 +880,7 @@ Type: oos help me <your question>
         print_info(f"Status: {task['status']}")
         return 0
 
-    async def handle_task_show(self, args: List[str]) -> int:
+    async def handle_task_show(self, args: list[str]) -> int:
         """Handle task show command"""
         if not args:
             print_error("Please provide a task ID")
@@ -1134,7 +1130,7 @@ Type: oos help me <your question>
     def show_project_info(self):
         """Show current project information"""
         if Path('project.json').exists():
-            with open('project.json', 'r') as f:
+            with open('project.json') as f:
                 config = json.load(f)
             print_info(f"Project: {config.get('description', 'Unknown')}")
             print_info(f"Type: {config.get('type', 'Unknown')}")

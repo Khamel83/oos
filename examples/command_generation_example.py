@@ -4,8 +4,9 @@ Example usage of the Idea-to-Command Transformation System
 """
 
 import json
-import sys
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.command_generator import IdeaToCommandTransformer
@@ -115,7 +116,7 @@ def demonstrate_command_generation():
     # Generate complete command library
     library = transformer.generate_command_library(patterns_data)
 
-    print(f"\\nCommand Library Summary:")
+    print("\\nCommand Library Summary:")
     print(f"Total Commands: {library['metadata']['total_commands']}")
     print("Commands by Category:")
     for category, count in library['metadata']['categories'].items():

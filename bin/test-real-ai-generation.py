@@ -11,8 +11,8 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from template_engine import TemplateEngine
 from renderers import Colors
+from template_engine import TemplateEngine
 
 
 async def test_real_ai_generation():
@@ -58,7 +58,7 @@ async def test_real_ai_generation():
                 content = main_py.read_text()[:200]
                 print(f"   📄 main.py preview: {content}...")
         else:
-            print(f"   ❌ Project directory not found!")
+            print("   ❌ Project directory not found!")
     else:
         print(f"{Colors.RED}❌ Fallback generation failed{Colors.END}")
 
@@ -106,7 +106,7 @@ async def test_real_ai_generation():
                             ('print(' in content or 'log' in content, 'Has logging/output')
                         ]
 
-                        print(f"   📈 Code quality checks:")
+                        print("   📈 Code quality checks:")
                         for check, description in quality_indicators:
                             status = "✅" if check else "❌"
                             print(f"      {status} {description}")
@@ -122,7 +122,7 @@ async def test_real_ai_generation():
             print(f"{Colors.RED}❌ Real AI generation failed: {e}{Colors.END}")
     else:
         print(f"{Colors.YELLOW}⚠️  No OPENROUTER_API_KEY found, skipping real API test{Colors.END}")
-        print(f"   To test real AI generation, set: export OPENROUTER_API_KEY=your_key")
+        print("   To test real AI generation, set: export OPENROUTER_API_KEY=your_key")
 
     # Summary
     print(f"\n{Colors.GREEN}{Colors.BOLD}")
@@ -144,9 +144,9 @@ async def test_real_ai_generation():
     print(f"{Colors.END}")
 
     print(f"\n{Colors.WHITE}🚀 Next: Run with real API key to see full AI power!{Colors.END}")
-    print(f"   1. Get API key from: https://openrouter.ai/keys")
-    print(f"   2. Run: export OPENROUTER_API_KEY=your_key_here")
-    print(f"   3. Re-run this test to see real AI generation")
+    print("   1. Get API key from: https://openrouter.ai/keys")
+    print("   2. Run: export OPENROUTER_API_KEY=your_key_here")
+    print("   3. Re-run this test to see real AI generation")
 
 
 if __name__ == "__main__":

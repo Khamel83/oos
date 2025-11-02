@@ -3,9 +3,10 @@
 Test if these models can actually do REAL work
 """
 
-import os
-import requests
 import json
+import os
+
+import requests
 from dotenv import load_dotenv
 
 load_dotenv('/home/ubuntu/dev/oos/.env')
@@ -141,9 +142,9 @@ Create an automated file organization system that:
 
                 # Quick quality check
                 if 'def ' in result['response'] or '1.' in result['response'] or 'Python' in result['response']:
-                    print(f"   📝 Appears to be substantive content")
+                    print("   📝 Appears to be substantive content")
                 else:
-                    print(f"   ⚠️  May be low-quality or generic response")
+                    print("   ⚠️  May be low-quality or generic response")
 
             else:
                 print(f"❌ FAILED: {result['error']}")
@@ -162,7 +163,7 @@ Create an automated file organization system that:
     with open('/home/ubuntu/dev/oos/real_model_capability_test_results.json', 'w') as f:
         json.dump(results, f, indent=2)
 
-    print(f"\n📊 SUMMARY")
+    print("\n📊 SUMMARY")
     print("=" * 60)
 
     for model_id, data in results.items():
@@ -170,7 +171,7 @@ Create an automated file organization system that:
         success_rate = (summary['successful'] / summary['total_tasks']) * 100
         print(f"{data['model_name']}: {summary['successful']}/{summary['total_tasks']} tasks ({success_rate:.0f}%)")
 
-    print(f"\n💾 Detailed results saved to: real_model_capability_test_results.json")
+    print("\n💾 Detailed results saved to: real_model_capability_test_results.json")
 
     return results
 

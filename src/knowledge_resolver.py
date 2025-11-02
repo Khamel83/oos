@@ -4,10 +4,9 @@ Integrates multiple documentation sources to provide normalized answers
 """
 
 import os
-import json
-from typing import Dict, List, Optional, Any
-from datetime import datetime, date
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import date
+
 import requests
 
 
@@ -32,13 +31,13 @@ class QuotaInfo:
 @dataclass
 class KnowledgeResult:
     """Normalized knowledge query result"""
-    capabilities: List[str]
-    limits: List[str]
-    quotas: List[QuotaInfo]
+    capabilities: list[str]
+    limits: list[str]
+    quotas: list[QuotaInfo]
     api_access: bool
-    auth_methods: List[str]
-    pricing_notes: List[str]
-    sources: List[SourceInfo]
+    auth_methods: list[str]
+    pricing_notes: list[str]
+    sources: list[SourceInfo]
     summary: str
     confidence: float
 
@@ -105,7 +104,7 @@ class Context7Adapter:
         except:
             return False
 
-    async def query(self, query: str, domain: str) -> Optional[KnowledgeResult]:
+    async def query(self, query: str, domain: str) -> KnowledgeResult | None:
         """Query Context7 for documentation"""
         try:
             # Try to resolve library URI first
@@ -145,7 +144,7 @@ class Context7Adapter:
             print(f"Context7 query failed: {e}")
             return None
 
-    def _normalize_context7_result(self, data: Dict, query: str, domain: str) -> KnowledgeResult:
+    def _normalize_context7_result(self, data: dict, query: str, domain: str) -> KnowledgeResult:
         """Normalize Context7 response to standard format"""
         content = data.get('content', '')
         sources = data.get('sources', [])
@@ -200,7 +199,7 @@ class DocsMCPAdapter:
         except:
             return False
 
-    async def query(self, query: str, domain: str) -> Optional[KnowledgeResult]:
+    async def query(self, query: str, domain: str) -> KnowledgeResult | None:
         """Query Docs MCP for documentation"""
         try:
             response = requests.post(
@@ -223,7 +222,7 @@ class DocsMCPAdapter:
             print(f"Docs MCP query failed: {e}")
             return None
 
-    def _normalize_docs_mcp_result(self, data: Dict, query: str, domain: str) -> KnowledgeResult:
+    def _normalize_docs_mcp_result(self, data: dict, query: str, domain: str) -> KnowledgeResult:
         """Normalize Docs MCP response to standard format"""
         results = data.get('results', [])
         sources = data.get('sources', [])
@@ -277,7 +276,7 @@ class DeepResearchAdapter:
         except:
             return False
 
-    async def query(self, query: str, domain: str) -> Optional[KnowledgeResult]:
+    async def query(self, query: str, domain: str) -> KnowledgeResult | None:
         """Query Deep-Research MCP for web research"""
         try:
             response = requests.post(
@@ -300,7 +299,7 @@ class DeepResearchAdapter:
             print(f"Deep-Research query failed: {e}")
             return None
 
-    def _normalize_deep_research_result(self, data: Dict, query: str, domain: str) -> KnowledgeResult:
+    def _normalize_deep_research_result(self, data: dict, query: str, domain: str) -> KnowledgeResult:
         """Normalize Deep-Research response to standard format"""
         findings = data.get('findings', [])
         sources = data.get('sources', [])
@@ -352,7 +351,7 @@ async def resolve_knowledge(query: str, domain: str) -> KnowledgeResult:
     return await resolver.resolve_query(query, domain)
 
 
-def result_to_dict(result: KnowledgeResult) -> Dict:
+def result_to_dict(result: KnowledgeResult) -> dict:
     """Convert KnowledgeResult to dictionary for JSON serialization"""
     data = asdict(result)
     # Convert SourceInfo objects to dicts

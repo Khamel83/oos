@@ -5,19 +5,17 @@ Validates the simple command handler functionality
 """
 
 import json
-import tempfile
 import os
 import sys
+import tempfile
 from pathlib import Path
-import unittest.mock as mock
-from unittest.mock import patch, MagicMock
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from src.claude_integration import ClaudeCodeIntegration
-from src.simple_command_handler import SimpleCommandHandler, CommandInfo
+from src.simple_command_handler import CommandInfo, SimpleCommandHandler
 
 
 class TestSimplifiedClaudeIntegration:

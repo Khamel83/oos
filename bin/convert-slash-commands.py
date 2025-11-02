@@ -15,7 +15,7 @@ def convert_json_to_claude_commands(json_file: str, output_dir: str = ".claude/c
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     # Load JSON commands
-    with open(json_file, 'r') as f:
+    with open(json_file) as f:
         data = json.load(f)
 
     commands = data.get('commands', [])

@@ -5,14 +5,14 @@ Comprehensive test suite for TaskDatabase including CRUD operations,
 dependency tracking, and query functionality.
 """
 
-import pytest
-import tempfile
 import shutil
+import tempfile
 from pathlib import Path
-from datetime import datetime, timedelta
 
-from src.oos_task_system.models import Task, TaskStatus, TaskPriority
+import pytest
+
 from src.oos_task_system.database import TaskDatabase
+from src.oos_task_system.models import Task, TaskPriority, TaskStatus
 
 
 class TestTaskDatabase:

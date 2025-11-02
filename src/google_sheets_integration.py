@@ -3,18 +3,15 @@ Google Sheets Integration for OOS
 Universal data backend accessible from any device
 """
 
-import json
-import os
-import asyncio
 import webbrowser
-from pathlib import Path
-from typing import Dict, List, Optional, Any
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from pathlib import Path
+from typing import Any
 
 try:
-    from google.oauth2.credentials import Credentials
     from google.auth.transport.requests import Request
+    from google.oauth2.credentials import Credentials
     from google_auth_oauthlib.flow import InstalledAppFlow
     from googleapiclient.discovery import build
     from googleapiclient.errors import HttpError
@@ -111,7 +108,7 @@ class GoogleSheetsIntegration:
             print(f"{Colors.YELLOW}You can continue without Google Sheets, but projects will be local-only.{Colors.END}")
             return False
 
-    async def create_dev_folder(self) -> Optional[str]:
+    async def create_dev_folder(self) -> str | None:
         """Create 'dev' folder in Google Drive if it doesn't exist"""
         if not self.drive_service:
             return None
@@ -148,7 +145,7 @@ class GoogleSheetsIntegration:
             print(f"{Colors.RED}Error creating dev folder: {e}{Colors.END}")
             return None
 
-    async def create_project_spreadsheet(self, project_data: ProjectData) -> Optional[Dict[str, Any]]:
+    async def create_project_spreadsheet(self, project_data: ProjectData) -> dict[str, Any] | None:
         """Create a new spreadsheet for a project"""
         if not self.sheets_service or not self.dev_folder_id:
             return None
@@ -324,7 +321,7 @@ class GoogleSheetsIntegration:
         except HttpError as e:
             print(f"{Colors.RED}Error initializing spreadsheet: {e}{Colors.END}")
 
-    async def list_projects(self) -> List[Dict[str, Any]]:
+    async def list_projects(self) -> list[dict[str, Any]]:
         """List all projects in the dev folder"""
         if not self.drive_service or not self.dev_folder_id:
             return []
@@ -352,7 +349,7 @@ class GoogleSheetsIntegration:
             print(f"{Colors.RED}Error listing projects: {e}{Colors.END}")
             return []
 
-    async def get_project_data(self, spreadsheet_id: str) -> Optional[Dict[str, Any]]:
+    async def get_project_data(self, spreadsheet_id: str) -> dict[str, Any] | None:
         """Get all data from a project spreadsheet"""
         if not self.sheets_service:
             return None
@@ -373,7 +370,7 @@ class GoogleSheetsIntegration:
 
             sheets = result.get('sheets', [])
             for i, sheet in enumerate(sheets):
-                sheet_title = sheet['properties']['title']
+                sheet['properties']['title']
                 data = sheet.get('data', [])[0]
                 rows = data.get('rowData', [])
 
@@ -407,7 +404,7 @@ class GoogleSheetsIntegration:
                             row_data.append('')
 
                     if any(row_data):  # Skip empty rows
-                        data_rows.append(dict(zip(headers, row_data)))
+                        data_rows.append(dict(zip(headers, row_data, strict=False)))
 
                 # Organize by sheet type
                 if i == 0:  # Config sheet
@@ -520,7 +517,7 @@ async def setup_google_sheets(config_dir: Path) -> bool:
     return success
 
 
-async def create_project_with_sheets(project_data: ProjectData, config_dir: Path) -> Optional[Dict[str, Any]]:
+async def create_project_with_sheets(project_data: ProjectData, config_dir: Path) -> dict[str, Any] | None:
     """Create a new project with Google Sheets integration"""
     integration = get_sheets_integration(config_dir)
 
@@ -536,7 +533,7 @@ async def create_project_with_sheets(project_data: ProjectData, config_dir: Path
     return await integration.create_project_spreadsheet(project_data)
 
 
-async def list_sheets_projects(config_dir: Path) -> List[Dict[str, Any]]:
+async def list_sheets_projects(config_dir: Path) -> list[dict[str, Any]]:
     """List all projects in Google Sheets"""
     integration = get_sheets_integration(config_dir)
 

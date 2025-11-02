@@ -16,9 +16,8 @@ The system will:
 4. Optionally send it directly to Claude via API
 """
 
-import sys
-import json
 import argparse
+import json
 from pathlib import Path
 
 # Prompt templates for different types of requests
@@ -123,7 +122,7 @@ def save_prompt_history(prompt_data, history_file="~/.oos/prompt_history.json"):
     history = []
     if history_path.exists():
         try:
-            with open(history_path, 'r') as f:
+            with open(history_path) as f:
                 history = json.load(f)
         except:
             history = []

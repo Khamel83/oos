@@ -166,7 +166,7 @@ def main():
     # Optimal selection
     optimal = create_optimal_selection()
 
-    print(f"\n🎯 OPTIMAL MODEL SELECTION:")
+    print("\n🎯 OPTIMAL MODEL SELECTION:")
     for category, model_id in optimal.items():
         model = model_analysis[model_id]
         print(f"   {category}: {model_id}")
@@ -186,7 +186,7 @@ def main():
     with open('/home/ubuntu/dev/oos/complete_model_analysis_results.json', 'w') as f:
         json.dump(results, f, indent=2)
 
-    print(f"\n💾 Complete analysis saved to: complete_model_analysis_results.json")
+    print("\n💾 Complete analysis saved to: complete_model_analysis_results.json")
 
     return results
 

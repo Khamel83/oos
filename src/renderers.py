@@ -4,11 +4,10 @@ Convert structured data into human-readable summaries and JSON outputs
 """
 
 import json
-from typing import Dict, List, Any, Optional
 from dataclasses import asdict
 
+from actions_gateway import ActionResult, ToolInfo
 from knowledge_resolver import KnowledgeResult, SourceInfo
-from actions_gateway import ToolInfo, ActionResult
 
 
 # Colors for terminal output
@@ -129,7 +128,7 @@ class CapabilityRenderer:
 
         return "\n".join(output)
 
-    def render_tools_list(self, tools: List[ToolInfo], domain: Optional[str] = None, show_json: bool = False) -> str:
+    def render_tools_list(self, tools: list[ToolInfo], domain: str | None = None, show_json: bool = False) -> str:
         """Render list of available tools"""
         output = []
 
@@ -192,7 +191,6 @@ class CapabilityRenderer:
         # Header
         status_color = 'green' if result.success else 'red'
         status_icon = '✅' if result.success else '❌'
-        status_text = 'Success' if result.success else 'Failed'
 
         output.append(self._colorize(f"{status_icon} Action Result", status_color))
         output.append("=" * 50)
@@ -290,7 +288,7 @@ def render_knowledge(result: KnowledgeResult, show_json: bool = False) -> str:
     return renderer.render_knowledge_result(result, show_json)
 
 
-def render_tools(tools: List[ToolInfo], domain: Optional[str] = None, show_json: bool = False) -> str:
+def render_tools(tools: list[ToolInfo], domain: str | None = None, show_json: bool = False) -> str:
     """Convenience function for rendering tool lists"""
     return renderer.render_tools_list(tools, domain, show_json)
 
@@ -307,7 +305,7 @@ def render_help() -> str:
 
 if __name__ == "__main__":
     # Test rendering with sample data
-    from .knowledge_resolver import KnowledgeResult, SourceInfo, QuotaInfo
+    from .knowledge_resolver import KnowledgeResult, QuotaInfo, SourceInfo
 
     sample_result = KnowledgeResult(
         domain="account/plan",

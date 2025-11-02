@@ -4,11 +4,11 @@ Handles action execution through MCP aggregators
 """
 
 import os
-import json
-import requests
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from typing import Any
+
+import requests
 
 
 @dataclass
@@ -18,11 +18,11 @@ class ToolInfo:
     name: str
     description: str
     domain: str
-    required_params: List[str]
-    optional_params: List[str]
-    provenance: Dict[str, str]  # source, repo_url, version, etc.
+    required_params: list[str]
+    optional_params: list[str]
+    provenance: dict[str, str]  # source, repo_url, version, etc.
     auth_required: bool
-    input_schema: Optional[Dict] = None
+    input_schema: dict | None = None
 
 
 @dataclass
@@ -30,15 +30,15 @@ class ActionResult:
     """Result of action execution"""
     success: bool
     message: str
-    tool_id: Optional[str] = None
+    tool_id: str | None = None
     result: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     duration_ms: int = 0
-    audit_trail: List[Dict] = None
+    audit_trail: list[dict] = None
     timestamp: str = ""
-    next_steps: List[str] = None
-    data: Optional[Dict] = None
-    suggested_actions: List[str] = None
+    next_steps: list[str] = None
+    data: dict | None = None
+    suggested_actions: list[str] = None
 
     def __post_init__(self):
         if self.audit_trail is None:
@@ -57,19 +57,19 @@ class ActionsGateway:
     Supports MetaMCP/Magg and direct MCP server connections
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.config = config or {}
         self.meta_mcp_url = os.getenv('META_MCP_URL')
         self.remote_mcp_urls = self._parse_remote_mcp_urls()
         self.timeout = int(os.getenv('ACTIONS_TIMEOUT', '30'))
         self.audit_log = []
 
-    def _parse_remote_mcp_urls(self) -> List[str]:
+    def _parse_remote_mcp_urls(self) -> list[str]:
         """Parse comma-separated remote MCP URLs"""
         urls = os.getenv('REMOTE_MCP_URLS', '')
         return [url.strip() for url in urls.split(',') if url.strip()]
 
-    async def list_tools(self, domain: Optional[str] = None) -> List[ToolInfo]:
+    async def list_tools(self, domain: str | None = None) -> list[ToolInfo]:
         """
         List available tools, optionally filtered by domain
         """
@@ -93,7 +93,7 @@ class ActionsGateway:
 
         return tools
 
-    async def _list_meta_mcp_tools(self, domain: Optional[str] = None) -> List[ToolInfo]:
+    async def _list_meta_mcp_tools(self, domain: str | None = None) -> list[ToolInfo]:
         """List tools from MetaMCP aggregator"""
         response = requests.post(
             f"{self.meta_mcp_url}/tools/list",
@@ -107,7 +107,7 @@ class ActionsGateway:
         data = response.json()
         return [self._parse_tool_info(tool, "meta-mcp") for tool in data.get('tools', [])]
 
-    async def _list_remote_mcp_tools(self, url: str, domain: Optional[str] = None) -> List[ToolInfo]:
+    async def _list_remote_mcp_tools(self, url: str, domain: str | None = None) -> list[ToolInfo]:
         """List tools from a remote MCP server"""
         response = requests.post(
             f"{url}/tools/list",
@@ -121,7 +121,7 @@ class ActionsGateway:
         data = response.json()
         return [self._parse_tool_info(tool, url) for tool in data.get('tools', [])]
 
-    def _parse_tool_info(self, tool_data: Dict, source: str) -> ToolInfo:
+    def _parse_tool_info(self, tool_data: dict, source: str) -> ToolInfo:
         """Parse tool information from server response"""
         return ToolInfo(
             id=tool_data.get('id', ''),
@@ -140,7 +140,7 @@ class ActionsGateway:
             input_schema=tool_data.get('input_schema')
         )
 
-    async def invoke(self, tool_id: str, params: Dict[str, Any]) -> ActionResult:
+    async def invoke(self, tool_id: str, params: dict[str, Any]) -> ActionResult:
         """
         Invoke a tool with parameters
         """
@@ -316,7 +316,7 @@ class ActionsGateway:
                 ]
             )
 
-    async def _find_tool(self, tool_id: str) -> Optional[ToolInfo]:
+    async def _find_tool(self, tool_id: str) -> ToolInfo | None:
         """Find a tool by ID"""
         all_tools = await self.list_tools()
         for tool in all_tools:
@@ -324,7 +324,7 @@ class ActionsGateway:
                 return tool
         return None
 
-    async def _invoke_meta_mcp(self, tool_id: str, params: Dict) -> Any:
+    async def _invoke_meta_mcp(self, tool_id: str, params: dict) -> Any:
         """Invoke tool through MetaMCP"""
         response = requests.post(
             f"{self.meta_mcp_url}/tools/invoke",
@@ -337,7 +337,7 @@ class ActionsGateway:
 
         return response.json().get('result')
 
-    async def _invoke_remote_mcp(self, url: str, tool_id: str, params: Dict) -> Any:
+    async def _invoke_remote_mcp(self, url: str, tool_id: str, params: dict) -> Any:
         """Invoke tool through remote MCP server"""
         response = requests.post(
             f"{url}/tools/invoke",
@@ -350,7 +350,7 @@ class ActionsGateway:
 
         return response.json().get('result')
 
-    def _sanitize_params(self, params: Dict) -> Dict:
+    def _sanitize_params(self, params: dict) -> dict:
         """Remove sensitive information from parameters for audit log"""
         sanitized = {}
         sensitive_keys = ['password', 'token', 'key', 'secret', 'auth']
@@ -379,11 +379,11 @@ class ActionsGateway:
         else:
             return f"Result of type {type(result).__name__}"
 
-    async def get_audit_log(self) -> List[Dict]:
+    async def get_audit_log(self) -> list[dict]:
         """Get the audit log of all actions"""
         return self.audit_log.copy()
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Check health of all connected aggregators"""
         health_status = {}
 
@@ -425,22 +425,22 @@ class ActionsGateway:
 gateway = ActionsGateway()
 
 
-async def list_available_tools(domain: Optional[str] = None) -> List[ToolInfo]:
+async def list_available_tools(domain: str | None = None) -> list[ToolInfo]:
     """Convenience function for listing tools"""
     return await gateway.list_tools(domain)
 
 
-async def execute_action(tool_id: str, params: Dict[str, Any]) -> ActionResult:
+async def execute_action(tool_id: str, params: dict[str, Any]) -> ActionResult:
     """Convenience function for executing actions"""
     return await gateway.invoke(tool_id, params)
 
 
-def tool_info_to_dict(tool: ToolInfo) -> Dict:
+def tool_info_to_dict(tool: ToolInfo) -> dict:
     """Convert ToolInfo to dictionary for JSON serialization"""
     return asdict(tool)
 
 
-def action_result_to_dict(result: ActionResult) -> Dict:
+def action_result_to_dict(result: ActionResult) -> dict:
     """Convert ActionResult to dictionary for JSON serialization"""
     return asdict(result)
 

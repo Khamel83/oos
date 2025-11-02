@@ -4,15 +4,13 @@ Test script for Learning & Improvement System
 Validates pattern detection, usage tracking, and recommendation generation
 """
 
-import json
 import asyncio
-import tempfile
 import os
-import sys
-from pathlib import Path
-from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
 import sqlite3
+import sys
+import tempfile
+from datetime import datetime, timedelta
+from pathlib import Path
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -21,9 +19,14 @@ sys.path.insert(0, str(project_root))
 # Try to import the learning system
 try:
     from src.learning_system import (
-        LearningSystem, LearningData, UsagePattern, ImprovementSuggestion,
-        record_command_usage, get_recommendations, get_usage_statistics,
-        get_learning_system
+        ImprovementSuggestion,
+        LearningData,
+        LearningSystem,
+        UsagePattern,
+        get_learning_system,
+        get_recommendations,
+        get_usage_statistics,
+        record_command_usage,
     )
     LEARNING_SYSTEM_AVAILABLE = True
 except ImportError as e:
@@ -81,7 +84,7 @@ class TestLearningSystem:
         """Test database initialization and table creation"""
         print("\n🧪 Testing Database Initialization...")
 
-        learning_system = LearningSystem(db_path=self.db_path)
+        LearningSystem(db_path=self.db_path)
 
         # Check that database file is created
         assert os.path.exists(self.db_path)

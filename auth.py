@@ -1,10 +1,7 @@
-import os
-import hashlib
-from typing import Optional
 
 # In a real implementation, this would use proper password hashing
 # and secure credential storage
-def authenticate_user(username: Optional[str], password: Optional[str]) -> bool:
+def authenticate_user(username: str | None, password: str | None) -> bool:
     """
     Authenticate user with secure password validation.
 

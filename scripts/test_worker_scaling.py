@@ -5,13 +5,13 @@ Test script for worker scaling functionality
 
 import sys
 import time
-import json
 from pathlib import Path
 
 # Add helpers to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from helpers.resource_manager import ResourceManager
 from scripts.worker_scaler import WorkerScaler
+
 
 def test_resource_manager():
     """Test resource manager functionality"""
@@ -116,7 +116,7 @@ def test_integration():
 
     # Get combined status
     print("  Getting combined status...")
-    combined_status = {
+    {
         'resource_metrics': rm.get_metrics_summary(),
         'worker_status': scaler.get_status(),
         'timestamp': time.time()
@@ -134,7 +134,7 @@ def test_error_handling():
     # Test with invalid configuration
     print("  Testing with invalid config...")
     try:
-        rm = ResourceManager("nonexistent_config.json")
+        ResourceManager("nonexistent_config.json")
         print("  ✓ Resource manager handles missing config")
     except Exception as e:
         print(f"  ✗ Unexpected error: {e}")
@@ -164,14 +164,14 @@ def run_performance_test():
         print(f"  Iteration {i+1}/5...")
 
         # Collect metrics
-        metrics = rm.collect_metrics()
+        rm.collect_metrics()
 
         # Check scaling decision
         queue_depth = 100 + (i * 50)  # Simulate increasing load
-        scale_result = scaler.scale_workers(queue_depth)
+        scaler.scale_workers(queue_depth)
 
         # Health check
-        health_result = scaler.health_check()
+        scaler.health_check()
 
         time.sleep(1)  # Brief pause
 

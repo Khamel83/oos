@@ -25,12 +25,12 @@ Usage:
     ready_tasks = db.get_ready_tasks()
 """
 
-from .models import Task, TaskStatus, TaskPriority
 from .database import TaskDatabase
-from .dependencies import DependencyGraph, CyclicDependencyError
+from .dependencies import CyclicDependencyError, DependencyGraph
+from .jsonl_export import ExportError, TaskExporter
+from .jsonl_import import ConflictResolution, ImportResult, TaskImporter
+from .models import Task, TaskPriority, TaskStatus
 from .validation import TaskValidator, ValidationError, ValidationResult
-from .jsonl_export import TaskExporter, ExportError
-from .jsonl_import import TaskImporter, ImportResult, ConflictResolution
 
 # CLI is optional import to avoid requiring click for basic usage
 try:

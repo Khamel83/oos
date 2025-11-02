@@ -4,16 +4,15 @@ Strategic Consultant - AI Consultant Brain
 Analyzes current state, maps optimal paths, drives execution through Archon
 """
 
-import asyncio
-import json
-import yaml
-import re
-from typing import Dict, Any, List, Optional, Tuple
-from pathlib import Path
-from dataclasses import dataclass, asdict
-from datetime import datetime
 import logging
+import re
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Any
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -25,36 +24,36 @@ class StrategicDirection(Enum):
 @dataclass
 class CurrentState:
     """Analysis of current project state"""
-    project_structure: Dict[str, Any]
-    tech_stack: List[str]
+    project_structure: dict[str, Any]
+    tech_stack: list[str]
     documentation_quality: float  # 0-1 score
-    code_quality_metrics: Dict[str, float]
-    team_capacity: Dict[str, Any]
-    current_roadmap: Optional[Dict[str, Any]]
-    constraints: Dict[str, Any]
-    risks: List[str]
-    opportunities: List[str]
+    code_quality_metrics: dict[str, float]
+    team_capacity: dict[str, Any]
+    current_roadmap: dict[str, Any] | None
+    constraints: dict[str, Any]
+    risks: list[str]
+    opportunities: list[str]
 
 @dataclass
 class DesiredFuture:
     """Defined future state and goals"""
     primary_objective: str
-    success_metrics: List[str]
-    timeline_constraints: Dict[str, str]
-    budget_constraints: Dict[str, Any]
-    quality_requirements: List[str]
-    strategic_priorities: List[str]
+    success_metrics: list[str]
+    timeline_constraints: dict[str, str]
+    budget_constraints: dict[str, Any]
+    quality_requirements: list[str]
+    strategic_priorities: list[str]
 
 @dataclass
 class PathAnalysis:
     """Analysis of current vs optimal path"""
-    current_trajectory: Dict[str, Any]
-    optimal_path: Dict[str, Any]
-    gap_analysis: List[str]
-    recommendations: List[str]
-    estimated_timeline: Dict[str, str]
-    resource_requirements: Dict[str, Any]
-    risk_assessment: List[Dict[str, Any]]
+    current_trajectory: dict[str, Any]
+    optimal_path: dict[str, Any]
+    gap_analysis: list[str]
+    recommendations: list[str]
+    estimated_timeline: dict[str, str]
+    resource_requirements: dict[str, Any]
+    risk_assessment: list[dict[str, Any]]
     strategic_direction: StrategicDirection
 
 @dataclass
@@ -62,12 +61,12 @@ class ConsultantRecommendation:
     """Final strategic recommendation"""
     direction: StrategicDirection
     rationale: str
-    immediate_actions: List[str]
-    medium_term_actions: List[str]
-    long_term_actions: List[str]
-    success_metrics: List[str]
-    early_warnings: List[str]
-    archon_project_plan: Dict[str, Any]
+    immediate_actions: list[str]
+    medium_term_actions: list[str]
+    long_term_actions: list[str]
+    success_metrics: list[str]
+    early_warnings: list[str]
+    archon_project_plan: dict[str, Any]
 
 class StrategicConsultant:
     """
@@ -86,10 +85,10 @@ class StrategicConsultant:
             logger.warning("Archon integration not available")
             self.archon_integration = None
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load consultant configuration"""
         try:
-            with open("config/consultant.yaml", "r") as f:
+            with open("config/consultant.yaml") as f:
                 return yaml.safe_load(f)
         except:
             # Default config
@@ -136,9 +135,6 @@ class StrategicConsultant:
     def _parse_strategic_question(self, question: str) -> DesiredFuture:
         """Parse strategic question to extract objectives and constraints"""
         # Extract key information patterns
-        scaling_pattern = r"scale from (\d+) to (\d+)"
-        timeline_pattern = r"by (Q[1-4]| \d+ weeks| \d+ months)"
-        budget_pattern = r"(\$?\d+[kKmM]|budget \$?\d+)"
 
         desired_future = DesiredFuture(
             primary_objective=question,
@@ -190,7 +186,7 @@ class StrategicConsultant:
             opportunities=opportunities
         )
 
-    def _analyze_project_structure(self) -> Dict[str, Any]:
+    def _analyze_project_structure(self) -> dict[str, Any]:
         """Analyze project directory structure"""
         structure = {
             "directories": [],
@@ -214,7 +210,7 @@ class StrategicConsultant:
 
         return structure
 
-    def _identify_tech_stack(self) -> List[str]:
+    def _identify_tech_stack(self) -> list[str]:
         """Identify technology stack from files"""
         tech_stack = []
 
@@ -258,7 +254,7 @@ class StrategicConsultant:
 
         return min(score, 1.0)
 
-    def _analyze_code_quality(self) -> Dict[str, float]:
+    def _analyze_code_quality(self) -> dict[str, float]:
         """Analyze code quality metrics"""
         metrics = {
             "test_coverage": 0.0,
@@ -278,7 +274,7 @@ class StrategicConsultant:
 
         return metrics
 
-    def _extract_team_capacity(self) -> Dict[str, Any]:
+    def _extract_team_capacity(self) -> dict[str, Any]:
         """Extract team capacity from documentation"""
         capacity = {
             "team_size": "Unknown",
@@ -295,7 +291,7 @@ class StrategicConsultant:
 
         return capacity
 
-    def _extract_current_roadmap(self) -> Optional[Dict[str, Any]]:
+    def _extract_current_roadmap(self) -> dict[str, Any] | None:
         """Extract current roadmap from documentation"""
         roadmap_files = ["ROADMAP.md", "roadmap.md", "PLANNING.md"]
         for file in roadmap_files:
@@ -304,7 +300,7 @@ class StrategicConsultant:
                 return {"source": file, "exists": True}
         return None
 
-    def _identify_constraints(self) -> Dict[str, Any]:
+    def _identify_constraints(self) -> dict[str, Any]:
         """Identify project constraints"""
         return {
             "budget": "Documented in question",
@@ -313,7 +309,7 @@ class StrategicConsultant:
             "technical": "Current tech stack"
         }
 
-    def _identify_risks(self) -> List[str]:
+    def _identify_risks(self) -> list[str]:
         """Identify project risks"""
         risks = []
         if self._assess_documentation() < 0.5:
@@ -322,7 +318,7 @@ class StrategicConsultant:
             risks.append("Single technology dependency")
         return risks
 
-    def _identify_opportunities(self) -> List[str]:
+    def _identify_opportunities(self) -> list[str]:
         """Identify improvement opportunities"""
         opportunities = []
         if self._assess_documentation() < 0.8:
@@ -332,7 +328,7 @@ class StrategicConsultant:
             opportunities.append("Consolidate technology stack")
         return opportunities
 
-    def _extract_success_metrics(self, question: str) -> List[str]:
+    def _extract_success_metrics(self, question: str) -> list[str]:
         """Extract success metrics from question"""
         metrics = []
         if "scale" in question.lower():
@@ -343,23 +339,21 @@ class StrategicConsultant:
             metrics.append("Vulnerability resolution rate")
         return metrics or ["Objective achievement rate"]
 
-    def _extract_timeline_constraints(self, question: str) -> Dict[str, str]:
+    def _extract_timeline_constraints(self, question: str) -> dict[str, str]:
         """Extract timeline constraints from question"""
-        import re
         timeline_match = re.search(r"by (Q[1-4]| \d+ weeks| \d+ months)", question)
         if timeline_match:
             return {"deadline": timeline_match.group(1)}
         return {"deadline": "Not specified"}
 
-    def _extract_budget_constraints(self, question: str) -> Dict[str, Any]:
+    def _extract_budget_constraints(self, question: str) -> dict[str, Any]:
         """Extract budget constraints from question"""
-        import re
         budget_match = re.search(r"\$?(\d+)[kK]", question)
         if budget_match:
             return {"budget": f"${budget_match.group(1)}k"}
         return {"budget": "Not specified"}
 
-    def _extract_strategic_priorities(self, question: str) -> List[str]:
+    def _extract_strategic_priorities(self, question: str) -> list[str]:
         """Extract strategic priorities from question"""
         priorities = []
         if "scale" in question.lower():
@@ -413,7 +407,7 @@ class StrategicConsultant:
             strategic_direction=direction
         )
 
-    def _calculate_gaps(self, current: CurrentState, desired: DesiredFuture) -> List[str]:
+    def _calculate_gaps(self, current: CurrentState, desired: DesiredFuture) -> list[str]:
         """Calculate gaps between current and desired state"""
         gaps = []
 
@@ -432,7 +426,7 @@ class StrategicConsultant:
 
         return gaps
 
-    def _design_phases(self, current: CurrentState, desired: DesiredFuture) -> List[Dict[str, Any]]:
+    def _design_phases(self, current: CurrentState, desired: DesiredFuture) -> list[dict[str, Any]]:
         """Design implementation phases"""
         phases = [
             {
@@ -460,7 +454,7 @@ class StrategicConsultant:
 
         return phases
 
-    def _optimize_resources(self, current: CurrentState, desired: DesiredFuture) -> Dict[str, Any]:
+    def _optimize_resources(self, current: CurrentState, desired: DesiredFuture) -> dict[str, Any]:
         """Optimize resource allocation"""
         return {
             "team_allocation": "Full team on strategic initiatives",
@@ -468,7 +462,7 @@ class StrategicConsultant:
             "tooling_investment": "Automation and monitoring tools"
         }
 
-    def _calculate_optimal_timeline(self, current: CurrentState, desired: DesiredFuture) -> Dict[str, str]:
+    def _calculate_optimal_timeline(self, current: CurrentState, desired: DesiredFuture) -> dict[str, str]:
         """Calculate optimal timeline"""
         return {
             "total_duration": "6 months",
@@ -477,7 +471,7 @@ class StrategicConsultant:
             "optimization_phase": "1 month"
         }
 
-    def _identify_key_milestones(self, desired: DesiredFuture) -> List[str]:
+    def _identify_key_milestones(self, desired: DesiredFuture) -> list[str]:
         """Identify key milestones"""
         from datetime import timedelta
         now = datetime.now()
@@ -489,7 +483,7 @@ class StrategicConsultant:
             f"Objective achieved: {desired.timeline_constraints.get('deadline', 'Q4')}"
         ]
 
-    def _generate_recommendations(self, current: CurrentState, desired: DesiredFuture, gaps: List[str]) -> List[str]:
+    def _generate_recommendations(self, current: CurrentState, desired: DesiredFuture, gaps: list[str]) -> list[str]:
         """Generate strategic recommendations"""
         recommendations = []
 
@@ -507,7 +501,7 @@ class StrategicConsultant:
 
         return recommendations
 
-    def _determine_strategic_direction(self, current: CurrentState, desired: DesiredFuture, gaps: List[str]) -> StrategicDirection:
+    def _determine_strategic_direction(self, current: CurrentState, desired: DesiredFuture, gaps: list[str]) -> StrategicDirection:
         """Determine strategic direction"""
         # If current state is close to desired, stay course
         if len(gaps) <= 2 and current.documentation_quality > 0.7:
@@ -521,7 +515,7 @@ class StrategicConsultant:
         else:
             return StrategicDirection.SCRAP_AND_REBUILD
 
-    def _assess_path_risks(self, optimal_path: Dict[str, Any], current: CurrentState) -> List[Dict[str, Any]]:
+    def _assess_path_risks(self, optimal_path: dict[str, Any], current: CurrentState) -> list[dict[str, Any]]:
         """Assess risks in optimal path"""
         risks = [
             {"risk": "Timeline slippage", "probability": "Medium", "mitigation": "Buffer planning"},
@@ -530,7 +524,7 @@ class StrategicConsultant:
         ]
         return risks
 
-    def _estimate_timeline(self, optimal_path: Dict[str, Any]) -> Dict[str, str]:
+    def _estimate_timeline(self, optimal_path: dict[str, Any]) -> dict[str, str]:
         """Estimate implementation timeline"""
         return {
             "foundation": "30 days",
@@ -572,7 +566,7 @@ class StrategicConsultant:
             archon_project_plan={}  # Will be populated in _create_archon_plan
         )
 
-    def _generate_immediate_actions(self, direction: StrategicDirection, path_analysis: PathAnalysis) -> List[str]:
+    def _generate_immediate_actions(self, direction: StrategicDirection, path_analysis: PathAnalysis) -> list[str]:
         """Generate immediate action items"""
         actions = [
             "Document current state assessment",
@@ -588,7 +582,7 @@ class StrategicConsultant:
 
         return actions
 
-    def _generate_medium_term_actions(self, direction: StrategicDirection, path_analysis: PathAnalysis) -> List[str]:
+    def _generate_medium_term_actions(self, direction: StrategicDirection, path_analysis: PathAnalysis) -> list[str]:
         """Generate medium-term action items"""
         return [
             "Execute core implementation phases",
@@ -596,7 +590,7 @@ class StrategicConsultant:
             "Adjust based on learnings"
         ]
 
-    def _generate_long_term_actions(self, direction: StrategicDirection, desired: DesiredFuture) -> List[str]:
+    def _generate_long_term_actions(self, direction: StrategicDirection, desired: DesiredFuture) -> list[str]:
         """Generate long-term action items"""
         return [
             f"Achieve primary objective: {desired.primary_objective}",
@@ -604,7 +598,7 @@ class StrategicConsultant:
             "Plan next strategic cycle"
         ]
 
-    def _generate_early_warnings(self, direction: StrategicDirection, path_analysis: PathAnalysis) -> List[str]:
+    def _generate_early_warnings(self, direction: StrategicDirection, path_analysis: PathAnalysis) -> list[str]:
         """Generate early warning indicators"""
         warnings = [
             "Documentation quality below 70%",
@@ -617,7 +611,7 @@ class StrategicConsultant:
 
         return warnings
 
-    async def _create_archon_plan(self, recommendation: ConsultantRecommendation, question: str = None) -> Dict[str, Any]:
+    async def _create_archon_plan(self, recommendation: ConsultantRecommendation, question: str = None) -> dict[str, Any]:
         """Create Archon project plan for execution"""
         if self.archon_integration:
             try:
@@ -650,7 +644,7 @@ class StrategicConsultant:
             "archon_connected": False
         }
 
-    def _plan_archon_phases(self, recommendation: ConsultantRecommendation) -> List[Dict[str, Any]]:
+    def _plan_archon_phases(self, recommendation: ConsultantRecommendation) -> list[dict[str, Any]]:
         """Plan Archon project phases"""
         return [
             {
@@ -670,7 +664,7 @@ class StrategicConsultant:
             }
         ]
 
-    def _plan_archon_tasks(self, recommendation: ConsultantRecommendation) -> List[Dict[str, Any]]:
+    def _plan_archon_tasks(self, recommendation: ConsultantRecommendation) -> list[dict[str, Any]]:
         """Plan detailed Archon tasks"""
         tasks = []
         all_actions = recommendation.immediate_actions + recommendation.medium_term_actions + recommendation.long_term_actions
@@ -685,7 +679,7 @@ class StrategicConsultant:
 
         return tasks
 
-    def _plan_archon_milestones(self, recommendation: ConsultantRecommendation) -> List[Dict[str, Any]]:
+    def _plan_archon_milestones(self, recommendation: ConsultantRecommendation) -> list[dict[str, Any]]:
         """Plan Archon milestones"""
         from datetime import timedelta
         now = datetime.now()

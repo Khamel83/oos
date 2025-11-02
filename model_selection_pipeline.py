@@ -10,9 +10,8 @@ Takes the full model cost table and filters down to the usable population:
 
 import csv
 import json
-from typing import Dict, List, Tuple
 from dataclasses import dataclass
-from pathlib import Path
+
 
 @dataclass
 class ModelInfo:
@@ -24,7 +23,7 @@ class ModelInfo:
     is_free: bool
     avg_cost: float
     compatibility_status: str = "UNKNOWN"
-    restrictions: List[str] = None
+    restrictions: list[str] = None
 
     def __post_init__(self):
         if self.restrictions is None:
@@ -37,11 +36,11 @@ class ModelSelectionPipeline:
         self.models = []
         self.compatibility_results = {}
 
-    def load_models_from_csv(self, csv_path: str) -> List[ModelInfo]:
+    def load_models_from_csv(self, csv_path: str) -> list[ModelInfo]:
         """Load all models from the cost table CSV"""
         models = []
 
-        with open(csv_path, 'r') as f:
+        with open(csv_path) as f:
             reader = csv.DictReader(f)
             for row in reader:
                 model = ModelInfo(
@@ -58,10 +57,10 @@ class ModelSelectionPipeline:
         print(f"Loaded {len(models)} models from cost table")
         return models
 
-    def load_compatibility_results(self, results_path: str) -> Dict:
+    def load_compatibility_results(self, results_path: str) -> dict:
         """Load compatibility test results"""
         try:
-            with open(results_path, 'r') as f:
+            with open(results_path) as f:
                 self.compatibility_results = json.load(f)
                 print(f"Loaded compatibility results for {len(self.compatibility_results.get('results', []))} models")
         except FileNotFoundError:
@@ -70,7 +69,7 @@ class ModelSelectionPipeline:
 
         return self.compatibility_results
 
-    def apply_cost_filter(self, models: List[ModelInfo]) -> Tuple[List[ModelInfo], List[ModelInfo]]:
+    def apply_cost_filter(self, models: list[ModelInfo]) -> tuple[list[ModelInfo], list[ModelInfo]]:
         """Filter models by $1/M cost ceiling"""
         affordable = []
         too_expensive = []
@@ -84,7 +83,7 @@ class ModelSelectionPipeline:
         print(f"Cost filter: {len(affordable)} affordable, {len(too_expensive)} too expensive")
         return affordable, too_expensive
 
-    def apply_compatibility_filter(self, models: List[ModelInfo]) -> Tuple[List[ModelInfo], List[ModelInfo]]:
+    def apply_compatibility_filter(self, models: list[ModelInfo]) -> tuple[list[ModelInfo], list[ModelInfo]]:
         """Filter out incompatible models based on test results"""
         compatible = []
         incompatible = []
@@ -113,7 +112,7 @@ class ModelSelectionPipeline:
         print(f"Compatibility filter: {len(compatible)} compatible, {len(incompatible)} incompatible")
         return compatible, incompatible
 
-    def categorize_models(self, models: List[ModelInfo]) -> Dict[str, List[ModelInfo]]:
+    def categorize_models(self, models: list[ModelInfo]) -> dict[str, list[ModelInfo]]:
         """Categorize models by type and cost for strategic selection"""
         categories = {
             'free_tier': [],      # $0.00 - Free models
@@ -139,7 +138,7 @@ class ModelSelectionPipeline:
 
         return categories
 
-    def create_selection_matrix(self, categories: Dict[str, List[ModelInfo]]) -> Dict:
+    def create_selection_matrix(self, categories: dict[str, list[ModelInfo]]) -> dict:
         """Create strategic selection matrix for different use cases"""
         matrix = {
             'rapid_iteration': {
@@ -165,7 +164,7 @@ class ModelSelectionPipeline:
         }
 
         # Populate models for each use case
-        for use_case, config in matrix.items():
+        for _use_case, config in matrix.items():
             for tier in config['preferred_tiers']:
                 config['models'].extend(categories.get(tier, []))
 
@@ -174,7 +173,7 @@ class ModelSelectionPipeline:
 
         return matrix
 
-    def generate_final_population(self) -> Dict:
+    def generate_final_population(self) -> dict:
         """Generate the final usable model population"""
         print("=== SOLO CREATOR MECHA SUIT - Model Selection Pipeline ===\n")
 
@@ -230,28 +229,28 @@ class ModelSelectionPipeline:
 
         return final_population
 
-    def save_results(self, population: Dict, output_path: str):
+    def save_results(self, population: dict, output_path: str):
         """Save the final population to JSON"""
         with open(output_path, 'w') as f:
             json.dump(population, f, indent=2)
         print(f"\nFinal population saved to: {output_path}")
 
-    def print_summary(self, population: Dict):
+    def print_summary(self, population: dict):
         """Print summary of the selection process"""
         metadata = population['metadata']
         categories = population['categories']
 
-        print(f"\n=== SELECTION SUMMARY ===")
+        print("\n=== SELECTION SUMMARY ===")
         print(f"Starting models: {metadata['total_models_in_table']}")
         print(f"Excluded for cost > ${metadata['cost_ceiling']}/M: {metadata['expensive_excluded']}")
         print(f"Excluded for incompatibility: {metadata['incompatible_excluded']}")
         print(f"Final usable population: {metadata['final_population']}")
 
-        print(f"\n=== FINAL MODEL BREAKDOWN ===")
+        print("\n=== FINAL MODEL BREAKDOWN ===")
         for category, count in categories.items():
             print(f"{category.replace('_', ' ').title()}: {count} models")
 
-        print(f"\n=== TOP RECOMMENDED MODELS ===")
+        print("\n=== TOP RECOMMENDED MODELS ===")
         for use_case, config in population['selection_matrix'].items():
             print(f"\n{use_case.replace('_', ' ').title()}: {config['description']}")
             top_models = config['models'][:3]

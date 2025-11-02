@@ -4,19 +4,20 @@ Dynamic worker scaling based on queue depth and system resources
 """
 
 import json
-import time
-import psutil
-import subprocess
 import logging
 import signal
+import subprocess
 import sys
-from pathlib import Path
+import time
 from datetime import datetime
-from typing import Dict, List, Optional
+from pathlib import Path
+
+import psutil
 
 # Add helpers to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from helpers.resource_manager import ResourceManager
+
 
 class WorkerScaler:
     """Manages dynamic scaling of worker processes"""
@@ -26,7 +27,7 @@ class WorkerScaler:
         self.logger = self._setup_logging()
         self.config = self._load_config()
         self.resource_manager = ResourceManager()
-        self.worker_processes: List[subprocess.Popen] = []
+        self.worker_processes: list[subprocess.Popen] = []
         self.last_scale_time = datetime.now()
 
     def _setup_logging(self) -> logging.Logger:
@@ -44,7 +45,7 @@ class WorkerScaler:
 
         return logger
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """Load worker configuration"""
         default_config = {
             "worker_command": ["python3", "-c", "import time; time.sleep(60)"],  # Dummy worker
@@ -78,7 +79,7 @@ class WorkerScaler:
             self.logger.error(f"Error loading config: {e}")
             return default_config
 
-    def _save_config(self, config: Dict):
+    def _save_config(self, config: dict):
         """Save configuration to file"""
         try:
             with open(self.config_path, 'w') as f:
@@ -98,7 +99,7 @@ class WorkerScaler:
         except:
             return 0
 
-    def start_worker(self) -> Optional[subprocess.Popen]:
+    def start_worker(self) -> subprocess.Popen | None:
         """Start a new worker process"""
         try:
             import os
@@ -197,10 +198,7 @@ class WorkerScaler:
             return False
 
         # Check resource limits
-        if not self.check_resource_limits():
-            return False
-
-        return True
+        return self.check_resource_limits()
 
     def should_scale_down(self, queue_depth: int, current_workers: int) -> bool:
         """Determine if we should scale down workers"""
@@ -213,12 +211,9 @@ class WorkerScaler:
         # Check if enough time has passed since last scaling
         scale_delay = self.config["scale_down_delay"]
         time_since_last = (datetime.now() - self.last_scale_time).total_seconds()
-        if time_since_last < scale_delay:
-            return False
+        return not time_since_last < scale_delay
 
-        return True
-
-    def scale_workers(self, queue_depth: int) -> Dict:
+    def scale_workers(self, queue_depth: int) -> dict:
         """Scale workers based on queue depth"""
         current_workers = self.get_worker_count()
 
@@ -258,9 +253,9 @@ class WorkerScaler:
 
         return result
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         """Perform health check on all workers"""
-        current_workers = self.get_worker_count()
+        self.get_worker_count()
         dead_workers_cleaned = self.cleanup_dead_workers()
 
         # Check for stuck workers (running too long)
@@ -313,7 +308,7 @@ class WorkerScaler:
                 current_workers = self.get_worker_count()
 
                 # Collect system metrics
-                metrics = self.resource_manager.collect_metrics(
+                self.resource_manager.collect_metrics(
                     queue_depth=queue_depth,
                     worker_count=current_workers
                 )
@@ -322,7 +317,7 @@ class WorkerScaler:
                 scale_result = self.scale_workers(queue_depth)
 
                 # Health check
-                health_result = self.health_check()
+                self.health_check()
 
                 # Log status
                 if scale_result["action"] != "none":
@@ -347,7 +342,7 @@ class WorkerScaler:
 
         self.logger.info("Worker scaler shutdown complete")
 
-    def get_status(self) -> Dict:
+    def get_status(self) -> dict:
         """Get current scaler status"""
         queue_depth = self.get_queue_depth()
         current_workers = self.get_worker_count()
@@ -368,7 +363,6 @@ def signal_handler(signum, frame):
 
 if __name__ == "__main__":
     import argparse
-    import os
 
     # Setup signal handlers
     signal.signal(signal.SIGINT, signal_handler)

@@ -1,7 +1,8 @@
 import unittest
-from unittest.mock import patch, MagicMock
-import shutil
-from lib.health_check import run_health_check, Colors
+from unittest.mock import patch
+
+from lib.health_check import Colors, run_health_check
+
 
 class TestHealthCheck(unittest.TestCase):
 

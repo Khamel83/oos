@@ -6,23 +6,22 @@ Analyzes GitHub repositories to extract recurring patterns, architectural decisi
 and development workflows for conversion into Claude Code slash commands.
 """
 
-import os
-import json
-import re
 import ast
-from typing import Dict, List, Any, Optional, Set
+import json
+import os
+import re
+from collections import Counter, defaultdict
 from pathlib import Path
-from collections import defaultdict, Counter
-import requests
+from typing import Any
+
 from github import Github
 from github.Repository import Repository
-from github.ContentFile import ContentFile
 
 
 class RepositoryAnalyzer:
     """Main analyzer class for extracting patterns from GitHub repositories"""
 
-    def __init__(self, github_token: Optional[str] = None):
+    def __init__(self, github_token: str | None = None):
         self.github_token = github_token or os.getenv('GITHUB_TOKEN')
         self.github = Github(self.github_token) if self.github_token else None
         self.patterns = {
@@ -34,7 +33,7 @@ class RepositoryAnalyzer:
             'automation': []
         }
 
-    def analyze_repository(self, repo_url: str) -> Dict[str, Any]:
+    def analyze_repository(self, repo_url: str) -> dict[str, Any]:
         """Analyze a single repository and extract patterns"""
         if not self.github:
             raise ValueError("GitHub token required for repository analysis")
@@ -64,7 +63,7 @@ class RepositoryAnalyzer:
 
         return analysis
 
-    def _extract_repo_path(self, repo_url: str) -> Optional[str]:
+    def _extract_repo_path(self, repo_url: str) -> str | None:
         """Extract owner/repo path from GitHub URL"""
         patterns = [
             r'github\.com/([^/]+/[^/]+?)(?:\.git)?/?$',
@@ -77,7 +76,7 @@ class RepositoryAnalyzer:
                 return match.group(1)
         return None
 
-    def _analyze_file_structure(self, repo: Repository) -> Dict[str, Any]:
+    def _analyze_file_structure(self, repo: Repository) -> dict[str, Any]:
         """Analyze repository file structure and organization patterns"""
         structure = {
             'directories': defaultdict(list),
@@ -117,7 +116,7 @@ class RepositoryAnalyzer:
 
         return dict(structure)
 
-    def _extract_patterns(self, repo: Repository) -> Dict[str, List[Dict[str, Any]]]:
+    def _extract_patterns(self, repo: Repository) -> dict[str, list[dict[str, Any]]]:
         """Extract code patterns and architectural decisions"""
         patterns = {
             'architectural': [],
@@ -154,7 +153,7 @@ class RepositoryAnalyzer:
 
         return patterns
 
-    def _extract_workflows(self, repo: Repository) -> List[Dict[str, Any]]:
+    def _extract_workflows(self, repo: Repository) -> list[dict[str, Any]]:
         """Extract CI/CD and automation workflows"""
         workflows = []
 
@@ -170,7 +169,7 @@ class RepositoryAnalyzer:
                     except Exception as e:
                         print(f"Error analyzing workflow {workflow_file.name}: {e}")
 
-        except Exception as e:
+        except Exception:
             # No .github/workflows directory
             pass
 
@@ -179,7 +178,7 @@ class RepositoryAnalyzer:
 
         return workflows
 
-    def _analyze_documentation(self, repo: Repository) -> Dict[str, Any]:
+    def _analyze_documentation(self, repo: Repository) -> dict[str, Any]:
         """Analyze documentation patterns and structure"""
         docs_analysis = {
             'readme_exists': False,
@@ -207,14 +206,14 @@ class RepositoryAnalyzer:
 
             # Check for contributing guide
             try:
-                contributing = repo.get_contents('CONTRIBUTING.md')
+                repo.get_contents('CONTRIBUTING.md')
                 docs_analysis['contributing_guide'] = True
             except:
                 pass
 
             # Check for changelog
             try:
-                changelog = repo.get_contents('CHANGELOG.md')
+                repo.get_contents('CHANGELOG.md')
                 docs_analysis['changelog'] = True
             except:
                 pass
@@ -260,7 +259,7 @@ class RepositoryAnalyzer:
         ]
         return any(re.match(pattern, filepath.lower()) for pattern in entry_patterns)
 
-    def _get_code_files(self, repo: Repository) -> List[str]:
+    def _get_code_files(self, repo: Repository) -> list[str]:
         """Get list of code files to analyze"""
         code_extensions = ['.py', '.js', '.ts', '.jsx', '.tsx', '.go', '.rs', 'java', 'cpp', 'c']
         code_files = []
@@ -280,7 +279,7 @@ class RepositoryAnalyzer:
 
         return code_files
 
-    def _analyze_python_patterns(self, content: str, file_path: str) -> List[Dict[str, Any]]:
+    def _analyze_python_patterns(self, content: str, file_path: str) -> list[dict[str, Any]]:
         """Analyze Python code for patterns"""
         patterns = []
 
@@ -317,7 +316,7 @@ class RepositoryAnalyzer:
 
         return patterns
 
-    def _analyze_javascript_patterns(self, content: str, file_path: str) -> List[Dict[str, Any]]:
+    def _analyze_javascript_patterns(self, content: str, file_path: str) -> list[dict[str, Any]]:
         """Analyze JavaScript/TypeScript code for patterns"""
         patterns = []
 
@@ -342,7 +341,7 @@ class RepositoryAnalyzer:
 
         return patterns
 
-    def _analyze_go_patterns(self, content: str, file_path: str) -> List[Dict[str, Any]]:
+    def _analyze_go_patterns(self, content: str, file_path: str) -> list[dict[str, Any]]:
         """Analyze Go code for patterns"""
         patterns = []
 
@@ -366,7 +365,7 @@ class RepositoryAnalyzer:
 
         return patterns
 
-    def _analyze_github_workflow(self, content: str, filename: str) -> Dict[str, Any]:
+    def _analyze_github_workflow(self, content: str, filename: str) -> dict[str, Any]:
         """Analyze GitHub Actions workflow"""
         workflow_analysis = {
             'name': filename,
@@ -401,7 +400,7 @@ class RepositoryAnalyzer:
 
         return workflow_analysis
 
-    def _analyze_other_workflows(self, repo: Repository) -> List[Dict[str, Any]]:
+    def _analyze_other_workflows(self, repo: Repository) -> list[dict[str, Any]]:
         """Analyze other workflow systems"""
         workflows = []
 
@@ -420,7 +419,7 @@ class RepositoryAnalyzer:
 
         # Check for Docker
         try:
-            dockerfile = repo.get_contents('Dockerfile')
+            repo.get_contents('Dockerfile')
             workflows.append({
                 'type': 'docker',
                 'pattern_type': 'containerization'
@@ -430,7 +429,7 @@ class RepositoryAnalyzer:
 
         return workflows
 
-    def _analyze_readme_structure(self, content: str) -> Dict[str, Any]:
+    def _analyze_readme_structure(self, content: str) -> dict[str, Any]:
         """Analyze README structure and content patterns"""
         structure = {
             'sections': [],

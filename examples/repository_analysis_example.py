@@ -4,8 +4,9 @@ Example usage of the Repository Analysis & Pattern Extraction Engine
 """
 
 import json
-import sys
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.repository_analyzer import RepositoryAnalyzer
@@ -96,7 +97,7 @@ def extract_command_templates():
         }
     }
 
-    for template_name, template in command_templates.items():
+    for _template_name, template in command_templates.items():
         print(f"\\nCommand Template: {template['name']}")
         print(f"Description: {template['description']}")
         print(f"Parameters: {json.dumps(template['parameters'], indent=2)}")

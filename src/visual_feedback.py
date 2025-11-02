@@ -4,12 +4,11 @@ Provides rich terminal UI for monitoring background processing and user feedback
 """
 
 import asyncio
-import time
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timedelta
-from dataclasses import dataclass
-from enum import Enum
 import shutil
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any
 
 from renderers import Colors
 
@@ -31,9 +30,9 @@ class ProgressItem:
     state: ProgressState
     progress: float  # 0.0 to 1.0
     details: str = ""
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    estimated_time: Optional[int] = None  # seconds
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    estimated_time: int | None = None  # seconds
 
 
 class ProgressBar:
@@ -50,7 +49,7 @@ class ProgressBar:
 
         return f"{color}[{bar}] {percentage:3d}%{Colors.END} {title}"
 
-    def render_multi(self, items: List[Tuple[float, str, str]]) -> str:
+    def render_multi(self, items: list[tuple[float, str, str]]) -> str:
         """Render multiple progress bars"""
         lines = []
         for progress, title, color in items:
@@ -64,7 +63,7 @@ class StatusDisplay:
     def __init__(self):
         self.progress_bar = ProgressBar()
         self.terminal_width = self._get_terminal_width()
-        self.current_items: Dict[str, ProgressItem] = {}
+        self.current_items: dict[str, ProgressItem] = {}
         self.show_completed = True
         self.max_display_items = 10
 
@@ -239,7 +238,7 @@ class NotificationManager:
     """Manages various types of user notifications"""
 
     def __init__(self):
-        self.notification_history: List[Dict[str, Any]] = []
+        self.notification_history: list[dict[str, Any]] = []
         self.max_history = 100
 
     async def show_notification(self, title: str, message: str,

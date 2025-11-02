@@ -6,18 +6,19 @@ Interactive command-line interface for the clarification workflow system.
 Provides structured workflow: input → clarification → planning → execution
 """
 
-import sys
 import asyncio
 import json
+import sys
 from pathlib import Path
-from typing import List, Dict, Any
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from clarification_workflow import (
-    ClarificationWorkflow, ClarificationResponse, QuestionType,
-    WorkflowStage, get_clarification_workflow
+    ClarificationResponse,
+    QuestionType,
+    WorkflowStage,
+    get_clarification_workflow,
 )
 
 
@@ -85,7 +86,7 @@ class ClarificationCLI:
         """Display input analysis results"""
         cleaned = session.cleaned_input
 
-        print(f"\n📊 Input Analysis")
+        print("\n📊 Input Analysis")
         print(f"   Original: {cleaned.original_text}")
         print(f"   Intent: {cleaned.extracted_intent}")
         print(f"   Confidence: {cleaned.confidence:.1%}")
@@ -221,7 +222,7 @@ class ClarificationCLI:
         """Display execution plan"""
         plan = session.plan
 
-        print(f"\n📋 Execution Plan")
+        print("\n📋 Execution Plan")
         print(f"   {plan.summary}")
         print(f"   Estimated duration: {plan.estimated_duration} minutes")
         print()
@@ -234,22 +235,22 @@ class ClarificationCLI:
             print(f"\nRequired tools: {', '.join(plan.required_tools)}")
 
         if plan.prerequisites:
-            print(f"Prerequisites:")
+            print("Prerequisites:")
             for prereq in plan.prerequisites:
                 print(f"  - {prereq}")
 
         if plan.success_criteria:
-            print(f"\nSuccess criteria:")
+            print("\nSuccess criteria:")
             for criterion in plan.success_criteria:
                 print(f"  ✓ {criterion}")
 
         if plan.risks:
-            print(f"\n⚠️  Potential risks:")
+            print("\n⚠️  Potential risks:")
             for risk in plan.risks:
                 print(f"  - {risk}")
 
         if plan.fallback_options:
-            print(f"\nFallback options:")
+            print("\nFallback options:")
             for fallback in plan.fallback_options:
                 print(f"  - {fallback}")
 
@@ -260,17 +261,17 @@ class ClarificationCLI:
         while True:
             choice = input("Proceed with execution? (y/n): ").strip().lower()
             if choice in ['y', 'yes']:
-                approved = await self.workflow.approve_execution(self.current_session.session_id, True)
+                await self.workflow.approve_execution(self.current_session.session_id, True)
                 return True
             elif choice in ['n', 'no']:
-                approved = await self.workflow.approve_execution(self.current_session.session_id, False)
+                await self.workflow.approve_execution(self.current_session.session_id, False)
                 return False
             else:
                 print("❌ Please enter y/n")
 
     def _display_completion_summary(self, session):
         """Display completion summary"""
-        print(f"\n📊 Workflow Summary")
+        print("\n📊 Workflow Summary")
         print(f"   Session ID: {session.session_id}")
         print(f"   Original request: {session.original_input}")
         print(f"   Intent: {session.cleaned_input.extracted_intent}")
@@ -283,7 +284,7 @@ class ClarificationCLI:
         session_file = storage_path / f"{session.session_id}.json"
         doc_file = storage_path / f"{session.session_id}_documentation.md"
 
-        print(f"\n📁 Generated files:")
+        print("\n📁 Generated files:")
         if session_file.exists():
             print(f"   Session data: {session_file}")
         if doc_file.exists():
@@ -312,7 +313,7 @@ class ClarificationCLI:
             if approved:
                 await self.workflow.execute_plan(session.session_id)
                 await self.workflow.generate_documentation(session.session_id)
-                print(f"✅ Workflow completed!")
+                print("✅ Workflow completed!")
         else:
             print(f"Session is in {session.stage.value} stage")
 

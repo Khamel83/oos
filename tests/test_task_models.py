@@ -5,10 +5,12 @@ Comprehensive test suite for Task dataclass including validation,
 status management, and serialization.
 """
 
-import pytest
 import json
 from datetime import datetime, timedelta
-from src.oos_task_system.models import Task, TaskStatus, TaskPriority
+
+import pytest
+
+from src.oos_task_system.models import Task, TaskPriority, TaskStatus
 
 
 class TestTask:

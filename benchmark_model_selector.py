@@ -9,12 +9,10 @@ Automated system that:
 4. Creates min/default/max model selection strategy
 """
 
-import requests
-import json
 import csv
-from typing import Dict, List, Tuple
+import json
 from dataclasses import dataclass
-import time
+
 
 @dataclass
 class BenchmarkData:
@@ -43,11 +41,11 @@ class BenchmarkModelSelector:
         self.model_mapping = {}
         self.selections = []
 
-    def load_openrouter_models(self, csv_path: str) -> Dict:
+    def load_openrouter_models(self, csv_path: str) -> dict:
         """Load models from your cost table"""
         models = {}
 
-        with open(csv_path, 'r') as f:
+        with open(csv_path) as f:
             reader = csv.DictReader(f)
             for row in reader:
                 model_id = row['ModelID']
@@ -63,7 +61,7 @@ class BenchmarkModelSelector:
         print(f"Loaded {len(models)} OpenRouter models")
         return models
 
-    def create_model_mapping(self) -> Dict:
+    def create_model_mapping(self) -> dict:
         """Create mapping between benchmark names and OpenRouter IDs"""
         mapping = {
             # Qwen Models
@@ -126,7 +124,7 @@ class BenchmarkModelSelector:
         print(f"Created mapping for {len(mapping)} model variants")
         return mapping
 
-    def load_sample_benchmark_data(self) -> Dict[str, BenchmarkData]:
+    def load_sample_benchmark_data(self) -> dict[str, BenchmarkData]:
         """Load representative benchmark data (latest 2024 results)"""
         # Note: In production, this would scrape from HuggingFace/LMSYS APIs
         # For now, using well-established benchmark results
@@ -267,7 +265,7 @@ class BenchmarkModelSelector:
         print(f"Loaded benchmark data for {len(benchmark_data)} models")
         return benchmark_data
 
-    def calculate_value_scores(self) -> List[ModelSelection]:
+    def calculate_value_scores(self) -> list[ModelSelection]:
         """Calculate value scores and create model selections"""
         selections = []
 
@@ -327,7 +325,7 @@ class BenchmarkModelSelector:
         else:
             return "ALTERNATIVE"
 
-    def select_optimal_models(self) -> Dict:
+    def select_optimal_models(self) -> dict:
         """Select the optimal min/default/max models"""
         models_by_category = {}
         for selection in self.selections:
@@ -370,7 +368,7 @@ class BenchmarkModelSelector:
 
         return optimal_selections
 
-    def generate_final_report(self) -> Dict:
+    def generate_final_report(self) -> dict:
         """Generate comprehensive model selection report"""
         optimal_models = self.select_optimal_models()
 
@@ -431,7 +429,7 @@ class BenchmarkModelSelector:
 
         return report
 
-    def identify_strengths(self, selection: ModelSelection) -> List[str]:
+    def identify_strengths(self, selection: ModelSelection) -> list[str]:
         """Identify model strengths based on benchmarks"""
         strengths = []
         data = selection.benchmark_data
@@ -464,28 +462,28 @@ class BenchmarkModelSelector:
         }
         return use_cases.get(category, "General assistance")
 
-    def save_report(self, report: Dict, filename: str):
+    def save_report(self, report: dict, filename: str):
         """Save the selection report"""
         with open(filename, 'w') as f:
             json.dump(report, f, indent=2)
         print(f"Report saved to: {filename}")
 
-    def print_summary(self, report: Dict):
+    def print_summary(self, report: dict):
         """Print executive summary"""
         print("\n" + "="*60)
         print("SOLO CREATOR MECHA SUIT - MODEL SELECTION REPORT")
         print("="*60)
 
-        print(f"\n📊 ANALYSIS SUMMARY:")
+        print("\n📊 ANALYSIS SUMMARY:")
         print(f"• Models analyzed: {report['metadata']['total_models_analyzed']}")
         print(f"• Cost ceiling: ${report['metadata']['cost_ceiling']}/M tokens")
 
-        print(f"\n🎯 OPTIMAL SELECTIONS:")
+        print("\n🎯 OPTIMAL SELECTIONS:")
         for category, model in report["optimal_selections"].items():
             print(f"• {category}: {model['benchmark_name']}")
             print(f"  Cost: ${model['cost_per_m_tokens']}/M | Score: {model['overall_benchmark_score']:.1f}")
 
-        print(f"\n💡 USAGE STRATEGY:")
+        print("\n💡 USAGE STRATEGY:")
         usage = report["usage_recommendations"]
         print(f"• Default model: {usage['default_usage_percentage']}% of tasks")
         print(f"• Minimum model: {usage['minimum_usage_percentage']}% of tasks")
@@ -494,10 +492,10 @@ class BenchmarkModelSelector:
 
         # Estimate monthly costs
         estimated_monthly = self.estimate_monthly_costs(report, usage)
-        print(f"\n💰 ESTIMATED MONTHLY COST (100K tokens):")
+        print("\n💰 ESTIMATED MONTHLY COST (100K tokens):")
         print(f"• ${estimated_monthly:.2f} per month")
 
-    def estimate_monthly_costs(self, report: Dict, usage: Dict, monthly_tokens: int = 100000) -> float:
+    def estimate_monthly_costs(self, report: dict, usage: dict, monthly_tokens: int = 100000) -> float:
         """Estimate monthly costs based on usage pattern"""
         optimal = report["optimal_selections"]
 

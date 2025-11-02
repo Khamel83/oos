@@ -3,15 +3,14 @@
 Adaptive Planner - Adjusts strategic plans based on execution feedback
 """
 
-import asyncio
 import logging
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timedelta
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any
 
-from src.strategic_consultant import StrategicConsultant, ConsultantRecommendation, StrategicDirection
-from src.execution_driver import ExecutionDriver, ExecutionStatus
 from src.archon_integration import ArchonIntegration
+from src.execution_driver import ExecutionDriver, ExecutionStatus
+from src.strategic_consultant import StrategicConsultant
 
 logger = logging.getLogger(__name__)
 
@@ -23,14 +22,14 @@ class PlanAdjustment:
     description: str
     rationale: str
     impact_assessment: str
-    recommended_actions: List[str]
+    recommended_actions: list[str]
 
 @dataclass
 class AdaptationDecision:
     """Decision about plan adaptation"""
     decision: str  # "maintain", "adjust", "pivot", "abort"
     confidence: float  # 0-1
-    adjustments: List[PlanAdjustment]
+    adjustments: list[PlanAdjustment]
     reasoning: str
     next_review_date: str
 
@@ -46,9 +45,9 @@ class AdaptivePlanner:
         self.executor = execution_driver
         self.archon = archon_integration
         self.config = self._load_config()
-        self.adaptation_history: Dict[str, List[AdaptationDecision]] = {}
+        self.adaptation_history: dict[str, list[AdaptationDecision]] = {}
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load adaptive planning configuration"""
         return {
             "adaptation": {
@@ -101,7 +100,7 @@ class AdaptivePlanner:
         return decision
 
     def _analyze_adaptation_triggers(self, execution_status: ExecutionStatus,
-                                   project_status: Dict[str, Any]) -> List[str]:
+                                   project_status: dict[str, Any]) -> list[str]:
         """Analyze what's triggering the need for adaptation"""
         triggers = []
 
@@ -133,14 +132,14 @@ class AdaptivePlanner:
 
         return triggers
 
-    def _project_age_days(self, project_status: Dict[str, Any]) -> int:
+    def _project_age_days(self, project_status: dict[str, Any]) -> int:
         """Calculate project age in days"""
         # Simplified implementation
         return 30  # Default assumption
 
     async def _make_adaptation_decision(self, project_id: str, execution_status: ExecutionStatus,
-                                      project_status: Dict[str, Any],
-                                      triggers: List[str]) -> AdaptationDecision:
+                                      project_status: dict[str, Any],
+                                      triggers: list[str]) -> AdaptationDecision:
         """Make decision about how to adapt the strategic plan"""
 
         # Determine decision type based on triggers
@@ -167,7 +166,7 @@ class AdaptivePlanner:
             next_review_date=next_review
         )
 
-    def _determine_decision_type(self, triggers: List[str], execution_status: ExecutionStatus) -> str:
+    def _determine_decision_type(self, triggers: list[str], execution_status: ExecutionStatus) -> str:
         """Determine the type of adaptation decision needed"""
 
         # Critical situations require abort consideration
@@ -186,7 +185,7 @@ class AdaptivePlanner:
         return "maintain"
 
     def _calculate_decision_confidence(self, execution_status: ExecutionStatus,
-                                     project_status: Dict[str, Any], triggers: List[str]) -> float:
+                                     project_status: dict[str, Any], triggers: list[str]) -> float:
         """Calculate confidence in the adaptation decision"""
 
         # Base confidence
@@ -206,9 +205,9 @@ class AdaptivePlanner:
 
         return max(0.0, min(1.0, confidence))
 
-    async def _generate_plan_adjustments(self, decision_type: str, triggers: List[str],
+    async def _generate_plan_adjustments(self, decision_type: str, triggers: list[str],
                                        execution_status: ExecutionStatus,
-                                       project_status: Dict[str, Any]) -> List[PlanAdjustment]:
+                                       project_status: dict[str, Any]) -> list[PlanAdjustment]:
         """Generate specific plan adjustments based on decision type"""
         adjustments = []
 
@@ -221,8 +220,8 @@ class AdaptivePlanner:
 
         return adjustments
 
-    def _generate_minor_adjustments(self, triggers: List[str],
-                                   execution_status: ExecutionStatus) -> List[PlanAdjustment]:
+    def _generate_minor_adjustments(self, triggers: list[str],
+                                   execution_status: ExecutionStatus) -> list[PlanAdjustment]:
         """Generate minor plan adjustments"""
         adjustments = []
 
@@ -256,8 +255,8 @@ class AdaptivePlanner:
 
         return adjustments
 
-    def _generate_pivot_adjustments(self, triggers: List[str],
-                                   execution_status: ExecutionStatus) -> List[PlanAdjustment]:
+    def _generate_pivot_adjustments(self, triggers: list[str],
+                                   execution_status: ExecutionStatus) -> list[PlanAdjustment]:
         """Generate pivot adjustments"""
         adjustments = []
 
@@ -291,8 +290,8 @@ class AdaptivePlanner:
 
         return adjustments
 
-    def _generate_abort_adjustments(self, triggers: List[str],
-                                   execution_status: ExecutionStatus) -> List[PlanAdjustment]:
+    def _generate_abort_adjustments(self, triggers: list[str],
+                                   execution_status: ExecutionStatus) -> list[PlanAdjustment]:
         """Generate abort considerations"""
         return [
             PlanAdjustment(
@@ -309,7 +308,7 @@ class AdaptivePlanner:
             )
         ]
 
-    def _generate_adaptation_reasoning(self, decision_type: str, triggers: List[str],
+    def _generate_adaptation_reasoning(self, decision_type: str, triggers: list[str],
                                      execution_status: ExecutionStatus) -> str:
         """Generate reasoning for adaptation decision"""
 
@@ -382,7 +381,7 @@ class AdaptivePlanner:
     async def _update_archon_with_adaptations(self, project_id: str, decision: AdaptationDecision) -> None:
         """Update Archon project with adaptation decisions"""
         try:
-            adaptation_metadata = {
+            {
                 "last_adaptation": datetime.now().isoformat(),
                 "adaptation_decision": decision.decision,
                 "adaptation_confidence": decision.confidence,
@@ -449,7 +448,7 @@ class AdaptivePlanner:
             logger.error(f"Failed to generate adaptation report: {e}")
             return f"❌ Error generating adaptation report: {str(e)}"
 
-    def get_adaptation_summary(self, project_ids: List[str]) -> Dict[str, Any]:
+    def get_adaptation_summary(self, project_ids: list[str]) -> dict[str, Any]:
         """Get adaptation summary across multiple projects"""
         summary = {
             "total_projects": len(project_ids),

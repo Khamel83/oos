@@ -5,10 +5,11 @@ Provides working Archon integration using direct API calls when MCP is not avail
 """
 
 import os
-import json
-import requests
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any
+
+import requests
+
 
 # Load environment variables from .env file
 def load_env():
@@ -31,7 +32,7 @@ class ArchonAPI:
         self.api_url = os.getenv('ARCHON_API_URL', 'https://archon.khamel.com/api')
         self.project_id = os.getenv('ARCHON_PROJECT_ID')
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """Check Archon API health"""
         try:
             response = requests.get(f"{self.api_url}/health", timeout=10)
@@ -43,7 +44,7 @@ class ArchonAPI:
         except Exception as e:
             return {"status": "error", "error": str(e)}
 
-    def get_project(self, project_id: str = None) -> Dict[str, Any]:
+    def get_project(self, project_id: str = None) -> dict[str, Any]:
         """Get project details"""
         project_id = project_id or self.project_id
         if not project_id:
@@ -55,7 +56,7 @@ class ArchonAPI:
         except Exception as e:
             return {"error": str(e)}
 
-    def list_projects(self) -> List[Dict[str, Any]]:
+    def list_projects(self) -> list[dict[str, Any]]:
         """List all projects"""
         try:
             response = requests.get(f"{self.api_url}/projects", timeout=10)
@@ -66,7 +67,7 @@ class ArchonAPI:
         except Exception as e:
             return [{"error": str(e)}]
 
-    def search_knowledge(self, query: str, match_count: int = 5) -> Dict[str, Any]:
+    def search_knowledge(self, query: str, match_count: int = 5) -> dict[str, Any]:
         """Search knowledge base"""
         try:
             payload = {"query": query, "match_count": match_count}
@@ -80,7 +81,7 @@ class ArchonAPI:
         except Exception as e:
             return {"error": str(e)}
 
-    def list_tasks(self, project_id: str = None) -> List[Dict[str, Any]]:
+    def list_tasks(self, project_id: str = None) -> list[dict[str, Any]]:
         """List tasks for a project"""
         project_id = project_id or self.project_id
         if not project_id:
@@ -99,7 +100,7 @@ class ArchonAPI:
         except Exception as e:
             return [{"error": str(e)}]
 
-    def create_task(self, project_id: str, title: str, description: str, **kwargs) -> Dict[str, Any]:
+    def create_task(self, project_id: str, title: str, description: str, **kwargs) -> dict[str, Any]:
         """Create a new task"""
         try:
             payload = {

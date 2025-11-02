@@ -8,15 +8,11 @@ import asyncio
 import json
 import sys
 from pathlib import Path
-from datetime import datetime
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from background_processor import (
-    BackgroundProcessor, Idea, get_background_processor,
-    add_idea_for_processing
-)
+from background_processor import BackgroundProcessor, add_idea_for_processing
 from oos_daemon import get_daemon, start_daemon
 from renderers import Colors
 
@@ -148,7 +144,7 @@ async def test_daemon_integration():
 
     # Start daemon
     print(f"{Colors.GREEN}🚀 Starting daemon for 30 seconds...{Colors.END}")
-    daemon_task = asyncio.create_task(start_daemon(config_dir))
+    asyncio.create_task(start_daemon(config_dir))
 
     # Let it run for 30 seconds
     await asyncio.sleep(30)
@@ -166,7 +162,7 @@ async def test_daemon_integration():
         if result_files:
             # Show latest result
             latest_result = max(result_files, key=lambda f: f.stat().st_mtime)
-            with open(latest_result, 'r') as f:
+            with open(latest_result) as f:
                 result = json.load(f)
                 print(f"  Latest status: {result.get('status', 'unknown')}")
                 print(f"  Progress: {result.get('progress', 0) * 100:.0f}%")

@@ -9,27 +9,36 @@ Tests all components working together:
 - Meta-clarification
 """
 
-import sys
 import asyncio
-import pytest
-import json
+import sys
 import tempfile
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
+import pytest
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from auto_documentation import (
+    AutoDocumentationSystem,
+    ConsistencyEnforcer,
+    DocumentationGenerator,
+)
 from clarification_workflow import (
-    ClarificationWorkflow, ClarificationResponse, QuestionType,
-    WorkflowStage, InputProcessor, ClarificationEngine, PlanningEngine
+    ClarificationEngine,
+    ClarificationResponse,
+    ClarificationWorkflow,
+    InputProcessor,
+    QuestionType,
+    WorkflowStage,
 )
 from token_optimization import (
-    TokenOptimizer, TokenBudget, ContextChunk, optimize_for_budget,
-    estimate_context_tokens
-)
-from auto_documentation import (
-    AutoDocumentationSystem, DocumentationGenerator, ConsistencyEnforcer
+    ContextChunk,
+    TokenBudget,
+    TokenOptimizer,
+    estimate_context_tokens,
+    optimize_for_budget,
 )
 
 
@@ -493,7 +502,7 @@ class TestIntegration:
             # Test invalid session ID
             try:
                 await workflow.submit_responses("invalid_id", [])
-                assert False, "Should raise error"
+                raise AssertionError("Should raise error")
             except ValueError:
                 pass  # Expected
 
@@ -539,7 +548,7 @@ if __name__ == "__main__":
 
         # Token Optimization Tests
         print("\n1. Testing Token Optimization...")
-        token_test = TestTokenOptimization()
+        TestTokenOptimization()
         optimizer = TokenOptimizer()
         sample_context = {
             "large_text": "Test content. " * 100,

@@ -4,12 +4,13 @@ Perplexity Usage Manager
 Bulletproof protection to never exceed your $5/month Pro credits
 """
 
-import os
 import json
-import requests
-from datetime import datetime, date
-from typing import Dict, Optional, Tuple
+import os
+from datetime import date, datetime
 from pathlib import Path
+
+import requests
+
 
 # Load environment variables from .env file
 def load_env_file():
@@ -42,11 +43,11 @@ class PerplexityUsageManager:
         # Load or initialize usage tracking
         self.usage_data = self._load_usage_data()
 
-    def _load_usage_data(self) -> Dict:
+    def _load_usage_data(self) -> dict:
         """Load usage data from file"""
         if self.usage_file.exists():
             try:
-                with open(self.usage_file, 'r') as f:
+                with open(self.usage_file) as f:
                     data = json.load(f)
 
                 # Reset if new month
@@ -63,7 +64,7 @@ class PerplexityUsageManager:
         current_month = date.today().strftime('%Y-%m')
         return self._create_new_month_data(current_month)
 
-    def _create_new_month_data(self, month: str) -> Dict:
+    def _create_new_month_data(self, month: str) -> dict:
         """Create fresh month data"""
         return {
             'month': month,
@@ -73,12 +74,12 @@ class PerplexityUsageManager:
             'calls_history': []
         }
 
-    def _save_usage_data(self, data: Dict):
+    def _save_usage_data(self, data: dict):
         """Save usage data to file"""
         with open(self.usage_file, 'w') as f:
             json.dump(data, f, indent=2)
 
-    async def check_credits_and_ask_permission(self, estimated_cost: float = 0.02) -> Tuple[bool, str]:
+    async def check_credits_and_ask_permission(self, estimated_cost: float = 0.02) -> tuple[bool, str]:
         """
         Check current credits and ask user permission before making API call
         Returns: (can_proceed, message)
@@ -113,21 +114,21 @@ class PerplexityUsageManager:
         usage_percent = (current_cost / self.monthly_limit) * 100
         remaining_budget = self.monthly_limit - current_cost
 
-        print(f"\n📊 Perplexity Usage This Month:")
+        print("\n📊 Perplexity Usage This Month:")
         print(f"   Current spend: ${current_cost:.2f} / ${self.monthly_limit:.2f} ({usage_percent:.1f}%)")
         print(f"   Remaining budget: ${remaining_budget:.2f}")
         print(f"   Estimated call cost: ${estimated_cost:.2f}")
         print(f"   After this call: ${projected_cost:.2f} / ${self.monthly_limit:.2f}")
 
         # Ask for permission
-        response = input(f"\n🤔 Use Perplexity API for this search? (y/N): ").strip().lower()
+        response = input("\n🤔 Use Perplexity API for this search? (y/N): ").strip().lower()
 
         if response in ['y', 'yes']:
             return True, "Permission granted"
         else:
             return False, "User declined to use Perplexity API"
 
-    async def _get_account_balance(self) -> Optional[Dict]:
+    async def _get_account_balance(self) -> dict | None:
         """Get current account balance from Perplexity API"""
         try:
             # Note: Perplexity doesn't have a direct balance endpoint
@@ -186,7 +187,7 @@ class PerplexityUsageManager:
         if usage_percent > 90:
             print(f"🚨 ALERT: {usage_percent:.1f}% of monthly Perplexity budget used - approaching limit!")
 
-    def get_usage_summary(self) -> Dict:
+    def get_usage_summary(self) -> dict:
         """Get current usage summary"""
         current_cost = self.usage_data['total_cost']
         usage_percent = (current_cost / self.monthly_limit) * 100
@@ -219,7 +220,7 @@ class PerplexityUsageManager:
 usage_manager = PerplexityUsageManager()
 
 
-async def safe_perplexity_search(query: str, max_results: int = 5) -> Tuple[bool, str, list]:
+async def safe_perplexity_search(query: str, max_results: int = 5) -> tuple[bool, str, list]:
     """
     Safely execute Perplexity search with usage confirmation
     Returns: (success, message, results)
@@ -329,7 +330,7 @@ if __name__ == "__main__":
 
         # Show current usage
         summary = usage_manager.get_usage_summary()
-        print(f"\n📊 Current Usage:")
+        print("\n📊 Current Usage:")
         print(f"   Month: {summary['month']}")
         print(f"   Spent: ${summary['total_cost']:.2f} / ${summary['monthly_limit']:.2f}")
         print(f"   Usage: {summary['usage_percent']:.1f}%")
@@ -338,7 +339,7 @@ if __name__ == "__main__":
         print(f"   Within safety limit: {summary['within_safety_limit']}")
 
         # Test a search with confirmation
-        print(f"\n🔍 Testing safe search with confirmation...")
+        print("\n🔍 Testing safe search with confirmation...")
         success, message, results = await safe_perplexity_search("What is Python programming?")
 
         print(f"Result: {message}")

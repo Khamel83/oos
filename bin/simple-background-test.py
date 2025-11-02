@@ -19,10 +19,10 @@ async def simple_test():
     print(f"{Colors.GREEN}🌱 Testing Background Processor...{Colors.END}")
 
     config = {'google_enabled': False, 'openrouter_api_key': 'test'}
-    processor = BackgroundProcessor(config)
+    BackgroundProcessor(config)
 
     # Test adding an idea
-    idea = Idea(
+    Idea(
         id="test-123",
         content="Create a simple Discord bot",
         user_id="test",

@@ -6,19 +6,18 @@ Continuous learning from usage patterns to improve command generation,
 workflow execution, and system performance.
 """
 
-import json
-import sqlite3
 import asyncio
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
+import json
+import logging
+import sqlite3
+from collections import Counter, defaultdict
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-import logging
-from collections import defaultdict, Counter
+from typing import Any
+
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import pickle
 
 
 @dataclass
@@ -26,25 +25,25 @@ class UsagePattern:
     """Represents a usage pattern from command execution"""
     pattern_id: str
     pattern_type: str  # 'command_sequence', 'parameter_choice', 'workflow_usage'
-    pattern_data: Dict[str, Any]
+    pattern_data: dict[str, Any]
     frequency: int
     success_rate: float
     last_used: datetime
-    context: Dict[str, Any]
+    context: dict[str, Any]
 
 
 @dataclass
 class LearningData:
     """Learning data point from system usage"""
     timestamp: datetime
-    user_id: Optional[str]
+    user_id: str | None
     session_id: str
     command_name: str
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
     execution_time: float
     success: bool
-    error_message: Optional[str]
-    context: Dict[str, Any]
+    error_message: str | None
+    context: dict[str, Any]
 
 
 @dataclass
@@ -54,7 +53,7 @@ class ImprovementSuggestion:
     suggestion_type: str  # 'command', 'workflow', 'parameter', 'performance'
     description: str
     confidence: float
-    data: Dict[str, Any]
+    data: dict[str, Any]
     created_at: datetime
     implemented: bool = False
 
@@ -62,7 +61,7 @@ class ImprovementSuggestion:
 class LearningSystem:
     """Main learning system class"""
 
-    def __init__(self, db_path: Optional[str] = None, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, db_path: str | None = None, config: dict[str, Any] | None = None):
         self.config = {**self._default_config(), **(config or {})}
         self.db_path = db_path or str(Path.home() / ".oos" / "learning.db")
         self.logger = self._setup_logger()
@@ -80,7 +79,7 @@ class LearningSystem:
         self.suggestions = []
         self.last_learning_update = datetime.now()
 
-    def _default_config(self) -> Dict[str, Any]:
+    def _default_config(self) -> dict[str, Any]:
         """Default configuration for learning system"""
         return {
             "learning_enabled": True,
@@ -192,7 +191,7 @@ class LearningSystem:
         except Exception as e:
             self.logger.error(f"Failed to record usage data: {e}")
 
-    async def learn_patterns(self) -> List[UsagePattern]:
+    async def learn_patterns(self) -> list[UsagePattern]:
         """Learn patterns from usage data"""
         if not self.config["learning_enabled"]:
             return []
@@ -253,7 +252,7 @@ class LearningSystem:
             self.logger.error(f"Failed to learn patterns: {e}")
             return []
 
-    def _learn_command_sequences(self, usage_data: List) -> List[UsagePattern]:
+    def _learn_command_sequences(self, usage_data: list) -> list[UsagePattern]:
         """Learn command sequences from usage data"""
         sequences = defaultdict(list)
         pattern_id = 0
@@ -268,7 +267,7 @@ class LearningSystem:
             })
 
         # Find sequences
-        for session_id, commands in session_commands.items():
+        for _session_id, commands in session_commands.items():
             if len(commands) < 2:
                 continue
 
@@ -302,14 +301,14 @@ class LearningSystem:
                     frequency=len(occurrences),
                     success_rate=success_rate,
                     last_used=datetime.now(),
-                    context={"session_count": len(set(seq[3] for seq in usage_data))}
+                    context={"session_count": len({seq[3] for seq in usage_data})}
                 )
                 patterns.append(pattern)
                 pattern_id += 1
 
         return patterns
 
-    def _learn_parameter_patterns(self, usage_data: List) -> List[UsagePattern]:
+    def _learn_parameter_patterns(self, usage_data: list) -> list[UsagePattern]:
         """Learn parameter usage patterns"""
         patterns = []
         pattern_id = 0
@@ -350,7 +349,7 @@ class LearningSystem:
 
         return patterns
 
-    def _learn_workflow_patterns(self, usage_data: List) -> List[UsagePattern]:
+    def _learn_workflow_patterns(self, usage_data: list) -> list[UsagePattern]:
         """Learn workflow usage patterns"""
         patterns = []
         pattern_id = 0
@@ -393,7 +392,7 @@ class LearningSystem:
 
         return patterns
 
-    def _save_patterns(self, patterns: List[UsagePattern]):
+    def _save_patterns(self, patterns: list[UsagePattern]):
         """Save learned patterns to database"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
@@ -415,7 +414,7 @@ class LearningSystem:
 
             conn.commit()
 
-    async def generate_suggestions(self) -> List[ImprovementSuggestion]:
+    async def generate_suggestions(self) -> list[ImprovementSuggestion]:
         """Generate improvement suggestions based on patterns"""
         suggestions = []
 
@@ -447,7 +446,7 @@ class LearningSystem:
 
         return filtered_suggestions
 
-    def _generate_command_suggestions(self) -> List[ImprovementSuggestion]:
+    def _generate_command_suggestions(self) -> list[ImprovementSuggestion]:
         """Generate suggestions for command improvements"""
         suggestions = []
 
@@ -472,7 +471,7 @@ class LearningSystem:
 
         return suggestions
 
-    def _generate_workflow_suggestions(self) -> List[ImprovementSuggestion]:
+    def _generate_workflow_suggestions(self) -> list[ImprovementSuggestion]:
         """Generate suggestions for workflow improvements"""
         suggestions = []
 
@@ -516,7 +515,7 @@ class LearningSystem:
 
         return suggestions
 
-    def _generate_parameter_suggestions(self) -> List[ImprovementSuggestion]:
+    def _generate_parameter_suggestions(self) -> list[ImprovementSuggestion]:
         """Generate suggestions for parameter improvements"""
         suggestions = []
 
@@ -544,7 +543,7 @@ class LearningSystem:
 
         return suggestions
 
-    def _save_suggestions(self, suggestions: List[ImprovementSuggestion]):
+    def _save_suggestions(self, suggestions: list[ImprovementSuggestion]):
         """Save suggestions to database"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
@@ -566,7 +565,7 @@ class LearningSystem:
 
             conn.commit()
 
-    def get_recommendations(self, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def get_recommendations(self, context: dict[str, Any]) -> list[dict[str, Any]]:
         """Get personalized recommendations based on context"""
         recommendations = []
 
@@ -604,7 +603,7 @@ class LearningSystem:
 
         return recommendations[:10]  # Limit to 10 recommendations
 
-    def _get_related_commands(self, current_command: str) -> List[Dict[str, Any]]:
+    def _get_related_commands(self, current_command: str) -> list[dict[str, Any]]:
         """Get related commands based on sequence patterns"""
         related = []
 
@@ -625,7 +624,7 @@ class LearningSystem:
 
         return related
 
-    def _get_workspace_suggestions(self, workspace_type: str) -> List[Dict[str, Any]]:
+    def _get_workspace_suggestions(self, workspace_type: str) -> list[dict[str, Any]]:
         """Get workspace-specific suggestions"""
         suggestions = []
 
@@ -640,7 +639,7 @@ class LearningSystem:
                 GROUP BY command_name
                 ORDER BY usage_count DESC
                 LIMIT 5
-            ''', (f'%"{workspace_type}"%', f'%workspace_type%'))
+            ''', (f'%"{workspace_type}"%', '%workspace_type%'))
 
             popular_commands = cursor.fetchall()
 
@@ -654,7 +653,7 @@ class LearningSystem:
 
         return suggestions
 
-    def get_usage_statistics(self) -> Dict[str, Any]:
+    def get_usage_statistics(self) -> dict[str, Any]:
         """Get usage statistics and insights"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
@@ -734,9 +733,9 @@ def get_learning_system() -> LearningSystem:
 
 
 # Utility functions
-def record_command_usage(command_name: str, parameters: Dict[str, Any], execution_time: float,
-                         success: bool, error_message: Optional[str] = None,
-                         context: Optional[Dict[str, Any]] = None):
+def record_command_usage(command_name: str, parameters: dict[str, Any], execution_time: float,
+                         success: bool, error_message: str | None = None,
+                         context: dict[str, Any] | None = None):
     """Record command usage for learning"""
     learning_system = get_learning_system()
 
@@ -755,13 +754,13 @@ def record_command_usage(command_name: str, parameters: Dict[str, Any], executio
     learning_system.record_usage(learning_data)
 
 
-async def get_recommendations(context: Dict[str, Any]) -> List[Dict[str, Any]]:
+async def get_recommendations(context: dict[str, Any]) -> list[dict[str, Any]]:
     """Get learning-based recommendations"""
     learning_system = get_learning_system()
     return learning_system.get_recommendations(context)
 
 
-async def get_usage_statistics() -> Dict[str, Any]:
+async def get_usage_statistics() -> dict[str, Any]:
     """Get usage statistics and insights"""
     learning_system = get_learning_system()
     return learning_system.get_usage_statistics()

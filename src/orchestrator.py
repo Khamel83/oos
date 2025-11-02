@@ -6,17 +6,17 @@ Intelligent system for chaining slash commands together with conditional logic,
 parameter passing, error handling, and parallel execution capabilities.
 """
 
-import json
-import yaml
 import asyncio
-import uuid
-from typing import Dict, List, Any, Optional, Callable, Union
-from dataclasses import dataclass, asdict
-from pathlib import Path
-from enum import Enum
+import json
 import logging
+import uuid
+from dataclasses import dataclass
 from datetime import datetime
-import traceback
+from enum import Enum
+from pathlib import Path
+from typing import Any
+
+import yaml
 
 
 class ExecutionStatus(Enum):
@@ -43,10 +43,10 @@ class WorkflowStep:
     id: str
     name: str
     command: str
-    parameters: Dict[str, Any]
-    depends_on: List[str]
+    parameters: dict[str, Any]
+    depends_on: list[str]
     condition: WorkflowCondition
-    timeout: Optional[int] = None
+    timeout: int | None = None
     retry_count: int = 0
     max_retries: int = 3
     parallel: bool = False
@@ -58,9 +58,9 @@ class WorkflowContext:
     """Execution context for workflow steps"""
     workflow_id: str
     step_id: str
-    variables: Dict[str, Any]
-    previous_results: Dict[str, Any]
-    global_config: Dict[str, Any]
+    variables: dict[str, Any]
+    previous_results: dict[str, Any]
+    global_config: dict[str, Any]
     execution_start: datetime
     step_start: datetime
 
@@ -71,16 +71,16 @@ class ExecutionResult:
     step_id: str
     status: ExecutionStatus
     output: Any
-    error: Optional[str]
+    error: str | None
     execution_time: float
     retry_count: int
-    logs: List[str]
+    logs: list[str]
 
 
 class WorkflowOrchestrator:
     """Main orchestrator class for managing command workflows"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.workflows = {}
         self.execution_history = {}
@@ -102,7 +102,7 @@ class WorkflowOrchestrator:
 
         return logger
 
-    def define_workflow(self, workflow_definition: Dict[str, Any]) -> str:
+    def define_workflow(self, workflow_definition: dict[str, Any]) -> str:
         """Define a new workflow from definition"""
         workflow_id = workflow_definition.get('id', str(uuid.uuid4()))
 
@@ -146,7 +146,7 @@ class WorkflowOrchestrator:
         if not path.exists():
             raise FileNotFoundError(f"Workflow file not found: {file_path}")
 
-        with open(path, 'r') as f:
+        with open(path) as f:
             if path.suffix.lower() in ['.yaml', '.yml']:
                 definition = yaml.safe_load(f)
             else:
@@ -154,7 +154,7 @@ class WorkflowOrchestrator:
 
         return self.define_workflow(definition)
 
-    async def execute_workflow(self, workflow_id: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute_workflow(self, workflow_id: str, variables: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute a workflow with given variables"""
         if workflow_id not in self.workflows:
             raise ValueError(f"Workflow not found: {workflow_id}")
@@ -194,7 +194,7 @@ class WorkflowOrchestrator:
 
         return execution_context
 
-    async def _execute_workflow_steps(self, workflow: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, ExecutionResult]:
+    async def _execute_workflow_steps(self, workflow: dict[str, Any], context: dict[str, Any]) -> dict[str, ExecutionResult]:
         """Execute all steps in a workflow"""
         steps = workflow['steps']
         results = {}
@@ -223,8 +223,8 @@ class WorkflowOrchestrator:
 
         return results
 
-    async def _execute_step(self, step: WorkflowStep, workflow: Dict[str, Any],
-                          context: Dict[str, Any], previous_results: Dict[str, ExecutionResult]) -> ExecutionResult:
+    async def _execute_step(self, step: WorkflowStep, workflow: dict[str, Any],
+                          context: dict[str, Any], previous_results: dict[str, ExecutionResult]) -> ExecutionResult:
         """Execute a single workflow step"""
         step_context = WorkflowContext(
             workflow_id=workflow['id'],
@@ -291,7 +291,7 @@ class WorkflowOrchestrator:
                         logs=[f"Command failed: {error_msg}"]
                     )
 
-    def _should_execute_step(self, step: WorkflowStep, previous_results: Dict[str, ExecutionResult]) -> bool:
+    def _should_execute_step(self, step: WorkflowStep, previous_results: dict[str, ExecutionResult]) -> bool:
         """Determine if a step should be executed based on conditions"""
         if not step.depends_on:
             return True
@@ -314,7 +314,7 @@ class WorkflowOrchestrator:
 
         return True
 
-    def _resolve_parameters(self, parameters: Dict[str, Any], context: WorkflowContext) -> Dict[str, Any]:
+    def _resolve_parameters(self, parameters: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
         """Resolve parameters with variable substitution"""
         resolved = {}
 
@@ -339,7 +339,7 @@ class WorkflowOrchestrator:
 
         return resolved
 
-    async def _execute_command(self, command: str, parameters: Dict[str, Any],
+    async def _execute_command(self, command: str, parameters: dict[str, Any],
                             context: WorkflowContext) -> Any:
         """Execute a single command"""
         # This would integrate with Claude Code command execution
@@ -358,7 +358,7 @@ class WorkflowOrchestrator:
             'timestamp': datetime.now().isoformat()
         }
 
-    def _build_dependency_graph(self, steps: List[WorkflowStep]) -> Dict[str, List[str]]:
+    def _build_dependency_graph(self, steps: list[WorkflowStep]) -> dict[str, list[str]]:
         """Build dependency graph from steps"""
         graph = {}
 
@@ -374,9 +374,9 @@ class WorkflowOrchestrator:
 
         return graph
 
-    def _topological_sort(self, graph: Dict[str, List[str]]) -> List[List[str]]:
+    def _topological_sort(self, graph: dict[str, list[str]]) -> list[list[str]]:
         """Topological sort with level detection for parallel execution"""
-        in_degree = {node: 0 for node in graph}
+        in_degree = dict.fromkeys(graph, 0)
 
         # Calculate in-degrees
         for node in graph:
@@ -401,11 +401,11 @@ class WorkflowOrchestrator:
 
         return result
 
-    def get_workflow_status(self, execution_id: str) -> Optional[Dict[str, Any]]:
+    def get_workflow_status(self, execution_id: str) -> dict[str, Any] | None:
         """Get status of a workflow execution"""
         return self.execution_history.get(execution_id)
 
-    def list_workflows(self) -> List[Dict[str, Any]]:
+    def list_workflows(self) -> list[dict[str, Any]]:
         """List all defined workflows"""
         return [
             {
@@ -419,7 +419,7 @@ class WorkflowOrchestrator:
             for workflow in self.workflows.values()
         ]
 
-    def get_workflow_definition(self, workflow_id: str) -> Optional[Dict[str, Any]]:
+    def get_workflow_definition(self, workflow_id: str) -> dict[str, Any] | None:
         """Get workflow definition"""
         return self.workflows.get(workflow_id)
 

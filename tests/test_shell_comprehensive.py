@@ -8,11 +8,11 @@ import os
 import subprocess
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 import sys
+
 sys.path.insert(0, str(project_root))
 
 
@@ -46,7 +46,7 @@ class TestShellComprehensive:
             return result
         except subprocess.TimeoutExpired:
             return None
-        except Exception as e:
+        except Exception:
             return None
 
     def test_critical_scripts_exist(self):
@@ -224,7 +224,7 @@ class TestShellComprehensive:
             dir_path = project_root / script_dir
             if dir_path.exists():
                 for script_file in dir_path.glob('*.sh'):
-                    with open(script_file, 'r', encoding='utf-8', errors='ignore') as f:
+                    with open(script_file, encoding='utf-8', errors='ignore') as f:
                         content = f.read()
 
                         # Check for potentially dangerous patterns

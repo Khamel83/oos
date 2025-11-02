@@ -5,25 +5,24 @@ Provides comprehensive command-line interface for task management,
 dependency tracking, and export/import operations.
 """
 
-import click
 import json
 import sys
-from pathlib import Path
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Any
 
-from .models import Task, TaskStatus, TaskPriority
+import click
+
 from .database import TaskDatabase
-from .dependencies import DependencyGraph, CyclicDependencyError
-from .validation import TaskValidator, ValidationError
-from .jsonl_export import TaskExporter, ExportError
-from .jsonl_import import TaskImporter, ImportResult, ConflictResolution
+from .jsonl_export import ExportError, TaskExporter
+from .jsonl_import import TaskImporter
+from .models import Task, TaskPriority, TaskStatus
+from .validation import TaskValidator
 
 
 class TaskCLI:
     """Main CLI application for task management."""
 
-    def __init__(self, db_path: Optional[str] = None):
+    def __init__(self, db_path: str | None = None):
         """Initialize CLI with database path."""
         if db_path is None:
             # Default to .oos/tasks/tasks.db in current directory
@@ -102,19 +101,19 @@ class TaskCLI:
         }
         return icons.get(priority, "⚪")
 
-    def _parse_tags(self, tags_str: str) -> List[str]:
+    def _parse_tags(self, tags_str: str) -> list[str]:
         """Parse comma-separated tags string."""
         if not tags_str:
             return []
         return [tag.strip() for tag in tags_str.split(',') if tag.strip()]
 
-    def _parse_dependencies(self, deps_str: str) -> List[str]:
+    def _parse_dependencies(self, deps_str: str) -> list[str]:
         """Parse comma-separated dependencies string."""
         if not deps_str:
             return []
         return [dep.strip() for dep in deps_str.split(',') if dep.strip()]
 
-    def _parse_context(self, context_str: str) -> Dict[str, Any]:
+    def _parse_context(self, context_str: str) -> dict[str, Any]:
         """Parse context string (key=value pairs separated by commas)."""
         if not context_str:
             return {}
@@ -444,10 +443,9 @@ def delete(ctx, task_id, confirm):
             for dep_task in dependent_tasks:
                 print(f"  - {dep_task.id[:8]}: {dep_task.title}")
 
-            if not confirm:
-                if not click.confirm("Proceed with deletion?"):
-                    task_cli._info("Deletion cancelled")
-                    return
+            if not confirm and not click.confirm("Proceed with deletion?"):
+                task_cli._info("Deletion cancelled")
+                return
 
         success = db.delete_task(task_id)
         if success:
@@ -650,7 +648,7 @@ def import_tasks(ctx, input_file, resolution, dry_run, validate, strict):
         )
 
         if result.success:
-            task_cli._success(f"Import completed successfully")
+            task_cli._success("Import completed successfully")
             task_cli._info(f"  Tasks imported: {result.tasks_imported}")
             task_cli._info(f"  Tasks updated: {result.tasks_updated}")
             task_cli._info(f"  Tasks skipped: {result.tasks_skipped}")
@@ -682,7 +680,7 @@ def sync(ctx, jsonl_file, resolution):
         result = db.sync_tasks(jsonl_file, conflict_resolution=resolution)
 
         if result['success']:
-            task_cli._success(f"Sync completed successfully")
+            task_cli._success("Sync completed successfully")
             task_cli._info(f"  Backup exported: {result['backup_exported']} tasks")
             task_cli._info(f"  Tasks imported: {result['tasks_imported']}")
             task_cli._info(f"  Tasks updated: {result['tasks_updated']}")
@@ -705,7 +703,7 @@ def stats(ctx):
     try:
         stats = db.get_stats()
 
-        print(f"📊 Task Database Statistics")
+        print("📊 Task Database Statistics")
         print(f"  Database: {stats['db_path']}")
         print(f"  Total tasks: {stats['total_tasks']}")
         print(f"  File size: {stats['db_size_bytes']} bytes")

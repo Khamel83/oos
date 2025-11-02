@@ -4,19 +4,17 @@ Handles intelligent idea germination in the background while user focuses on oth
 """
 
 import asyncio
-import json
-import time
 import uuid
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
 from enum import Enum
+from typing import Any
 
-from template_engine import get_template_engine, GoalAnalysis
 from google_sheets_integration import GoogleSheetsIntegration
 from renderers import Colors
-from safety_guardrails import get_safety_guardrails, SafetyCheck
-from visual_feedback import get_notification_manager, get_live_dashboard
+from safety_guardrails import get_safety_guardrails
+from template_engine import GoalAnalysis, get_template_engine
+from visual_feedback import get_live_dashboard, get_notification_manager
 
 
 class GerminationPhase(Enum):
@@ -39,8 +37,8 @@ class Idea:
     source: str  # voice, text, terminal, chat
     timestamp: datetime
     priority: int = 5  # 1-10, higher = more important
-    context: Optional[Dict[str, Any]] = None
-    attachments: Optional[List[str]] = None
+    context: dict[str, Any] | None = None
+    attachments: list[str] | None = None
 
 
 @dataclass
@@ -49,12 +47,12 @@ class GerminationResult:
     idea_id: str
     phase: GerminationPhase
     progress: float  # 0.0 to 1.0
-    output: Dict[str, Any]
+    output: dict[str, Any]
     timestamp: datetime
     confidence: float
-    missing_info: List[str]
-    next_steps: List[str]
-    user_questions: List[str]
+    missing_info: list[str]
+    next_steps: list[str]
+    user_questions: list[str]
 
 
 @dataclass
@@ -65,8 +63,8 @@ class ProjectState:
     name: str
     description: str
     template_type: str
-    files_created: List[str]
-    config_generated: Dict[str, Any]
+    files_created: list[str]
+    config_generated: dict[str, Any]
     status: str
     last_updated: datetime
 
@@ -74,12 +72,12 @@ class ProjectState:
 class BackgroundProcessor:
     """Handles background idea processing and germination"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.processing_queue = asyncio.Queue()
-        self.active_ideas: Dict[str, Idea] = {}
-        self.germination_results: Dict[str, List[GerminationResult]] = {}
-        self.projects: Dict[str, ProjectState] = {}
+        self.active_ideas: dict[str, Idea] = {}
+        self.germination_results: dict[str, list[GerminationResult]] = {}
+        self.projects: dict[str, ProjectState] = {}
         self.template_engine = get_template_engine(config)
         self.google_sheets = GoogleSheetsIntegration(config) if config.get('google_enabled') else None
         self.safety_guardrails = get_safety_guardrails(config)
@@ -134,7 +132,7 @@ class BackgroundProcessor:
 
         return True
 
-    async def get_idea_status(self, idea_id: str) -> Optional[Dict[str, Any]]:
+    async def get_idea_status(self, idea_id: str) -> dict[str, Any] | None:
         """Get current status of an idea"""
         if idea_id in self.active_ideas:
             idea = self.active_ideas[idea_id]
@@ -375,7 +373,7 @@ class BackgroundProcessor:
         self.germination_results[idea.id].append(result)
         await self._save_germination_result(result)
 
-    async def _extract_context(self, idea: Idea) -> Dict[str, Any]:
+    async def _extract_context(self, idea: Idea) -> dict[str, Any]:
         """Extract additional context from the idea"""
         context = {
             'source': idea.source,
@@ -397,7 +395,7 @@ class BackgroundProcessor:
 
         return context
 
-    def _identify_missing_info(self, goal_analysis: GoalAnalysis, context: Dict[str, Any]) -> List[str]:
+    def _identify_missing_info(self, goal_analysis: GoalAnalysis, context: dict[str, Any]) -> list[str]:
         """Identify what information is missing to proceed"""
         missing = []
 
@@ -422,7 +420,7 @@ class BackgroundProcessor:
 
         return missing
 
-    def _generate_next_steps(self, goal_analysis: GoalAnalysis, missing_info: List[str]) -> List[str]:
+    def _generate_next_steps(self, goal_analysis: GoalAnalysis, missing_info: list[str]) -> list[str]:
         """Generate next steps based on analysis"""
         if missing_info:
             return [f"Resolve: {info}" for info in missing_info[:3]]
@@ -430,12 +428,12 @@ class BackgroundProcessor:
         next_steps = [
             f"Research {goal_analysis.goal_type} best practices",
             f"Create {goal_analysis.goal_type} project structure",
-            f"Generate initial code and configuration"
+            "Generate initial code and configuration"
         ]
 
         return next_steps
 
-    def _generate_user_questions(self, missing_info: List[str]) -> List[str]:
+    def _generate_user_questions(self, missing_info: list[str]) -> list[str]:
         """Generate questions for the user based on missing information"""
         questions = []
 
@@ -451,7 +449,7 @@ class BackgroundProcessor:
 
         return questions
 
-    async def _research_approaches(self, goal_analysis: GoalAnalysis) -> Dict[str, Any]:
+    async def _research_approaches(self, goal_analysis: GoalAnalysis) -> dict[str, Any]:
         """Research approaches for the given goal"""
         # Simulate research - in real implementation, this would use RAG
         research = {
@@ -475,7 +473,7 @@ class BackgroundProcessor:
 
         return research
 
-    async def _identify_blockers(self, goal_analysis: GoalAnalysis, research: Dict[str, Any]) -> Dict[str, Any]:
+    async def _identify_blockers(self, goal_analysis: GoalAnalysis, research: dict[str, Any]) -> dict[str, Any]:
         """Identify potential blockers and missing information"""
         blockers = {
             'missing_info': [],
@@ -500,7 +498,7 @@ class BackgroundProcessor:
 
         return blockers
 
-    async def _refine_project(self, idea: Idea) -> Dict[str, Any]:
+    async def _refine_project(self, idea: Idea) -> dict[str, Any]:
         """Refine and optimize the created project"""
         # Simulate refinement process
         refinement = {
@@ -554,7 +552,7 @@ class BackgroundProcessor:
                 cutoff_time = datetime.now() - timedelta(hours=24)
 
                 to_remove = []
-                for idea_id, idea in self.active_ideas.items():
+                for idea_id, _idea in self.active_ideas.items():
                     results = self.germination_results.get(idea_id, [])
                     if results and results[-1].phase == GerminationPhase.COMPLETED:
                         if results[-1].timestamp < cutoff_time:
@@ -714,7 +712,7 @@ oos continue {idea.id}
 background_processor = None
 
 
-def get_background_processor(config: Dict[str, Any]) -> BackgroundProcessor:
+def get_background_processor(config: dict[str, Any]) -> BackgroundProcessor:
     """Get or create background processor instance"""
     global background_processor
     if background_processor is None:
@@ -722,7 +720,7 @@ def get_background_processor(config: Dict[str, Any]) -> BackgroundProcessor:
     return background_processor
 
 
-async def start_background_processor(config: Dict[str, Any]):
+async def start_background_processor(config: dict[str, Any]):
     """Start the background processor"""
     processor = get_background_processor(config)
     await processor.start()
@@ -733,7 +731,7 @@ async def add_idea_for_processing(
     user_id: str = "default",
     source: str = "terminal",
     priority: int = 5,
-    context: Optional[Dict[str, Any]] = None
+    context: dict[str, Any] | None = None
 ) -> str:
     """Add an idea for background processing"""
     idea = Idea(
@@ -780,7 +778,7 @@ if __name__ == "__main__":
         await processor.add_idea(idea)
 
         # Monitor for a while
-        for i in range(10):
+        for _i in range(10):
             status = await processor.get_idea_status(idea.id)
             if status:
                 print(f"Status: {status['phase']} - {status['progress'] * 100}%")

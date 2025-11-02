@@ -4,11 +4,13 @@ Configuration loader for OOS Consultant
 """
 
 import json
-import yaml
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
 
-def load_config(config_name: str) -> Dict[str, Any]:
+import yaml
+
+
+def load_config(config_name: str) -> dict[str, Any]:
     """Load configuration by name"""
     config_paths = [
         Path(f"config/{config_name}.yaml"),
@@ -20,7 +22,7 @@ def load_config(config_name: str) -> Dict[str, Any]:
     for config_path in config_paths:
         if config_path.exists():
             try:
-                with open(config_path, 'r') as f:
+                with open(config_path) as f:
                     if config_path.suffix in ['.yaml', '.yml']:
                         return yaml.safe_load(f)
                     else:
@@ -32,7 +34,7 @@ def load_config(config_name: str) -> Dict[str, Any]:
     # Return default configuration if no files found
     return get_default_config(config_name)
 
-def get_default_config(config_name: str) -> Dict[str, Any]:
+def get_default_config(config_name: str) -> dict[str, Any]:
     """Get default configuration for given config name"""
     if config_name == "consultant":
         return {

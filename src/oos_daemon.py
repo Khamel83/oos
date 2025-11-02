@@ -7,14 +7,15 @@ import asyncio
 import json
 import signal
 import sys
-from pathlib import Path
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
-from datetime import datetime
 import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
+from background_processor import Idea as BackgroundIdea
+from background_processor import get_background_processor
 from renderers import Colors
-from background_processor import BackgroundProcessor, Idea as BackgroundIdea, get_background_processor
 
 
 @dataclass
@@ -25,8 +26,8 @@ class Idea:
     source: str  # voice, terminal, chat, ide
     user_id: str
     timestamp: str
-    project_id: Optional[str] = None
-    attachments: List[str] = None
+    project_id: str | None = None
+    attachments: list[str] = None
     priority: str = "normal"  # low, normal, high, urgent
 
 
@@ -34,11 +35,11 @@ class Idea:
 class IdeaUnderstanding:
     """Result of understanding user's idea"""
     goal_type: str
-    features: List[str]
-    requirements: List[str]
-    constraints: List[str]
+    features: list[str]
+    requirements: list[str]
+    constraints: list[str]
     confidence: float
-    missing_info: List[str]
+    missing_info: list[str]
     estimated_effort: str
 
 
@@ -49,9 +50,9 @@ class GerminationResult:
     status: str  # processing, needs_input, completed, blocked
     progress: float  # 0.0 to 1.0
     understanding: IdeaUnderstanding
-    artifacts: Dict[str, Any]
-    next_steps: List[str]
-    user_questions: List[str]
+    artifacts: dict[str, Any]
+    next_steps: list[str]
+    user_questions: list[str]
     created_at: str
     updated_at: str
 
@@ -68,9 +69,9 @@ class OOSDaemon:
         self.background_processor = get_background_processor(self.config)
 
         # Legacy components for backward compatibility
-        self.idea_queue: List[Idea] = []
-        self.active_projects: Dict[str, GerminationResult] = {}
-        self.processing_tasks: Dict[str, asyncio.Task] = {}
+        self.idea_queue: list[Idea] = []
+        self.active_projects: dict[str, GerminationResult] = {}
+        self.processing_tasks: dict[str, asyncio.Task] = {}
 
         # Initialize components
         self.idea_processor = IdeaProcessor(config_dir)
@@ -93,13 +94,13 @@ class OOSDaemon:
         await self.load_state()
 
         # Start background processor
-        bg_processor_task = asyncio.create_task(self.background_processor.start())
+        asyncio.create_task(self.background_processor.start())
 
         # Start legacy processing for backward compatibility
-        processing_task = asyncio.create_task(self.process_idea_queue())
+        asyncio.create_task(self.process_idea_queue())
 
         # Start input monitoring
-        monitor_task = asyncio.create_task(self.monitor_input_sources())
+        asyncio.create_task(self.monitor_input_sources())
 
         # Setup signal handlers
         self.setup_signal_handlers()
@@ -377,7 +378,7 @@ class OOSDaemon:
 
         if state_file.exists():
             try:
-                with open(state_file, 'r') as f:
+                with open(state_file) as f:
                     state = json.load(f)
 
                 self.start_time = datetime.fromisoformat(state['start_time'])
@@ -394,13 +395,13 @@ class OOSDaemon:
             except Exception as e:
                 print(f"{Colors.YELLOW}⚠️  Could not load previous state: {e}{Colors.END}")
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load daemon configuration"""
         config_file = self.config_dir / 'config.json'
 
         if config_file.exists():
             try:
-                with open(config_file, 'r') as f:
+                with open(config_file) as f:
                     return json.load(f)
             except Exception as e:
                 print(f"{Colors.YELLOW}⚠️  Could not load config: {e}{Colors.END}")
@@ -413,7 +414,7 @@ class OOSDaemon:
             'cleanup_interval': 3600
         }
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get current daemon status"""
         return {
             'running': self.running,
@@ -435,8 +436,8 @@ class IdeaProcessor:
 
     def __init__(self, config_dir: Path):
         self.config_dir = config_dir
-        from template_engine import get_template_engine
         from google_sheets_integration import get_sheets_integration
+        from template_engine import get_template_engine
 
         self.template_engine = get_template_engine({'api_key': 'demo'})
         self.google_sheets = get_sheets_integration(config_dir)
@@ -501,7 +502,7 @@ class IdeaProcessor:
                 estimated_effort="unknown"
             )
 
-    def extract_requirements(self, goal_analysis) -> List[str]:
+    def extract_requirements(self, goal_analysis) -> list[str]:
         """Extract requirements from goal analysis"""
         requirements = []
 
@@ -521,7 +522,7 @@ class IdeaProcessor:
 
         return requirements
 
-    def extract_constraints(self, content: str) -> List[str]:
+    def extract_constraints(self, content: str) -> list[str]:
         """Extract constraints from user input"""
         constraints = []
         content_lower = content.lower()
@@ -535,7 +536,7 @@ class IdeaProcessor:
 
         return constraints
 
-    def identify_missing_info(self, goal_analysis) -> List[str]:
+    def identify_missing_info(self, goal_analysis) -> list[str]:
         """Identify what information is missing"""
         missing = []
 
@@ -550,7 +551,7 @@ class IdeaProcessor:
 
         return missing
 
-    async def research_approaches(self, understanding: IdeaUnderstanding) -> Dict[str, Any]:
+    async def research_approaches(self, understanding: IdeaUnderstanding) -> dict[str, Any]:
         """Research best approaches for the idea"""
         print(f"{Colors.BLUE}📚 Researching approaches for {understanding.goal_type}{Colors.END}")
 
@@ -578,7 +579,7 @@ class IdeaProcessor:
 
         return research
 
-    async def create_solution(self, idea: Idea, understanding: IdeaUnderstanding, research: Dict[str, Any]) -> Dict[str, Any]:
+    async def create_solution(self, idea: Idea, understanding: IdeaUnderstanding, research: dict[str, Any]) -> dict[str, Any]:
         """Create initial solution based on research"""
         print(f"{Colors.BLUE}🛠️  Creating solution for {understanding.goal_type}{Colors.END}")
 
@@ -591,7 +592,7 @@ class IdeaProcessor:
 
         return creation
 
-    def generate_project_structure(self, understanding: IdeaUnderstanding) -> Dict[str, Any]:
+    def generate_project_structure(self, understanding: IdeaUnderstanding) -> dict[str, Any]:
         """Generate project directory structure"""
         base_name = understanding.goal_type.replace('_', '-')
 
@@ -611,7 +612,7 @@ class IdeaProcessor:
             ]
         }
 
-    def generate_initial_code(self, understanding: IdeaUnderstanding) -> Dict[str, str]:
+    def generate_initial_code(self, understanding: IdeaUnderstanding) -> dict[str, str]:
         """Generate initial code files"""
         main_code = f"""# {understanding.goal_type.title()} Project
 # Generated by OOS
@@ -633,7 +634,7 @@ if __name__ == "__main__":
             'requirements.txt': "\n".join(research['recommended_tools']) if 'recommended_tools' in research else ""
         }
 
-    def generate_setup_instructions(self, understanding: IdeaUnderstanding) -> List[str]:
+    def generate_setup_instructions(self, understanding: IdeaUnderstanding) -> list[str]:
         """Generate setup instructions"""
         return [
             f"Navigate to project directory: cd {understanding.goal_type}",
@@ -642,7 +643,7 @@ if __name__ == "__main__":
             "Customize as needed for your specific use case"
         ]
 
-    async def refine_solution(self, creation: Dict[str, Any]) -> Dict[str, Any]:
+    async def refine_solution(self, creation: dict[str, Any]) -> dict[str, Any]:
         """Refine and improve the initial solution"""
         print(f"{Colors.BLUE}🔧 Refining solution{Colors.END}")
 
@@ -658,7 +659,7 @@ if __name__ == "__main__":
 
         return creation
 
-    def determine_status(self, refinement: Dict[str, Any]) -> str:
+    def determine_status(self, refinement: dict[str, Any]) -> str:
         """Determine the status of idea processing"""
         quality_score = refinement.get('quality_score', 0.5)
 
@@ -669,12 +670,12 @@ if __name__ == "__main__":
         else:
             return "blocked"
 
-    def calculate_progress(self, refinement: Dict[str, Any]) -> float:
+    def calculate_progress(self, refinement: dict[str, Any]) -> float:
         """Calculate progress percentage"""
         quality_score = refinement.get('quality_score', 0.0)
         return min(quality_score, 1.0)
 
-    def extract_next_steps(self, refinement: Dict[str, Any]) -> List[str]:
+    def extract_next_steps(self, refinement: dict[str, Any]) -> list[str]:
         """Extract next steps for the user"""
         return [
             "Review the generated code",
@@ -683,7 +684,7 @@ if __name__ == "__main__":
             "Deploy to production"
         ]
 
-    def extract_user_questions(self, refinement: Dict[str, Any]) -> List[str]:
+    def extract_user_questions(self, refinement: dict[str, Any]) -> list[str]:
         """Extract questions for the user"""
         return [
             "What specific features do you need?",

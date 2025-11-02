@@ -3,19 +3,22 @@
 Test suite for the Knowledge Resolver
 """
 
-import pytest
 import sys
-import os
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
-from datetime import date
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Add src to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from knowledge_resolver import (
-    KnowledgeResolver, KnowledgeResult, SourceInfo, QuotaInfo,
-    Context7Adapter, DocsMCPAdapter, DeepResearchAdapter
+    Context7Adapter,
+    DeepResearchAdapter,
+    DocsMCPAdapter,
+    KnowledgeResolver,
+    KnowledgeResult,
+    SourceInfo,
 )
 
 

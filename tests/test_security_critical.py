@@ -5,11 +5,10 @@ Tests authentication, key management, and security-critical components
 """
 
 import os
+import subprocess
 import sys
 import tempfile
-import subprocess
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -84,7 +83,7 @@ class TestSecurityCritical:
         # Scan source files
         src_dir = project_root / 'src'
         for py_file in src_dir.glob('**/*.py'):
-            with open(py_file, 'r', encoding='utf-8') as f:
+            with open(py_file, encoding='utf-8') as f:
                 content = f.read()
                 for pattern in secret_patterns:
                     matches = re.findall(pattern, content, re.IGNORECASE)
@@ -94,7 +93,7 @@ class TestSecurityCritical:
         # Scan auth.py specifically
         auth_file = project_root / 'auth.py'
         if auth_file.exists():
-            with open(auth_file, 'r', encoding='utf-8') as f:
+            with open(auth_file, encoding='utf-8') as f:
                 content = f.read()
                 if 'admin' in content and 'password' in content:
                     issues_found.append("auth.py: Contains hardcoded admin credentials")
@@ -143,7 +142,7 @@ class TestSecurityCritical:
                 raise AssertionError(".env file has insecure permissions")
 
             # Check for secrets in .env
-            with open(env_file, 'r') as f:
+            with open(env_file) as f:
                 content = f.read()
                 if 'password' in content.lower() or 'secret' in content.lower():
                     # This might be okay if properly secured, but worth noting
@@ -188,7 +187,7 @@ class TestSecurityCritical:
         if security_script.exists():
             try:
                 # Run with --help or similar to test basic functionality
-                result = subprocess.run(
+                subprocess.run(
                     [str(security_script), '--help'],
                     capture_output=True,
                     text=True,

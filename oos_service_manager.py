@@ -3,17 +3,15 @@
 OOS Service Manager with SystemD integration and watchdog
 """
 
-import os
-import sys
-import time
-import json
-import signal
-import logging
-import threading
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, Optional
 import argparse
+import json
+import logging
+import os
+import signal
+import sys
+import threading
+import time
+from pathlib import Path
 
 # Add lib to path
 sys.path.insert(0, str(Path(__file__).parent / 'lib'))
@@ -27,6 +25,7 @@ except ImportError:
     print("Warning: systemd module not available, watchdog disabled")
 
 from resource_manager import ResourceManager
+
 
 class OOSServiceManager:
     """Main service manager with SystemD integration"""
@@ -44,7 +43,7 @@ class OOSServiceManager:
 
         self.logger.info("OOS Service Manager initializing...")
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """Load service configuration"""
         default_config = {
             "service": {
@@ -97,7 +96,7 @@ class OOSServiceManager:
             print(f"Error loading config: {e}")
             return default_config
 
-    def _save_config(self, config: Dict):
+    def _save_config(self, config: dict):
         """Save configuration to file"""
         try:
             os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
@@ -290,7 +289,7 @@ class OOSServiceManager:
                 except Exception as e:
                     self.logger.error(f"Failed to start component {component_name}: {e}")
 
-    def _start_component(self, name: str, config: Dict):
+    def _start_component(self, name: str, config: dict):
         """Start individual component"""
         if name == "resource_manager":
             # Resource manager already initialized
@@ -300,7 +299,7 @@ class OOSServiceManager:
         elif name == "log_manager":
             self._start_log_manager(config)
 
-    def _start_health_monitor(self, config: Dict):
+    def _start_health_monitor(self, config: dict):
         """Start health monitoring component"""
         def health_monitor_worker():
             interval = config.get("check_interval", 60)
@@ -328,7 +327,7 @@ class OOSServiceManager:
         health_thread.start()
         self.services["health_monitor"] = health_thread
 
-    def _start_log_manager(self, config: Dict):
+    def _start_log_manager(self, config: dict):
         """Start log management component"""
         def log_manager_worker():
             interval = config.get("rotation_interval", 3600)
@@ -394,7 +393,7 @@ class OOSServiceManager:
         except Exception as e:
             self.logger.error(f"Error during shutdown: {e}")
 
-    def status(self) -> Dict:
+    def status(self) -> dict:
         """Get service status"""
         return {
             'service': self.config["service"]["name"],

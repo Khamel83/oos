@@ -3,10 +3,11 @@
 Example usage of the Command Orchestration & Workflow Engine
 """
 
-import json
 import asyncio
-import sys
+import json
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.orchestrator import WorkflowOrchestrator, create_default_workflows
@@ -46,7 +47,7 @@ async def demonstrate_orchestration():
     # Execute workflow
     result = await orchestrator.execute_workflow("project_setup", variables)
 
-    print(f"\\nWorkflow execution result:")
+    print("\\nWorkflow execution result:")
     print(f"Status: {result['status']}")
     print(f"Execution ID: {result['execution_id']}")
     print(f"Start time: {result['start_time']}")
@@ -76,7 +77,7 @@ async def demonstrate_orchestration():
     # Execute workflow
     analysis_result = await orchestrator.execute_workflow("code_analysis", analysis_variables)
 
-    print(f"\\nAnalysis workflow result:")
+    print("\\nAnalysis workflow result:")
     print(f"Status: {analysis_result['status']}")
     print(f"Execution ID: {analysis_result['execution_id']}")
 
@@ -164,7 +165,7 @@ def demonstrate_custom_workflow():
 
     # Show workflow definition
     workflow_def = orchestrator.get_workflow_definition(workflow_id)
-    print(f"\\nWorkflow definition:")
+    print("\\nWorkflow definition:")
     print(f"Name: {workflow_def['name']}")
     print(f"Description: {workflow_def['description']}")
     print(f"Steps: {len(workflow_def['steps'])}")

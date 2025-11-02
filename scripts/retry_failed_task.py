@@ -3,14 +3,15 @@
 Script to manually retry failed tasks from dead letter queue
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
 from pathlib import Path
 
 # Add helpers to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from helpers.queue_manager import get_queue_manager
+
 
 def list_failed_tasks(queue_name: str):
     """List tasks in dead letter queue"""
@@ -113,7 +114,7 @@ def main():
 
         if dlq_id:
             print(f"Found task {args.original_id} in DLQ with ID {dlq_id}")
-            print(f"Retrying...")
+            print("Retrying...")
             success = retry_task(args.queue, dlq_id)
             sys.exit(0 if success else 1)
         else:

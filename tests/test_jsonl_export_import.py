@@ -5,18 +5,22 @@ Comprehensive test suite for export, import, validation, and
 conflict resolution features.
 """
 
-import pytest
-import json
 import gzip
-import tempfile
+import json
 import shutil
-from pathlib import Path
+import tempfile
 from datetime import datetime, timedelta
+from pathlib import Path
 
-from src.oos_task_system.models import Task, TaskStatus, TaskPriority
+import pytest
+
 from src.oos_task_system.database import TaskDatabase
-from src.oos_task_system.jsonl_export import TaskExporter, ExportError
-from src.oos_task_system.jsonl_import import TaskImporter, ImportResult, ConflictResolution
+from src.oos_task_system.jsonl_export import TaskExporter
+from src.oos_task_system.jsonl_import import (
+    ConflictResolution,
+    TaskImporter,
+)
+from src.oos_task_system.models import Task, TaskPriority, TaskStatus
 
 
 class TestTaskExporter:
@@ -62,7 +66,7 @@ class TestTaskExporter:
             assert result['file_size_bytes'] > 0
 
             # Verify file contents
-            with open(output_path, 'r') as f:
+            with open(output_path) as f:
                 lines = [line for line in f if line.strip() and not line.startswith('"__metadata__"')]
 
             assert len(lines) == 4  # 4 tasks exported
@@ -197,7 +201,7 @@ class TestTaskExporter:
             assert result['success'] is True
 
             # Verify sorting
-            with open(output_path, 'r') as f:
+            with open(output_path) as f:
                 lines = [line for line in f if line.strip() and not line.startswith('"__metadata__"')]
 
             task_titles = [json.loads(line)['title'] for line in lines]
@@ -223,7 +227,7 @@ class TestTaskExporter:
             assert result['success'] is True
 
             # Verify fields are excluded
-            with open(output_path, 'r') as f:
+            with open(output_path) as f:
                 task_data = json.loads(f.readline())
                 assert 'context' not in task_data
                 assert 'estimated_hours' not in task_data

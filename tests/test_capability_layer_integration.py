@@ -3,22 +3,20 @@
 Integration tests for the OOS Capability Layer
 """
 
-import pytest
 import sys
-import os
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import patch
+
+import pytest
 
 # Add src to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from capability_router import CapabilityRouter, RoutingResult
-from knowledge_resolver import KnowledgeResolver, KnowledgeResult
 from actions_gateway import ActionsGateway, ToolInfo
+from capability_router import CapabilityRouter
+from knowledge_resolver import KnowledgeResolver, KnowledgeResult
 from renderers import CapabilityRenderer
 from simple_command_handler import SimpleCommandHandler
-from commands.capabilities_command import CapabilitiesCommand
-from commands.actions_command import ActionsCommand
 
 
 class TestCapabilityLayerIntegration:
@@ -116,7 +114,7 @@ class TestCapabilityLayerIntegration:
         """Test error handling in the workflow"""
         # Step 1: Route the request
         query = "Tell me about non-existent-service"
-        routing_result = router.classify(query)
+        router.classify(query)
 
         # Step 2: Mock empty knowledge result
         mock_knowledge_result = KnowledgeResult(
@@ -181,7 +179,7 @@ class TestCapabilityLayerIntegration:
 
         # Check that the server has the new tools
         tools = server.server._tools if hasattr(server.server, '_tools') else []
-        tool_names = [tool.name for tool in tools] if tools else []
+        [tool.name for tool in tools] if tools else []
 
         # The tools should be available in the list_tools method
         assert hasattr(server, '_oos_capabilities')

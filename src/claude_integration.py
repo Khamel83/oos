@@ -10,7 +10,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -21,11 +21,11 @@ from simple_command_handler import SimpleCommandHandler
 class ClaudeCodeIntegration:
     """Simple integration for Claude Code slash commands"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
         self.command_handler = SimpleCommandHandler()
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load configuration from file"""
         default_config = {
             "debug": False,
@@ -34,7 +34,7 @@ class ClaudeCodeIntegration:
 
         if config_path and Path(config_path).exists():
             try:
-                with open(config_path, 'r') as f:
+                with open(config_path) as f:
                     config = json.load(f)
                     default_config.update(config)
             except Exception:
@@ -42,7 +42,7 @@ class ClaudeCodeIntegration:
 
         return default_config
 
-    def list_commands(self) -> List[Dict[str, Any]]:
+    def list_commands(self) -> list[dict[str, Any]]:
         """List all available commands"""
         commands = []
         for cmd in self.command_handler.list_commands():
@@ -53,11 +53,11 @@ class ClaudeCodeIntegration:
             })
         return commands
 
-    def execute_command(self, command_name: str, args: str = "") -> Dict[str, Any]:
+    def execute_command(self, command_name: str, args: str = "") -> dict[str, Any]:
         """Execute a command by name"""
         return self.command_handler.execute_command(command_name, args)
 
-    def get_command_info(self, command_name: str) -> Optional[Dict[str, Any]]:
+    def get_command_info(self, command_name: str) -> dict[str, Any] | None:
         """Get information about a specific command"""
         cmd = self.command_handler.get_command(command_name)
         if not cmd:

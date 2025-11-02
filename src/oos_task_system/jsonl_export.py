@@ -5,15 +5,15 @@ Provides git-syncable task export with filtering, formatting,
 and incremental export capabilities.
 """
 
-import json
 import gzip
-from pathlib import Path
+import json
+from collections.abc import Callable
 from datetime import datetime
-from typing import List, Dict, Any, Optional, Set, Callable
-from dataclasses import asdict
+from pathlib import Path
+from typing import Any
 
-from .models import Task, TaskStatus
 from .database import TaskDatabase
+from .models import Task, TaskStatus
 
 
 class ExportError(Exception):
@@ -41,7 +41,7 @@ class TaskExporter:
             'format_options': {}
         }
 
-    def export_all_tasks(self, output_path: str, **options) -> Dict[str, Any]:
+    def export_all_tasks(self, output_path: str, **options) -> dict[str, Any]:
         """
         Export all tasks to JSONL file.
 
@@ -56,12 +56,12 @@ class TaskExporter:
         return self._export_tasks(tasks, output_path, **options)
 
     def export_filtered_tasks(self, output_path: str,
-                            status_filter: Optional[List[TaskStatus]] = None,
-                            assignee_filter: Optional[str] = None,
-                            tag_filter: Optional[List[str]] = None,
-                            date_range: Optional[tuple] = None,
-                            custom_filter: Optional[Callable[[Task], bool]] = None,
-                            **options) -> Dict[str, Any]:
+                            status_filter: list[TaskStatus] | None = None,
+                            assignee_filter: str | None = None,
+                            tag_filter: list[str] | None = None,
+                            date_range: tuple | None = None,
+                            custom_filter: Callable[[Task], bool] | None = None,
+                            **options) -> dict[str, Any]:
         """
         Export tasks with filtering options.
 
@@ -102,7 +102,7 @@ class TaskExporter:
 
         return self._export_tasks(filtered_tasks, output_path, **options)
 
-    def export_incremental(self, output_path: str, since: datetime, **options) -> Dict[str, Any]:
+    def export_incremental(self, output_path: str, since: datetime, **options) -> dict[str, Any]:
         """
         Export tasks modified since a specific date.
 
@@ -121,7 +121,7 @@ class TaskExporter:
 
         return self._export_tasks(incremental_tasks, output_path, **options)
 
-    def export_by_project(self, output_dir: str, project_field: str = "project", **options) -> Dict[str, Any]:
+    def export_by_project(self, output_dir: str, project_field: str = "project", **options) -> dict[str, Any]:
         """
         Export tasks grouped by project into separate files.
 
@@ -183,7 +183,7 @@ class TaskExporter:
 
         return export_summary
 
-    def _export_tasks(self, tasks: List[Task], output_path: str, **options) -> Dict[str, Any]:
+    def _export_tasks(self, tasks: list[Task], output_path: str, **options) -> dict[str, Any]:
         """
         Internal method to export task list to JSONL.
 
@@ -246,8 +246,8 @@ class TaskExporter:
         except Exception as e:
             raise ExportError(f"Failed to export tasks to {output_path}: {str(e)}")
 
-    def _write_tasks_to_file(self, file, tasks: List[Task], include_metadata: bool,
-                           exclude_fields: List[str], pretty_format: bool):
+    def _write_tasks_to_file(self, file, tasks: list[Task], include_metadata: bool,
+                           exclude_fields: list[str], pretty_format: bool):
         """Write tasks to file handle."""
         # Write metadata header if requested
         if include_metadata:
@@ -267,7 +267,7 @@ class TaskExporter:
 
             file.write(task_line + '\n')
 
-    def _prepare_task_data(self, task: Task, exclude_fields: List[str]) -> Dict[str, Any]:
+    def _prepare_task_data(self, task: Task, exclude_fields: list[str]) -> dict[str, Any]:
         """Prepare task data for export."""
         task_data = task.to_dict()
 
@@ -280,9 +280,9 @@ class TaskExporter:
 
         return task_data
 
-    def _apply_filters(self, tasks: List[Task], status_filter: Optional[List[TaskStatus]],
-                      assignee_filter: Optional[str], tag_filter: Optional[List[str]],
-                      date_range: Optional[tuple], custom_filter: Optional[Callable[[Task], bool]]) -> List[Task]:
+    def _apply_filters(self, tasks: list[Task], status_filter: list[TaskStatus] | None,
+                      assignee_filter: str | None, tag_filter: list[str] | None,
+                      date_range: tuple | None, custom_filter: Callable[[Task], bool] | None) -> list[Task]:
         """Apply filtering logic to task list."""
         filtered = tasks
 
@@ -311,7 +311,7 @@ class TaskExporter:
 
         return filtered
 
-    def _sort_tasks(self, tasks: List[Task], sort_by: str, reverse: bool) -> List[Task]:
+    def _sort_tasks(self, tasks: list[Task], sort_by: str, reverse: bool) -> list[Task]:
         """Sort tasks by specified field."""
         sort_key_map = {
             'created_at': lambda t: t.created_at,
@@ -338,7 +338,7 @@ class TaskExporter:
         sanitized = sanitized.strip('. ')
         return sanitized or 'unnamed'
 
-    def get_export_formats(self) -> List[str]:
+    def get_export_formats(self) -> list[str]:
         """Get list of supported export formats."""
         return ['jsonl', 'jsonl.gz']
 
@@ -376,7 +376,7 @@ class TaskExporter:
         except Exception as e:
             return False, f"Invalid path: {e}"
 
-    def estimate_export_size(self, tasks: List[Task], compress: bool = False) -> Dict[str, int]:
+    def estimate_export_size(self, tasks: list[Task], compress: bool = False) -> dict[str, int]:
         """
         Estimate export file size.
 

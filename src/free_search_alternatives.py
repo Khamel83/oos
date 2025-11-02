@@ -4,11 +4,9 @@ Free Search Alternatives for OOS
 100% free search options that never cost money
 """
 
-import requests
-import json
-import os
-from typing import List, Dict, Optional
 from dataclasses import dataclass
+
+import requests
 
 
 @dataclass
@@ -28,7 +26,7 @@ class FreeSearchEngine:
             'User-Agent': 'Mozilla/5.0 (compatible; OOS-Search/1.0)'
         })
 
-    async def search(self, query: str, max_results: int = 10) -> List[SearchResult]:
+    async def search(self, query: str, max_results: int = 10) -> list[SearchResult]:
         """Search using free alternatives in priority order"""
 
         # Try each search engine in priority order
@@ -54,7 +52,7 @@ class FreeSearchEngine:
 
         return all_results[:max_results]
 
-    async def _search_duckduckgo_instant(self, query: str, limit: int) -> List[SearchResult]:
+    async def _search_duckduckgo_instant(self, query: str, limit: int) -> list[SearchResult]:
         """DuckDuckGo Instant Answer API - 100% FREE"""
         url = "https://api.duckduckgo.com/"
         params = {
@@ -90,7 +88,7 @@ class FreeSearchEngine:
 
         return results
 
-    async def _search_wikipedia(self, query: str, limit: int) -> List[SearchResult]:
+    async def _search_wikipedia(self, query: str, limit: int) -> list[SearchResult]:
         """Wikipedia API - 100% FREE"""
         search_url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
 
@@ -127,7 +125,7 @@ class FreeSearchEngine:
 
         return results
 
-    async def _search_github(self, query: str, limit: int) -> List[SearchResult]:
+    async def _search_github(self, query: str, limit: int) -> list[SearchResult]:
         """GitHub Search API - 5000 requests/hour FREE"""
         url = "https://api.github.com/search/repositories"
         params = {
@@ -151,7 +149,7 @@ class FreeSearchEngine:
 
         return results
 
-    async def _search_perplexity(self, query: str, limit: int) -> List[SearchResult]:
+    async def _search_perplexity(self, query: str, limit: int) -> list[SearchResult]:
         """Perplexity Sonar API with usage confirmation and safety limits"""
         try:
             # Use the safe search function that handles all safety checks
@@ -169,7 +167,7 @@ class FreeSearchEngine:
             print(f"Perplexity search error: {e}")
             return []
 
-    async def _search_stackoverflow(self, query: str, limit: int) -> List[SearchResult]:
+    async def _search_stackoverflow(self, query: str, limit: int) -> list[SearchResult]:
         """Stack Overflow API - 10000 requests/day FREE"""
         url = "https://api.stackexchange.com/2.3/search/advanced"
         params = {
@@ -205,7 +203,7 @@ FREE_SEARCH_LIMITS = {
 }
 
 
-async def search_free(query: str, max_results: int = 10) -> List[SearchResult]:
+async def search_free(query: str, max_results: int = 10) -> list[SearchResult]:
     """Main function for free search"""
     engine = FreeSearchEngine()
     return await engine.search(query, max_results)

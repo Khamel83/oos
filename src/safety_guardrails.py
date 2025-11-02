@@ -4,18 +4,16 @@ Protects users from dangerous operations and provides safe project execution
 """
 
 import asyncio
-import json
-import re
+import builtins
+import contextlib
 import os
+import re
 import subprocess
 import tempfile
-from typing import Dict, List, Any, Optional, Set, Tuple
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-import hashlib
-
-from renderers import Colors
+from typing import Any
 
 
 class SafetyLevel(Enum):
@@ -31,26 +29,26 @@ class SafetyCheck:
     """Result of a safety check"""
     level: SafetyLevel
     message: str
-    details: Dict[str, Any]
-    recommendations: List[str]
+    details: dict[str, Any]
+    recommendations: list[str]
     requires_confirmation: bool = False
-    allowed_alternatives: List[str] = None
+    allowed_alternatives: list[str] = None
 
 
 @dataclass
 class CodeScan:
     """Result of code safety scanning"""
     is_safe: bool
-    vulnerabilities: List[Dict[str, Any]]
-    suspicious_patterns: List[str]
-    recommendations: List[str]
+    vulnerabilities: list[dict[str, Any]]
+    suspicious_patterns: list[str]
+    recommendations: list[str]
     confidence: float
 
 
 class SafetyGuardrails:
     """Intelligent safety system for OOS operations"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.sandbox_enabled = config.get('sandbox_enabled', True)
         self.max_file_size = config.get('max_file_size', 10 * 1024 * 1024)  # 10MB
@@ -59,14 +57,14 @@ class SafetyGuardrails:
         self.safe_libraries = self._load_safe_libraries()
         self.suspicious_imports = self._load_suspicious_imports()
 
-    def _load_allowed_operations(self) -> Set[str]:
+    def _load_allowed_operations(self) -> set[str]:
         """Load allowed file operations"""
         return {
             'read', 'write', 'create', 'append', 'list', 'exists',
             'download', 'upload', 'copy', 'move', 'rename'
         }
 
-    def _load_blocked_patterns(self) -> List[re.Pattern]:
+    def _load_blocked_patterns(self) -> list[re.Pattern]:
         """Load patterns that are potentially dangerous"""
         patterns = [
             # System commands
@@ -93,7 +91,7 @@ class SafetyGuardrails:
         ]
         return patterns
 
-    def _load_safe_libraries(self) -> Set[str]:
+    def _load_safe_libraries(self) -> set[str]:
         """Load libraries that are generally safe to use"""
         return {
             'requests', 'beautifulsoup4', 'pandas', 'numpy', 'matplotlib',
@@ -103,7 +101,7 @@ class SafetyGuardrails:
             'slack-sdk', 'schedule', 'smtplib', 'email'
         }
 
-    def _load_suspicious_imports(self) -> Set[str]:
+    def _load_suspicious_imports(self) -> set[str]:
         """Load imports that require extra scrutiny"""
         return {
             'os', 'sys', 'subprocess', 'shutil', 'glob', 'tempfile',
@@ -265,7 +263,7 @@ class SafetyGuardrails:
             confidence=confidence
         )
 
-    def _is_suspicious_usage(self, module: str, lines: List[str]) -> bool:
+    def _is_suspicious_usage(self, module: str, lines: list[str]) -> bool:
         """Check if a suspicious module is being used dangerously"""
         dangerous_methods = {
             'os': ['system', 'popen', 'exec', 'spawn'],
@@ -299,7 +297,7 @@ class SafetyGuardrails:
 
         return False
 
-    async def check_project_structure_safety(self, project_files: Dict[str, str]) -> SafetyCheck:
+    async def check_project_structure_safety(self, project_files: dict[str, str]) -> SafetyCheck:
         """Check if project structure is safe"""
         issues = []
         recommendations = []
@@ -311,7 +309,7 @@ class SafetyGuardrails:
             'malware', 'virus', 'trojan', 'spy'
         ]
 
-        for file_path in project_files.keys():
+        for file_path in project_files:
             file_name = Path(file_path).name.lower()
 
             for suspicious in suspicious_files:
@@ -346,7 +344,7 @@ class SafetyGuardrails:
             requires_confirmation=risk_level != SafetyLevel.SAFE
         )
 
-    async def execute_in_sandbox(self, code: str, timeout: int = 30) -> Dict[str, Any]:
+    async def execute_in_sandbox(self, code: str, timeout: int = 30) -> dict[str, Any]:
         """Execute code in a sandboxed environment"""
         if not self.sandbox_enabled:
             return {
@@ -394,12 +392,10 @@ class SafetyGuardrails:
             }
         finally:
             # Clean up temporary file
-            try:
+            with contextlib.suppress(builtins.BaseException):
                 os.unlink(temp_file)
-            except:
-                pass
 
-    async def validate_dependencies(self, dependencies: List[str]) -> SafetyCheck:
+    async def validate_dependencies(self, dependencies: list[str]) -> SafetyCheck:
         """Validate that dependencies are safe to install"""
         issues = []
         recommendations = []
@@ -441,7 +437,7 @@ class SafetyGuardrails:
             requires_confirmation=risk_level != SafetyLevel.SAFE
         )
 
-    def generate_safety_report(self, checks: List[SafetyCheck]) -> Dict[str, Any]:
+    def generate_safety_report(self, checks: list[SafetyCheck]) -> dict[str, Any]:
         """Generate a comprehensive safety report"""
         overall_risk = SafetyLevel.SAFE
 
@@ -483,7 +479,7 @@ class SafetyGuardrails:
         }
         return summaries.get(risk_level, "Unknown risk level")
 
-    def get_safety_guidelines(self) -> Dict[str, str]:
+    def get_safety_guidelines(self) -> dict[str, str]:
         """Get safety guidelines for users"""
         return {
             'general': "Always review generated code before execution",
@@ -499,7 +495,7 @@ class SafetyGuardrails:
 _safety_guardrails = None
 
 
-def get_safety_guardrails(config: Dict[str, Any]) -> SafetyGuardrails:
+def get_safety_guardrails(config: dict[str, Any]) -> SafetyGuardrails:
     """Get or create safety guardrails instance"""
     global _safety_guardrails
     if _safety_guardrails is None:
@@ -507,13 +503,13 @@ def get_safety_guardrails(config: Dict[str, Any]) -> SafetyGuardrails:
     return _safety_guardrails
 
 
-async def check_idea_safety(idea_content: str, config: Dict[str, Any]) -> SafetyCheck:
+async def check_idea_safety(idea_content: str, config: dict[str, Any]) -> SafetyCheck:
     """Convenience function for idea safety checking"""
     guardrails = get_safety_guardrails(config)
     return await guardrails.check_idea_safety(idea_content)
 
 
-async def scan_code_safety(code: str, config: Dict[str, Any]) -> CodeScan:
+async def scan_code_safety(code: str, config: dict[str, Any]) -> CodeScan:
     """Convenience function for code safety scanning"""
     guardrails = get_safety_guardrails(config)
     return await guardrails.scan_code_safety(code)

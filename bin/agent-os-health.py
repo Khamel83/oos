@@ -11,10 +11,8 @@ import json
 import os
 import sqlite3
 import sys
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 
 class HealthChecker:
@@ -293,7 +291,7 @@ class HealthChecker:
             self.log('WARNING', f"Could not check Archon connectivity: {e}")
             return False
 
-    def get_db_path(self) -> Optional[Path]:
+    def get_db_path(self) -> Path | None:
         """Get database path from environment or default."""
         env_file = self.project_dir / '.env'
         if env_file.exists():
@@ -335,7 +333,7 @@ class HealthChecker:
 
         return overall_success
 
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """Get summary of health check results."""
         error_count = sum(1 for r in self.results if r['level'] == 'ERROR')
         warning_count = sum(1 for r in self.results if r['level'] == 'WARNING')
@@ -395,7 +393,7 @@ Examples:
     if args.json:
         print(json.dumps(summary, indent=2))
     else:
-        print(f"\n--- Health Check Summary ---")
+        print("\n--- Health Check Summary ---")
         print(f"Overall Status: {'✓ HEALTHY' if success else '✗ UNHEALTHY'}")
         print(f"Errors: {summary['error_count']}")
         print(f"Warnings: {summary['warning_count']}")

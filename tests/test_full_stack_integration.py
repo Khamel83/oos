@@ -4,19 +4,23 @@ Comprehensive Test Suite for OOS Full Stack Integration
 Tests AI SDK + OpenRouter, RelayQ Architecture, and Archon Sync
 """
 
-import pytest
 import asyncio
 import sys
-import os
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
+
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from ai_provider import OOSAIManager, ask_ai, get_ai_manager
-from relayq_architecture import RelayQManager, get_relayq_manager, DeploymentTask, NodeType
-from archon_sync import ArchonSyncManager, get_sync_manager
+from archon_sync import get_sync_manager
+from relayq_architecture import (
+    DeploymentTask,
+    NodeType,
+    RelayQManager,
+    get_relayq_manager,
+)
 
 
 class TestAIProvider:
@@ -116,7 +120,7 @@ class TestRelayQArchitecture:
         assert isinstance(health, dict)
         assert len(health) == 3
         # Local ocivm-dev node should be online
-        assert health.get("ocivm-dev", False) == True
+        assert health.get("ocivm-dev", False)
 
     @pytest.mark.asyncio
     async def test_local_task_execution(self, relayq_manager):
@@ -128,9 +132,9 @@ class TestRelayQArchitecture:
         )
 
         result = await relayq_manager.deploy_task(task)
-        assert result["success"] == True
+        assert result["success"]
         assert "ocivm-dev" in result["results"]
-        assert result["results"]["ocivm-dev"]["success"] == True
+        assert result["results"]["ocivm-dev"]["success"]
         assert "Local execution test successful" in result["results"]["ocivm-dev"]["stdout"]
 
     def test_topology_summary(self, relayq_manager):
@@ -261,7 +265,7 @@ class TestIntegrationWorkflow:
         )
 
         result = await relayq_manager.deploy_task(task)
-        assert result["success"] == True
+        assert result["success"]
         assert "results" in result
 
     @pytest.mark.asyncio
@@ -291,11 +295,11 @@ class TestIntegrationWorkflow:
             )
 
             deploy_result = await relayq_manager.deploy_task(deployment)
-            assert deploy_result["success"] == True
+            assert deploy_result["success"]
 
             # 4. Sync to Archon
             sync_manager = get_sync_manager()
-            sync_result = await sync_manager.sync_task_state([task])
+            await sync_manager.sync_task_state([task])
 
             # Workflow completed successfully
             assert True  # If we get here without exceptions, the workflow works
@@ -390,7 +394,7 @@ if __name__ == "__main__":
                 print(f"   AI Response: {'✅' if response and response.content else '❌'}")
             except:
                 test_results["ai_response"] = False
-                print(f"   AI Response: ❌ (No API key)")
+                print("   AI Response: ❌ (No API key)")
 
             await manager.close_all()
         except Exception as e:
@@ -443,7 +447,7 @@ if __name__ == "__main__":
                 print(f"   Task Sync: {'✅' if sync_result else '❌'}")
             else:
                 test_results["sync_task"] = False
-                print(f"   Task Sync: ❌ (Sync disabled)")
+                print("   Task Sync: ❌ (Sync disabled)")
 
         except Exception as e:
             test_results["sync"] = False

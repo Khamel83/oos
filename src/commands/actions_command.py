@@ -4,17 +4,14 @@ Handles /actions and /act slash commands for managing actions
 """
 
 import asyncio
-import sys
 import os
-import json
-from typing import Dict, Any
+import sys
 
 # Add src to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from capability_router import route_request
-from actions_gateway import list_available_tools, execute_action, ActionResult
-from renderers import render_tools, CapabilityRenderer
+from actions_gateway import execute_action, list_available_tools
+from renderers import CapabilityRenderer, render_tools
 
 
 class ActionsCommand:

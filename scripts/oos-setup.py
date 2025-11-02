@@ -4,14 +4,13 @@ OOS Zero-Configuration Setup Script
 The only setup users need: provide OpenRouter API key and everything else works automatically
 """
 
-import sys
-import os
 import json
-import subprocess
 import shutil
+import subprocess
+import sys
 from pathlib import Path
-from urllib.request import urlopen
-from typing import Optional, Dict, Any
+from typing import Any
+
 
 # Colors for terminal output
 class Colors:
@@ -225,13 +224,10 @@ def setup_perplexity_api() -> bool:
 
 def check_python_version() -> bool:
     """Check if Python version is compatible"""
-    if sys.version_info < (3, 8):
-        print_error(f"Python 3.8+ required, found {sys.version}")
-        return False
     print_success(f"Python {sys.version_info.major}.{sys.version_info.minor} detected")
     return True
 
-def check_system_requirements() -> Dict[str, bool]:
+def check_system_requirements() -> dict[str, bool]:
     """Check system requirements"""
     print_info("Checking system requirements...")
 
@@ -262,7 +258,7 @@ def create_oos_directory() -> Path:
     print_success(f"Created OOS directory at {oos_dir}")
     return oos_dir
 
-def create_config_file(oos_dir: Path, api_key: str) -> Dict[str, Any]:
+def create_config_file(oos_dir: Path, api_key: str) -> dict[str, Any]:
     """Create OOS configuration file"""
     config = {
         'api_key': api_key,
@@ -346,7 +342,7 @@ python3 "{oos_dir}/oos_cli.py" "$@"
         shell_rc = Path.home() / '.zshrc'
 
     if shell_rc.exists():
-        with open(shell_rc, 'r') as f:
+        with open(shell_rc) as f:
             content = f.read()
 
         if 'export PATH="$HOME/.local/bin:$PATH"' not in content:
@@ -463,7 +459,7 @@ def main():
     oos_dir = create_oos_directory()
 
     print_step(3, 7, "Create configuration")
-    config = create_config_file(oos_dir, api_key)
+    create_config_file(oos_dir, api_key)
 
     print_step(4, 7, "Install OOS core components")
     if not download_oos_core(oos_dir):
@@ -476,7 +472,7 @@ def main():
 
     # Optional Google integration
     google_enabled = setup_google_integration()
-    perplexity_enabled = setup_perplexity_api()
+    setup_perplexity_api()
 
     print_step(8, 8, "Setup complete!")
     create_first_project_guide(oos_dir, google_enabled)

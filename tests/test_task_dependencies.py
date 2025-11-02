@@ -5,11 +5,11 @@ Comprehensive test suite for DependencyGraph including cycle detection,
 topological sorting, and impact analysis.
 """
 
-import pytest
-from datetime import datetime
 
-from src.oos_task_system.models import Task, TaskStatus, TaskPriority
-from src.oos_task_system.dependencies import DependencyGraph, CyclicDependencyError
+import pytest
+
+from src.oos_task_system.dependencies import CyclicDependencyError, DependencyGraph
+from src.oos_task_system.models import Task, TaskPriority, TaskStatus
 
 
 class TestDependencyGraph:

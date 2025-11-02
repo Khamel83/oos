@@ -3,20 +3,19 @@
 Automated disk cleanup based on usage thresholds
 """
 
-import os
 import json
-import time
-import psutil
 import logging
-from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple
-import shutil
+import os
 import sys
+from datetime import datetime, timedelta
+from pathlib import Path
+
+import psutil
 
 # Add helpers to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from helpers.resource_manager import ResourceManager
+
 
 class DiskCleanupManager:
     """Manages automated disk space cleanup"""
@@ -43,7 +42,7 @@ class DiskCleanupManager:
 
         return logger
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """Load disk cleanup configuration"""
         default_config = {
             "cleanup_paths": [
@@ -115,7 +114,7 @@ class DiskCleanupManager:
             self.logger.error(f"Error loading config: {e}")
             return default_config
 
-    def _save_config(self, config: Dict):
+    def _save_config(self, config: dict):
         """Save configuration to file"""
         try:
             os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
@@ -124,7 +123,7 @@ class DiskCleanupManager:
         except Exception as e:
             self.logger.error(f"Error saving config: {e}")
 
-    def get_disk_usage(self, path: str = '/') -> Dict:
+    def get_disk_usage(self, path: str = '/') -> dict:
         """Get disk usage statistics"""
         try:
             usage = psutil.disk_usage(path)
@@ -138,7 +137,7 @@ class DiskCleanupManager:
             self.logger.error(f"Error getting disk usage for {path}: {e}")
             return {"total": 0, "used": 0, "free": 0, "percent": 0}
 
-    def should_cleanup(self, disk_usage: Dict = None) -> Tuple[bool, str]:
+    def should_cleanup(self, disk_usage: dict = None) -> tuple[bool, str]:
         """Determine if cleanup should run"""
         if disk_usage is None:
             disk_usage = self.get_disk_usage()
@@ -155,14 +154,11 @@ class DiskCleanupManager:
         else:
             return False, "normal"
 
-    def matches_pattern(self, filename: str, patterns: List[str]) -> bool:
+    def matches_pattern(self, filename: str, patterns: list[str]) -> bool:
         """Check if filename matches any of the patterns"""
         import fnmatch
 
-        for pattern in patterns:
-            if fnmatch.fnmatch(filename, pattern):
-                return True
-        return False
+        return any(fnmatch.fnmatch(filename, pattern) for pattern in patterns)
 
     def should_preserve_file(self, filepath: str) -> bool:
         """Check if file should be preserved"""
@@ -171,7 +167,7 @@ class DiskCleanupManager:
 
         return self.matches_pattern(filename, preserve_patterns)
 
-    def cleanup_path(self, path_config: Dict) -> Dict:
+    def cleanup_path(self, path_config: dict) -> dict:
         """Clean up files in a specific path"""
         path = path_config["path"]
         max_age_days = path_config["max_age_days"]
@@ -195,7 +191,7 @@ class DiskCleanupManager:
         try:
             if recursive:
                 files_to_process = []
-                for root, dirs, files in os.walk(path):
+                for root, _dirs, files in os.walk(path):
                     for file in files:
                         filepath = os.path.join(root, file)
                         if self.matches_pattern(file, patterns):
@@ -250,7 +246,7 @@ class DiskCleanupManager:
 
         return result
 
-    def cleanup_large_log_files(self) -> Dict:
+    def cleanup_large_log_files(self) -> dict:
         """Clean up or truncate large log files"""
         result = {
             "files_processed": 0,
@@ -269,7 +265,7 @@ class DiskCleanupManager:
                 continue
 
             try:
-                for root, dirs, files in os.walk(log_path):
+                for root, _dirs, files in os.walk(log_path):
                     for file in files:
                         if file.endswith(('.log', '.txt')):
                             filepath = os.path.join(root, file)
@@ -308,7 +304,7 @@ class DiskCleanupManager:
     def _truncate_log_file(self, filepath: str, keep_ratio: float = 0.25):
         """Truncate log file keeping only the last portion"""
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath) as f:
                 lines = f.readlines()
 
             keep_lines = int(len(lines) * keep_ratio)
@@ -322,7 +318,7 @@ class DiskCleanupManager:
         except Exception as e:
             self.logger.error(f"Error truncating {filepath}: {e}")
 
-    def cleanup_core_dumps(self) -> Dict:
+    def cleanup_core_dumps(self) -> dict:
         """Clean up core dump files"""
         result = {
             "files_processed": 0,
@@ -376,7 +372,7 @@ class DiskCleanupManager:
 
         return result
 
-    def run_cleanup(self, force: bool = False) -> Dict:
+    def run_cleanup(self, force: bool = False) -> dict:
         """Run full disk cleanup process"""
         start_time = datetime.now()
         disk_usage_before = self.get_disk_usage()
@@ -458,7 +454,7 @@ class DiskCleanupManager:
 
         return total_result
 
-    def _save_cleanup_log(self, result: Dict):
+    def _save_cleanup_log(self, result: dict):
         """Save cleanup result to log file"""
         try:
             log_file = "data/cleanup_logs/cleanup_history.jsonl"
@@ -470,14 +466,14 @@ class DiskCleanupManager:
         except Exception as e:
             self.logger.error(f"Error saving cleanup log: {e}")
 
-    def get_cleanup_history(self, limit: int = 10) -> List[Dict]:
+    def get_cleanup_history(self, limit: int = 10) -> list[dict]:
         """Get recent cleanup history"""
         history = []
         log_file = "data/cleanup_logs/cleanup_history.jsonl"
 
         try:
             if os.path.exists(log_file):
-                with open(log_file, 'r') as f:
+                with open(log_file) as f:
                     lines = f.readlines()
 
                 # Get last N lines

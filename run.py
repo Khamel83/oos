@@ -4,12 +4,12 @@ OOS Interactive Launcher - Modern UX for Organized Operational Setup
 One command to rule them all: ./run.py
 """
 import os
-import sys
-import subprocess
-from pathlib import Path
-import json
 import shutil
-from lib.health_check import run_health_check, Colors
+import subprocess
+import sys
+from pathlib import Path
+
+from lib.health_check import Colors, run_health_check
 
 
 def run_development_gate():
@@ -145,7 +145,7 @@ def auth_only_setup():
         # Add to .gitignore if it doesn't exist
         gitignore_path = Path('.gitignore')
         if gitignore_path.exists():
-            with open('.gitignore', 'r') as f:
+            with open('.gitignore') as f:
                 content = f.read()
             if '.env' not in content:
                 with open('.gitignore', 'a') as f:
@@ -212,7 +212,7 @@ def new_project_setup():
             project_path = Path(project_path)
     else:
         # Current directory is empty, offer to use it
-        use_current = input(f"Create project in current directory? [Y/n]: ").strip()
+        use_current = input("Create project in current directory? [Y/n]: ").strip()
         if use_current.lower().startswith('n'):
             project_path = Path(input("Project path: ").strip())
         else:
@@ -246,12 +246,12 @@ def full_project_setup(project_name, project_path, existing=False):
     print(f"Running: {' '.join(cmd)}")
 
     try:
-        result = subprocess.run(cmd, env=env, check=True)
+        subprocess.run(cmd, env=env, check=True)
         print(f"\n{Colors.GREEN}🎉 Project setup complete!{Colors.END}")
         if not existing:
-            print(f"\nNext steps:")
+            print("\nNext steps:")
             print(f"  cd {project_path}")
-            print(f"  .agents/runners/run_claude.sh")
+            print("  .agents/runners/run_claude.sh")
     except subprocess.CalledProcessError as e:
         print(f"{Colors.RED}❌ Setup failed with exit code {e.returncode}{Colors.END}")
         sys.exit(1)
@@ -306,8 +306,8 @@ def show_general_menu():
 
 def show_help():
     """Show help information"""
-    help_text = """
-{bold}📖 OOS Help{end}
+    help_text = f"""
+{Colors.BOLD}📖 OOS Help{Colors.END}
 OOS provides secure, AI-ready development environments.
 
 Usage:
@@ -323,7 +323,7 @@ Context-aware behavior:
   • Other directories     → Flexible options
 
 For advanced usage, see the full documentation in the repository.
-""".format(bold=Colors.BOLD, end=Colors.END)
+"""
     print(help_text)
 
 def integrate_oos():
@@ -357,7 +357,7 @@ def integrate_oos():
     try:
         with open(target_path / '.gitignore', 'a') as f:
             f.write(gitignore_content)
-    except IOError as e:
+    except OSError as e:
         print(f"{Colors.YELLOW}    Could not write to .gitignore: {e}{Colors.END}")
 
     # 3. Update requirements-dev.txt
@@ -367,7 +367,7 @@ def integrate_oos():
     try:
         existing_deps = []
         if req_file.exists():
-            with open(req_file, 'r') as f:
+            with open(req_file) as f:
                 existing_deps = [line.strip() for line in f.readlines()]
 
         with open(req_file, 'a') as f:
@@ -375,7 +375,7 @@ def integrate_oos():
                 if dep not in existing_deps:
                     f.write(f"{dep}\n")
 
-    except IOError as e:
+    except OSError as e:
         print(f"{Colors.YELLOW}    Could not write to requirements-dev.txt: {e}{Colors.END}")
 
     print(f"\n{Colors.GREEN}✅ OOS integration complete!{Colors.END}")

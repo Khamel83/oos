@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Test script for the new OOS interface"""
+import os
 import subprocess
 import tempfile
-import os
-from pathlib import Path
+
 
 def test_empty_directory():
     """Test the empty directory flow"""

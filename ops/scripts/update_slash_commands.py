@@ -6,11 +6,11 @@ Reads ops/claude/commands.template.json and merges with existing commands
 in $CLAUDE_COMMANDS_FILE or ./.claude/commands.json (created if needed).
 """
 
+import datetime
 import json
 import os
 import pathlib
 import sys
-import datetime
 
 # Project-aware updater:
 # - Reads ops/claude/commands.template.json
@@ -33,7 +33,7 @@ OUT_PATH = os.environ.get("CLAUDE_COMMANDS_FILE", str(PROJECT_ROOT / ".claude" /
 def load_json(p):
     """Load JSON file, return empty structure if not found."""
     try:
-        with open(p, "r", encoding="utf-8") as f:
+        with open(p, encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
         return {"commands": []}
@@ -71,7 +71,7 @@ def main():
     # Create merged structure
     merged = {
         "commands": list(e_idx.values()),
-        "_updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "_updated_at": datetime.datetime.now(datetime.UTC).isoformat(),
         "_source": "ops/scripts/update_slash_commands.py"
     }
 

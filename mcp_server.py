@@ -7,32 +7,32 @@ Install once, use everywhere with automatic optimization.
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Any, Optional
+
+# OOS imports
+import sys
 from pathlib import Path
+from typing import Any
 
 # MCP imports
 from mcp.server import Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import (
-    Resource, Tool, TextContent, ImageContent, EmbeddedResource,
-    CallToolRequest, CallToolResult, ListResourcesRequest, ListResourcesResult,
-    ListToolsRequest, ListToolsResult, ReadResourceRequest, ReadResourceResult
+    CallToolResult,
+    TextContent,
+    Tool,
 )
 
-# OOS imports
-import sys
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from clarification_workflow import get_clarification_workflow, ClarificationResponse
-from token_optimization import optimize_for_budget, estimate_context_tokens
+from actions_gateway import execute_action, list_available_tools
 from auto_documentation import get_auto_documentation_system
 from capability_router import route_request
-from knowledge_resolver import resolve_knowledge, result_to_dict
-from actions_gateway import list_available_tools, execute_action, tool_info_to_dict, action_result_to_dict
-from renderers import render_knowledge, render_tools, CapabilityRenderer
+from clarification_workflow import get_clarification_workflow
+from knowledge_resolver import resolve_knowledge
+from renderers import CapabilityRenderer, render_knowledge, render_tools
+from token_optimization import estimate_context_tokens, optimize_for_budget
 
 
 class OOSContextEngineeringServer:
@@ -57,7 +57,7 @@ class OOSContextEngineeringServer:
         """Setup MCP handlers"""
 
         @self.server.list_tools()
-        async def list_tools() -> List[Tool]:
+        async def list_tools() -> list[Tool]:
             """List available context engineering tools"""
             return [
                 Tool(
@@ -210,7 +210,7 @@ class OOSContextEngineeringServer:
             ]
 
         @self.server.call_tool()
-        async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
+        async def call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
             """Handle tool calls"""
 
             try:
@@ -318,7 +318,7 @@ class OOSContextEngineeringServer:
             elif session.cleaned_input.extracted_intent == "analysis":
                 response += "\n🔍 I'll provide comprehensive analysis and insights."
 
-        response += f"\n\n🚀 What would you like to focus on first?"
+        response += "\n\n🚀 What would you like to focus on first?"
 
         return CallToolResult(
             content=[TextContent(type="text", text=response)]
@@ -342,7 +342,7 @@ class OOSContextEngineeringServer:
 """
 
         if session.cleaned_input.ambiguities:
-            response += f"⚠️ **Ambiguities to clarify:**\n"
+            response += "⚠️ **Ambiguities to clarify:**\n"
             for ambiguity in session.cleaned_input.ambiguities:
                 response += f"   • {ambiguity}\n"
             response += "\n💡 Use /clarify to get specific questions about these ambiguities.\n"
@@ -452,7 +452,7 @@ Copy this entire prompt to ChatGPT, Claude, or any other AI to get structured he
             content=[TextContent(type="text", text=response)]
         )
 
-    async def _optimize_context(self, context: Dict[str, Any], target_tokens: int) -> CallToolResult:
+    async def _optimize_context(self, context: dict[str, Any], target_tokens: int) -> CallToolResult:
         """Optimize context for token efficiency"""
 
         original_tokens = await estimate_context_tokens(context)
@@ -484,7 +484,7 @@ Copy this entire prompt to ChatGPT, Claude, or any other AI to get structured he
             content=[TextContent(type="text", text=response)]
         )
 
-    async def _smart_commit(self, changed_files: List[str]) -> CallToolResult:
+    async def _smart_commit(self, changed_files: list[str]) -> CallToolResult:
         """Generate smart commit message"""
 
         message = await self.auto_doc_system.git_integration.suggest_commit_message(changed_files)
@@ -512,7 +512,7 @@ Copy this entire prompt to ChatGPT, Claude, or any other AI to get structured he
             content=[TextContent(type="text", text=response)]
         )
 
-    async def _doc_check(self, file_paths: List[str]) -> CallToolResult:
+    async def _doc_check(self, file_paths: list[str]) -> CallToolResult:
         """Check documentation and consistency"""
 
         result = await self.auto_doc_system.process_files(file_paths)
@@ -536,7 +536,7 @@ Copy this entire prompt to ChatGPT, Claude, or any other AI to get structured he
                 response += f"... and {len(result.consistency_issues) - 5} more issues\n"
 
         if result.documentation_generated:
-            response += f"\n**Documentation needed:**\n"
+            response += "\n**Documentation needed:**\n"
             for doc in result.documentation_generated[:3]:
                 response += f"• {doc}\n"
 
@@ -545,13 +545,13 @@ Copy this entire prompt to ChatGPT, Claude, or any other AI to get structured he
             response += f"\n💡 {auto_fixable} issues can be auto-fixed! Use /auto-fix to apply them."
 
         if result.commit_suggested and result.commit_message:
-            response += f"\n📝 Suggested commit message ready! Use /smart-commit to see it."
+            response += "\n📝 Suggested commit message ready! Use /smart-commit to see it."
 
         return CallToolResult(
             content=[TextContent(type="text", text=response)]
         )
 
-    async def _context_stats(self, context: Dict[str, Any]) -> CallToolResult:
+    async def _context_stats(self, context: dict[str, Any]) -> CallToolResult:
         """Show context statistics"""
 
         tokens = await estimate_context_tokens(context) if context else 0
@@ -626,7 +626,7 @@ Copy this entire prompt to ChatGPT, Claude, or any other AI to get structured he
             context = {"task": complex_task, "session": session.cleaned_input.__dict__}
             tokens = await estimate_context_tokens(context)
             if tokens > self.token_budget:
-                response += f"\n🔧 Context auto-optimized for efficiency"
+                response += "\n🔧 Context auto-optimized for efficiency"
 
         return CallToolResult(
             content=[TextContent(type="text", text=response)]

@@ -8,12 +8,13 @@ This script tests:
 3. Whether they store/use your prompts and data
 """
 
-import os
-import requests
 import json
-from typing import Dict, List
+import os
 
-def test_model_privacy(model_id: str, model_name: str) -> Dict:
+import requests
+
+
+def test_model_privacy(model_id: str, model_name: str) -> dict:
     """Test model access and privacy policy"""
 
     api_key = os.getenv('OPENROUTER_API_KEY')
@@ -115,7 +116,7 @@ def test_model_privacy(model_id: str, model_name: str) -> Dict:
 
     return results
 
-def analyze_privacy_response(response: str) -> Dict:
+def analyze_privacy_response(response: str) -> dict:
     """Analyze privacy policy responses"""
     response_lower = response.lower()
 

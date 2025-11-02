@@ -83,7 +83,7 @@ async def test_universal_commands():
     for i, test_case in enumerate(test_commands, 1):
         command = test_case['command']
         command_type = test_case['type']
-        expected = test_case['expected']
+        test_case['expected']
 
         print(f"\n{Colors.CYAN}Test {i}: {command_type}{Colors.END}")
         print(f"Command: {command}")
@@ -97,7 +97,7 @@ async def test_universal_commands():
 
                 # Show next steps
                 if result.next_steps:
-                    print(f"   Next steps:")
+                    print("   Next steps:")
                     for step in result.next_steps[:2]:
                         print(f"     • {step}")
 
@@ -176,7 +176,7 @@ async def test_universal_commands():
     print("                                                              ║")
     print(f"   ✅ Successful commands: {successful_commands}/{len(test_commands)}                             ║")
     print(f"   ❌ Failed commands: {failed_commands}/{len(test_commands)}                                 ║")
-    print(f"   💰 Cost management: Working                                 ║")
+    print("   💰 Cost management: Working                                 ║")
     print(f"   🔍 Edge case handling: {edge_success}/{len(edge_cases)-1} helpful                        ║")
     print("                                                              ║")
 
@@ -199,12 +199,12 @@ async def test_universal_commands():
     print(f"   • {Colors.GREEN}Cost Control:{Colors.END} Automatic $1/day limit with notifications")
 
     print(f"\n{Colors.CYAN}🎯 The Universal Command System is working!{Colors.END}")
-    print(f"   Your friend can now say anything to OOS and it will:")
-    print(f"   1. Understand what they want")
-    print(f"   2. Route to the right handler")
-    print(f"   3. Execute the action safely")
-    print(f"   4. Provide helpful feedback")
-    print(f"   5. Stay within budget limits")
+    print("   Your friend can now say anything to OOS and it will:")
+    print("   1. Understand what they want")
+    print("   2. Route to the right handler")
+    print("   3. Execute the action safely")
+    print("   4. Provide helpful feedback")
+    print("   5. Stay within budget limits")
 
 
 if __name__ == "__main__":

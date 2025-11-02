@@ -4,16 +4,18 @@ OOS Archon Synchronization System
 Syncs OOS state, tasks, and data to Archon Supabase backend
 """
 
-import os
-import json
 import asyncio
-import time
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
-from pathlib import Path
+import json
 import logging
+import os
+import time
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
 import httpx
+
 
 # Load environment variables
 def load_env():
@@ -30,13 +32,12 @@ load_env()
 
 # Try to import supabase, but provide fallback
 try:
-    from supabase import create_client, Client
+    from supabase import Client, create_client
     SUPABASE_AVAILABLE = True
 except ImportError:
     SUPABASE_AVAILABLE = False
     print("Warning: Supabase library not available. Using HTTP API fallback.")
 
-import httpx
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -44,10 +45,10 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class SyncStatus:
-    last_sync: Optional[datetime] = None
+    last_sync: datetime | None = None
     sync_count: int = 0
     error_count: int = 0
-    last_error: Optional[str] = None
+    last_error: str | None = None
     enabled: bool = True
 
 
@@ -60,7 +61,7 @@ class ArchonProjectState:
     tasks_completed: int
     ai_requests_today: int
     last_activity: datetime
-    system_health: Dict[str, Any]
+    system_health: dict[str, Any]
 
 
 class ArchonSyncManager:
@@ -73,7 +74,7 @@ class ArchonSyncManager:
         self.vault_password = os.getenv('ARCHON_VAULT_PASSWORD')
 
         self.sync_status = SyncStatus()
-        self.client: Optional[Client] = None
+        self.client: Client | None = None
 
         if not self.project_id:
             logger.warning("No ARCHON_PROJECT_ID configured. Sync will be disabled.")
@@ -93,7 +94,7 @@ class ArchonSyncManager:
         else:
             logger.info("Using HTTP API for Archon sync")
 
-    async def sync_task_state(self, tasks: List[Dict[str, Any]]) -> bool:
+    async def sync_task_state(self, tasks: list[dict[str, Any]]) -> bool:
         """Sync local task state to Archon"""
         if not self.sync_status.enabled:
             logger.debug("Sync disabled, skipping task sync")
@@ -162,7 +163,7 @@ class ArchonSyncManager:
         try:
             heartbeat_data = {
                 "project_id": self.project_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "status": "active",
                 "service": "oos"
             }
@@ -189,7 +190,7 @@ class ArchonSyncManager:
             logger.warning(f"Heartbeat failed: {e}")
             return False
 
-    async def _get_archon_tasks(self) -> List[Dict[str, Any]]:
+    async def _get_archon_tasks(self) -> list[dict[str, Any]]:
         """Get tasks from Archon project"""
         try:
             async with httpx.AsyncClient() as client:
@@ -206,7 +207,7 @@ class ArchonSyncManager:
             logger.error(f"Failed to get Archon tasks: {e}")
             return []
 
-    async def _create_archon_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def _create_archon_task(self, task: dict[str, Any]) -> dict[str, Any]:
         """Create a new task in Archon"""
         task_data = {
             "project_id": self.project_id,
@@ -230,7 +231,7 @@ class ArchonSyncManager:
             response.raise_for_status()
             return response.json()
 
-    async def _update_archon_task(self, task_id: str, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def _update_archon_task(self, task_id: str, task: dict[str, Any]) -> dict[str, Any]:
         """Update an existing task in Archon"""
         update_data = {
             "status": task.get('status'),
@@ -252,7 +253,7 @@ class ArchonSyncManager:
             response.raise_for_status()
             return response.json()
 
-    async def _upload_to_knowledge_base(self, entry: Dict[str, Any]) -> Dict[str, Any]:
+    async def _upload_to_knowledge_base(self, entry: dict[str, Any]) -> dict[str, Any]:
         """Upload document to Archon knowledge base"""
         try:
             async with httpx.AsyncClient() as client:
@@ -273,7 +274,7 @@ class ArchonSyncManager:
             logger.error(f"Failed to upload to knowledge base: {e}")
             raise
 
-    async def full_sync(self, oos_state: Dict[str, Any]) -> Dict[str, Any]:
+    async def full_sync(self, oos_state: dict[str, Any]) -> dict[str, Any]:
         """Perform full synchronization with Archon"""
         start_time = time.time()
         sync_results = {
@@ -335,7 +336,7 @@ class ArchonSyncManager:
             sync_results["errors"].append(str(e))
             return sync_results
 
-    def get_sync_status(self) -> Dict[str, Any]:
+    def get_sync_status(self) -> dict[str, Any]:
         """Get current sync status"""
         return {
             "enabled": self.sync_status.enabled,
@@ -360,7 +361,7 @@ def get_sync_manager() -> ArchonSyncManager:
     return _sync_manager
 
 
-async def start_background_sync(oos_state: Dict[str, Any], interval: int = 300):
+async def start_background_sync(oos_state: dict[str, Any], interval: int = 300):
     """Start background sync process"""
     sync_manager = get_sync_manager()
 

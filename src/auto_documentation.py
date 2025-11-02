@@ -6,27 +6,24 @@ Implements automated documentation generation, GitHub commit hooks,
 and consistency enforcement to "save you from yourself"
 """
 
-import json
 import asyncio
-import subprocess
-import re
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
-from datetime import datetime
-from pathlib import Path
+import json
 import logging
-import hashlib
-import yaml
+import re
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 
 @dataclass
 class DocumentationRule:
     """Rule for auto-generating documentation"""
     rule_id: str
-    trigger_patterns: List[str]  # File patterns that trigger this rule
+    trigger_patterns: list[str]  # File patterns that trigger this rule
     documentation_type: str  # 'function', 'class', 'module', 'readme', 'changelog'
     template: str
-    required_sections: List[str]
+    required_sections: list[str]
     auto_generate: bool = True
     enforce: bool = True
 
@@ -46,11 +43,11 @@ class ConsistencyCheck:
 class AutoDocResult:
     """Result of auto-documentation operation"""
     operation: str
-    files_processed: List[str]
-    documentation_generated: List[str]
-    consistency_issues: List[Dict[str, Any]]
+    files_processed: list[str]
+    documentation_generated: list[str]
+    consistency_issues: list[dict[str, Any]]
     commit_suggested: bool
-    commit_message: Optional[str] = None
+    commit_message: str | None = None
 
 
 class GitIntegration:
@@ -104,7 +101,7 @@ echo "✅ Documentation check complete"
 
         self.logger.info("Git hooks installed successfully")
 
-    async def suggest_commit_message(self, changed_files: List[str]) -> str:
+    async def suggest_commit_message(self, changed_files: list[str]) -> str:
         """Generate intelligent commit message based on changes"""
 
         # Analyze file changes
@@ -144,7 +141,7 @@ echo "✅ Documentation check complete"
 
         return message
 
-    def _analyze_changes(self, changed_files: List[str]) -> Dict[str, List[str]]:
+    def _analyze_changes(self, changed_files: list[str]) -> dict[str, list[str]]:
         """Analyze file changes to categorize commit type"""
         change_types = {
             'new_features': [],
@@ -168,7 +165,7 @@ echo "✅ Documentation check complete"
 
         return change_types
 
-    def _detect_scope(self, changed_files: List[str]) -> Optional[str]:
+    def _detect_scope(self, changed_files: list[str]) -> str | None:
         """Detect scope of changes"""
         scopes = set()
 
@@ -192,7 +189,7 @@ echo "✅ Documentation check complete"
 
         return None
 
-    async def create_smart_commit(self, files: List[str], user_message: Optional[str] = None) -> bool:
+    async def create_smart_commit(self, files: list[str], user_message: str | None = None) -> bool:
         """Create commit with smart message generation"""
 
         if user_message:
@@ -227,7 +224,7 @@ class DocumentationGenerator:
         self.logger = logging.getLogger(__name__)
         self.rules = self._load_documentation_rules()
 
-    def _load_documentation_rules(self) -> List[DocumentationRule]:
+    def _load_documentation_rules(self) -> list[DocumentationRule]:
         """Load documentation generation rules"""
         return [
             DocumentationRule(
@@ -297,7 +294,7 @@ Methods:
             )
         ]
 
-    async def generate_function_docs(self, file_path: str) -> List[str]:
+    async def generate_function_docs(self, file_path: str) -> list[str]:
         """Generate documentation for functions in a Python file"""
         generated_docs = []
 
@@ -328,7 +325,7 @@ Methods:
         func_pattern = rf'def\s+{function_name}\s*\([^)]*\):\s*"""'
         return bool(re.search(func_pattern, content, re.DOTALL))
 
-    async def _generate_function_docstring(self, content: str, function_name: str) -> Optional[str]:
+    async def _generate_function_docstring(self, content: str, function_name: str) -> str | None:
         """Generate docstring for a function using AI assistance"""
 
         # Extract function signature and body
@@ -371,7 +368,7 @@ Methods:
 
         return docstring
 
-    async def check_documentation_completeness(self, file_path: str) -> List[Dict[str, Any]]:
+    async def check_documentation_completeness(self, file_path: str) -> list[dict[str, Any]]:
         """Check if documentation is complete for a file"""
         issues = []
 
@@ -419,7 +416,7 @@ class ConsistencyEnforcer:
         self.logger = logging.getLogger(__name__)
         self.checks = self._load_consistency_checks()
 
-    def _load_consistency_checks(self) -> List[ConsistencyCheck]:
+    def _load_consistency_checks(self) -> list[ConsistencyCheck]:
         """Load consistency check rules"""
         return [
             ConsistencyCheck(
@@ -448,7 +445,7 @@ class ConsistencyEnforcer:
             )
         ]
 
-    async def check_consistency(self, file_paths: List[str]) -> List[Dict[str, Any]]:
+    async def check_consistency(self, file_paths: list[str]) -> list[dict[str, Any]]:
         """Check consistency across files"""
         all_issues = []
 
@@ -458,7 +455,7 @@ class ConsistencyEnforcer:
 
         return all_issues
 
-    async def _check_file_consistency(self, file_path: str) -> List[Dict[str, Any]]:
+    async def _check_file_consistency(self, file_path: str) -> list[dict[str, Any]]:
         """Check consistency for a single file"""
         issues = []
 
@@ -480,13 +477,9 @@ class ConsistencyEnforcer:
 
     def _file_matches_check(self, file_path: str, check: ConsistencyCheck) -> bool:
         """Check if a file should be checked by this consistency check"""
-        if check.check_type == "naming" and file_path.endswith('.py'):
-            return True
-        elif check.check_type == "structure" and file_path.endswith('.py'):
-            return True
-        return False
+        return bool(check.check_type == "naming" and file_path.endswith('.py') or check.check_type == "structure" and file_path.endswith('.py'))
 
-    def _apply_check(self, content: str, file_path: str, check: ConsistencyCheck) -> List[Dict[str, Any]]:
+    def _apply_check(self, content: str, file_path: str, check: ConsistencyCheck) -> list[dict[str, Any]]:
         """Apply a specific consistency check"""
         issues = []
 
@@ -517,7 +510,7 @@ class ConsistencyEnforcer:
 
         return issues
 
-    async def auto_fix_issues(self, issues: List[Dict[str, Any]]) -> List[str]:
+    async def auto_fix_issues(self, issues: list[dict[str, Any]]) -> list[str]:
         """Automatically fix issues that can be auto-fixed"""
         fixed_files = []
 
@@ -537,7 +530,7 @@ class ConsistencyEnforcer:
 
         return fixed_files
 
-    async def _fix_file_issues(self, file_path: str, issues: List[Dict[str, Any]]) -> bool:
+    async def _fix_file_issues(self, file_path: str, issues: list[dict[str, Any]]) -> bool:
         """Fix issues in a single file"""
         try:
             content = Path(file_path).read_text()
@@ -573,7 +566,7 @@ class AutoDocumentationSystem:
         """Initialize the auto-documentation system"""
         await self.git_integration.setup_hooks()
 
-    async def process_files(self, file_paths: List[str], auto_commit: bool = False) -> AutoDocResult:
+    async def process_files(self, file_paths: list[str], auto_commit: bool = False) -> AutoDocResult:
         """Process files for documentation and consistency"""
 
         # Generate documentation
@@ -611,7 +604,7 @@ class AutoDocumentationSystem:
             commit_message=commit_message
         )
 
-    async def check_and_prompt(self, file_paths: List[str]) -> Dict[str, Any]:
+    async def check_and_prompt(self, file_paths: list[str]) -> dict[str, Any]:
         """Check files and prompt user for actions"""
 
         result = await self.process_files(file_paths)

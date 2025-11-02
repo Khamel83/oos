@@ -7,16 +7,16 @@ for compatibility with our personal AI enhancement system.
 """
 
 import asyncio
-import json
-import time
 import csv
-from typing import Dict, List, Optional
-from pathlib import Path
-import aiohttp
+import json
 import os
+import time
+
+import aiohttp
+
 
 class FreeModelTester:
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.api_key = api_key or os.getenv('OPENROUTER_API_KEY')
         if not self.api_key:
             raise ValueError("OpenRouter API key required. Set OPENROUTER_API_KEY environment variable.")
@@ -25,7 +25,7 @@ class FreeModelTester:
         self.test_prompts = self._load_test_prompts()
         self.results = []
 
-    def _load_test_prompts(self) -> List[str]:
+    def _load_test_prompts(self) -> list[str]:
         """Load test prompts from the specification file"""
         return [
             # Test 1: Basic Compatibility
@@ -110,12 +110,12 @@ RESPONSE: Clear acknowledgment of your privacy capabilities and any restrictions
 If you have significant restrictions on personal/business data processing, respond "PRIVACY RESTRICTED" with details."""
         ]
 
-    def load_free_models(self) -> List[Dict]:
+    def load_free_models(self) -> list[dict]:
         """Load all free models from the cost table CSV"""
         free_models = []
 
         try:
-            with open('/home/ubuntu/dev/oos/model_costs.csv', 'r') as f:
+            with open('/home/ubuntu/dev/oos/model_costs.csv') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     input_cost = float(row['InputCost'])
@@ -136,7 +136,7 @@ If you have significant restrictions on personal/business data processing, respo
         print(f"Found {len(free_models)} free models to test")
         return free_models
 
-    async def call_model(self, model_id: str, prompt: str, timeout: int = 30) -> Dict:
+    async def call_model(self, model_id: str, prompt: str, timeout: int = 30) -> dict:
         """Make API call to test a model"""
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -170,7 +170,7 @@ If you have significant restrictions on personal/business data processing, respo
                             "response": None
                         }
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return {
                 "success": False,
                 "error": "Request timeout",
@@ -183,7 +183,7 @@ If you have significant restrictions on personal/business data processing, respo
                 "response": None
             }
 
-    def evaluate_response(self, test_num: int, response: str, model_name: str) -> Dict:
+    def evaluate_response(self, test_num: int, response: str, model_name: str) -> dict:
         """Evaluate individual test responses"""
         if not response:
             return {
@@ -231,7 +231,7 @@ If you have significant restrictions on personal/business data processing, respo
             "reason": "Unclear response pattern"
         }
 
-    async def test_model(self, model_info: Dict) -> Dict:
+    async def test_model(self, model_info: dict) -> dict:
         """Test a single model against all compatibility criteria"""
         model_id = model_info['ModelID']
         model_name = model_info['ModelName']
@@ -292,12 +292,12 @@ If you have significant restrictions on personal/business data processing, respo
 
         return result
 
-    def _determine_overall_status(self, result: Dict) -> str:
+    def _determine_overall_status(self, result: dict) -> str:
         """Determine overall model compatibility status"""
         test_results = result["tests"]
 
         # Any error or FAIL on critical tests = incompatible
-        for test_key, test_result in test_results.items():
+        for _test_key, test_result in test_results.items():
             if test_result.get("status") in ["FAIL", "ERROR"]:
                 return "INCOMPATIBLE"
 
@@ -308,7 +308,7 @@ If you have significant restrictions on personal/business data processing, respo
         # Mixed results = limited
         return "LIMITED"
 
-    async def test_all_free_models(self) -> Dict:
+    async def test_all_free_models(self) -> dict:
         """Test all free models from the cost table"""
         print("=== SOLO CREATOR MECHA SUIT - Free Model Compatibility Testing ===\n")
 
@@ -356,7 +356,7 @@ If you have significant restrictions on personal/business data processing, respo
 
         return final_results
 
-    def _generate_summary(self, results: List[Dict]) -> Dict:
+    def _generate_summary(self, results: list[dict]) -> dict:
         """Generate summary statistics from test results"""
         summary = {
             "compatible": 0,
@@ -387,34 +387,34 @@ If you have significant restrictions on personal/business data processing, respo
 
         return summary
 
-    def save_results(self, results: Dict, output_path: str):
+    def save_results(self, results: dict, output_path: str):
         """Save test results to JSON file"""
         with open(output_path, 'w') as f:
             json.dump(results, f, indent=2)
         print(f"\nTest results saved to: {output_path}")
 
-    def print_summary(self, results: Dict):
+    def print_summary(self, results: dict):
         """Print summary of test results"""
         summary = results["summary"]
 
-        print(f"\n=== COMPATIBILITY TEST SUMMARY ===")
+        print("\n=== COMPATIBILITY TEST SUMMARY ===")
         print(f"Models tested: {results['total_models_tested']}")
         print(f"Testing duration: {results['testing_duration']:.1f} seconds")
         print(f"Successful tests: {results['successful_tests']}")
         print(f"Failed tests: {results['failed_tests']}")
 
-        print(f"\n=== COMPATIBILITY BREAKDOWN ===")
+        print("\n=== COMPATIBILITY BREAKDOWN ===")
         print(f"✅ Fully Compatible: {summary['compatible']}")
         print(f"⚠️  Limited: {summary['limited']}")
         print(f"❌ Incompatible: {summary['incompatible']}")
 
         if summary["common_restrictions"]:
-            print(f"\n=== COMMON RESTRICTIONS ===")
+            print("\n=== COMMON RESTRICTIONS ===")
             for restriction, count in sorted(summary["common_restrictions"].items(), key=lambda x: x[1], reverse=True):
                 print(f"• {restriction}: {count} models")
 
         if summary["recommended_models"]:
-            print(f"\n=== TOP RECOMMENDED MODELS ===")
+            print("\n=== TOP RECOMMENDED MODELS ===")
             for model in summary["recommended_models"]:
                 print(f"• {model['model_name']}")
 

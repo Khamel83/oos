@@ -4,28 +4,26 @@ OOS Web Dashboard API Server
 Provides REST API for OOS management and monitoring
 """
 
-import os
-import sys
-import json
-import subprocess
-import asyncio
 import logging
-import time
-import shlex
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Optional, Any
-import hashlib
+import os
 import secrets
+import shlex
+import subprocess
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from flask import Flask, request, jsonify, render_template_string, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
+
 
 # Configuration
 class Config:
@@ -81,7 +79,7 @@ dashboard_data = {
 }
 
 # Utility functions
-def run_command(cmd: str, cwd: str = None) -> Dict[str, Any]:
+def run_command(cmd: str, cwd: str = None) -> dict[str, Any]:
     """Run a shell command and return result"""
     try:
         # Use shlex.split for secure command execution
@@ -114,11 +112,11 @@ def run_command(cmd: str, cwd: str = None) -> Dict[str, Any]:
             'returncode': -1
         }
 
-def load_env_file(file_path: str) -> Dict[str, str]:
+def load_env_file(file_path: str) -> dict[str, str]:
     """Load environment variables from file"""
     env_vars = {}
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith('#') and '=' in line:
@@ -132,7 +130,7 @@ def load_env_file(file_path: str) -> Dict[str, str]:
         logger.error(f"Failed to load env file {file_path}: {e}")
     return env_vars
 
-def get_system_status() -> Dict[str, Any]:
+def get_system_status() -> dict[str, Any]:
     """Get current system status"""
     status = {
         'timestamp': datetime.now().isoformat(),
@@ -247,7 +245,7 @@ def api_update_environment():
 
         # Backup existing file
         if env_file.exists():
-            with open(env_file, 'r') as src, open(backup_file, 'w') as dst:
+            with open(env_file) as src, open(backup_file, 'w') as dst:
                 dst.write(src.read())
 
         # Write new environment file
@@ -292,7 +290,7 @@ def api_logs():
 
         # Read and filter logs
         logs = []
-        with open(log_file, 'r') as f:
+        with open(log_file) as f:
             lines = f.readlines()
             for line in reversed(lines[-limit:]):  # Get last N lines
                 line = line.strip()

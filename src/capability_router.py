@@ -4,11 +4,10 @@ Routes natural language requests to capability domains and modes (info/action)
 """
 
 import re
-import yaml
-import json
-from typing import Dict, List, Optional, Tuple, Any
-from pathlib import Path
 from dataclasses import dataclass
+from typing import Any
+
+import yaml
 
 
 @dataclass
@@ -38,7 +37,7 @@ class CapabilityRouter:
     def _load_ontology(self) -> None:
         """Load domain ontology from YAML file"""
         try:
-            with open(self.ontology_path, 'r') as f:
+            with open(self.ontology_path) as f:
                 ontology = yaml.safe_load(f)
 
             self.domains = ontology.get('domains', {})
@@ -56,7 +55,7 @@ class CapabilityRouter:
                 "action_keywords": ["create", "upload", "send", "run"]
             }
 
-    def deterministic_match(self, text: str) -> Optional[Tuple[str, float, str]]:
+    def deterministic_match(self, text: str) -> tuple[str, float, str] | None:
         """
         Try deterministic matching against domain aliases
         Returns: (domain, confidence, matched_text) or None
@@ -100,7 +99,7 @@ class CapabilityRouter:
         # Default to info for ambiguous cases
         return "info"
 
-    def _llm_classify(self, text: str) -> Optional[Dict[str, Any]]:
+    def _llm_classify(self, text: str) -> dict[str, Any] | None:
         """
         Fallback LLM classification for ambiguous cases
         Returns structured classification result
@@ -161,11 +160,11 @@ class CapabilityRouter:
             method="fallback"
         )
 
-    def get_available_domains(self) -> List[str]:
+    def get_available_domains(self) -> list[str]:
         """Get list of all available domains"""
         return list(self.domains.keys())
 
-    def get_domain_aliases(self, domain: str) -> List[str]:
+    def get_domain_aliases(self, domain: str) -> list[str]:
         """Get aliases for a specific domain"""
         return self.domains.get(domain, {}).get('aliases', [])
 
@@ -179,7 +178,7 @@ def route_request(text: str) -> RoutingResult:
     return router.classify(text)
 
 
-def get_domains() -> List[str]:
+def get_domains() -> list[str]:
     """Convenience function for getting available domains"""
     return router.get_available_domains()
 

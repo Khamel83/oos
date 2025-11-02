@@ -4,12 +4,10 @@ Archon Integration for Strategic Consultant
 Creates and manages projects in Archon for execution and PMO
 """
 
-import asyncio
-import json
 import logging
-from typing import Dict, Any, List, Optional
+from dataclasses import dataclass
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
+from typing import Any
 
 from src.strategic_consultant import ConsultantRecommendation, StrategicDirection
 
@@ -22,9 +20,9 @@ class ArchonProject:
     name: str
     description: str
     status: str
-    phases: List[Dict[str, Any]]
-    tasks: List[Dict[str, Any]]
-    milestones: List[Dict[str, Any]]
+    phases: list[dict[str, Any]]
+    tasks: list[dict[str, Any]]
+    milestones: list[dict[str, Any]]
     created_at: str
     updated_at: str
 
@@ -38,8 +36,8 @@ class ArchonTask:
     status: str
     assignee: str
     due_date: str
-    dependencies: List[str]
-    tags: List[str]
+    dependencies: list[str]
+    tags: list[str]
 
 class ArchonIntegration:
     """
@@ -48,10 +46,10 @@ class ArchonIntegration:
 
     def __init__(self):
         self.archon_connected = False
-        self.active_projects: Dict[str, ArchonProject] = {}
+        self.active_projects: dict[str, ArchonProject] = {}
         self.config = self._load_config()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load Archon integration configuration"""
         return {
             "archon": {
@@ -132,7 +130,7 @@ class ArchonIntegration:
         direction_name = direction.value.replace("_", " ").title()
         return f"{' '.join(key_words)} - {direction_name}"
 
-    def _create_project_phases(self, recommendation: ConsultantRecommendation) -> List[Dict[str, Any]]:
+    def _create_project_phases(self, recommendation: ConsultantRecommendation) -> list[dict[str, Any]]:
         """Create project phases based on recommendation"""
         phases = []
 
@@ -191,7 +189,7 @@ class ArchonIntegration:
 
         return phases
 
-    def _create_project_tasks(self, recommendation: ConsultantRecommendation) -> List[Dict[str, Any]]:
+    def _create_project_tasks(self, recommendation: ConsultantRecommendation) -> list[dict[str, Any]]:
         """Create detailed project tasks"""
         tasks = []
         task_counter = 1
@@ -252,7 +250,7 @@ class ArchonIntegration:
 
         return tasks
 
-    def _create_project_milestones(self, recommendation: ConsultantRecommendation) -> List[Dict[str, Any]]:
+    def _create_project_milestones(self, recommendation: ConsultantRecommendation) -> list[dict[str, Any]]:
         """Create project milestones"""
         return [
             {
@@ -326,7 +324,7 @@ class ArchonIntegration:
             logger.error(f"Error creating Archon project: {e}")
             return False
 
-    async def update_project_status(self, project_id: str) -> Dict[str, Any]:
+    async def update_project_status(self, project_id: str) -> dict[str, Any]:
         """Update project status from Archon"""
         if project_id not in self.active_projects:
             return {"error": "Project not found"}
@@ -357,7 +355,7 @@ class ArchonIntegration:
             logger.error(f"Error updating project status: {e}")
             return {"error": str(e)}
 
-    async def _get_archon_project_status(self, project_id: str) -> Optional[Dict[str, Any]]:
+    async def _get_archon_project_status(self, project_id: str) -> dict[str, Any] | None:
         """Get project status from Archon"""
         try:
             # from src.oos_archon_integration import OOSArchonIntegration  # Self-reference, not needed
@@ -369,7 +367,7 @@ class ArchonIntegration:
             logger.error(f"Error getting Archon status: {e}")
             return None
 
-    def _merge_archon_updates(self, project: ArchonProject, archon_status: Dict[str, Any]) -> ArchonProject:
+    def _merge_archon_updates(self, project: ArchonProject, archon_status: dict[str, Any]) -> ArchonProject:
         """Merge updates from Archon into local project"""
         # Update task statuses
         for archon_task in archon_status.get("tasks", []):
@@ -389,7 +387,7 @@ class ArchonIntegration:
 
         return project
 
-    def _calculate_project_progress(self, project: ArchonProject) -> Dict[str, Any]:
+    def _calculate_project_progress(self, project: ArchonProject) -> dict[str, Any]:
         """Calculate project progress metrics"""
         total_tasks = len(project.tasks)
         completed_tasks = len([t for t in project.tasks if t["status"] == "completed"])
@@ -413,7 +411,7 @@ class ArchonIntegration:
             }
         }
 
-    def _get_upcoming_milestones(self, project: ArchonProject) -> List[Dict[str, Any]]:
+    def _get_upcoming_milestones(self, project: ArchonProject) -> list[dict[str, Any]]:
         """Get upcoming milestones for the project"""
         now = datetime.now()
         upcoming = []
@@ -434,7 +432,7 @@ class ArchonIntegration:
 
         return sorted(upcoming, key=lambda x: x["days_until"])
 
-    def _identify_at_risk_tasks(self, project: ArchonProject) -> List[Dict[str, Any]]:
+    def _identify_at_risk_tasks(self, project: ArchonProject) -> list[dict[str, Any]]:
         """Identify tasks that are at risk of delays"""
         now = datetime.now()
         at_risk = []
@@ -472,12 +470,12 @@ class ArchonIntegration:
         at_risk_tasks = status_data["at_risk_tasks"]
 
         report = [
-            f"📊 **Strategic Project Status Report**",
+            "📊 **Strategic Project Status Report**",
             f"**Project:** {project.name}",
             f"**Status:** {project.status.title()}",
             f"**Last Updated:** {status_data['updated_at']}",
             "",
-            f"📈 **Progress Overview:**",
+            "📈 **Progress Overview:**",
             f"• Overall Progress: {progress['overall_percentage']:.1f}%",
             f"• Tasks: {progress['tasks']['completed']}/{progress['tasks']['total']} completed",
             f"• Milestones: {progress['milestones']['completed']}/{progress['milestones']['total']} achieved",
@@ -513,7 +511,7 @@ class ArchonIntegration:
 
         return "\n".join(report)
 
-    def get_all_active_projects(self) -> List[Dict[str, Any]]:
+    def get_all_active_projects(self) -> list[dict[str, Any]]:
         """Get summary of all active strategic projects"""
         summaries = []
 

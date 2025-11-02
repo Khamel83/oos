@@ -4,14 +4,14 @@ Test script for database connection pool
 """
 
 import sys
-import time
 import threading
-import json
+import time
 from pathlib import Path
 
 # Add helpers to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from helpers.database_config import DatabaseManager, DatabasePool
+from helpers.database_config import DatabaseManager
+
 
 def test_basic_connection():
     """Test basic database connection and settings"""
@@ -126,7 +126,7 @@ def test_integrity_check():
 
         if 'database_info' in result:
             info = result['database_info']
-            print(f"  Database info:")
+            print("  Database info:")
             print(f"    Pages: {info['page_count']}")
             print(f"    Page size: {info['page_size']} bytes")
             print(f"    Total size: {info['size_bytes']} bytes")
@@ -248,7 +248,7 @@ def test_performance():
 
         with db_manager.pool.get_connection() as conn:
             for i in range(100):
-                result = conn.execute("SELECT COUNT(*) FROM health_checks WHERE check_type LIKE 'perf_test_%'").fetchone()
+                conn.execute("SELECT COUNT(*) FROM health_checks WHERE check_type LIKE 'perf_test_%'").fetchone()
 
         query_time = time.time() - start_time
         print(f"  Query performance: 100 queries in {query_time:.3f}s ({100/query_time:.0f} queries/sec)")

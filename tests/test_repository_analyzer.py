@@ -4,13 +4,10 @@ Test script for Repository Analysis Engine
 Validates the core functionality and context engineering principles
 """
 
-import json
-import tempfile
-import os
 import sys
-from pathlib import Path
 import unittest.mock as mock
-from unittest.mock import patch, MagicMock
+from pathlib import Path
+from unittest.mock import MagicMock
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -248,11 +245,11 @@ This project is licensed under the MIT License.
 
         structure = analyzer._analyze_readme_structure(test_readme)
 
-        assert structure['has_badges'] == True
-        assert structure['has_installation'] == True
-        assert structure['has_usage'] == True
-        assert structure['has_contributing'] == True
-        assert structure['has_license'] == True
+        assert structure['has_badges']
+        assert structure['has_installation']
+        assert structure['has_usage']
+        assert structure['has_contributing']
+        assert structure['has_license']
         assert structure['code_examples'] == 1
         assert 'Installation' in structure['sections']
 
@@ -260,7 +257,7 @@ This project is licensed under the MIT License.
         """Test context compression principles (Compress principle)"""
         print("\n🧪 Testing Context Compression Simulation...")
 
-        analyzer = RepositoryAnalyzer()
+        RepositoryAnalyzer()
 
         # Simulate large file list (would normally be compressed)
         large_file_list = [f"file_{i}.py" for i in range(1000)]

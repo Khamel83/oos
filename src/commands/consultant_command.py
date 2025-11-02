@@ -4,15 +4,13 @@ OOS Consultant Command
 Slash command implementation for structured consulting workflow
 """
 
-import asyncio
-import json
-from typing import Dict, Any, Optional, List
-from pathlib import Path
 import logging
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
-from strategic_consultant import StrategicConsultant
 from config_loader import load_config
+from strategic_consultant import StrategicConsultant
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +20,9 @@ class ConsultantCommand:
     def __init__(self):
         self.strategic_consultant = StrategicConsultant()
         self.config = load_config("consultant")
-        self.active_analyses: Dict[str, Dict[str, Any]] = {}
+        self.active_analyses: dict[str, dict[str, Any]] = {}
 
-    async def handle_command(self, args: List[str], context: Dict[str, Any] = None) -> str:
+    async def handle_command(self, args: list[str], context: dict[str, Any] = None) -> str:
         """Handle /consultant slash command - Strategic Analysis"""
         # Documentation-code sync check: Verify command implementation matches documentation
         self._validate_implementation_docs()
@@ -125,7 +123,7 @@ class ConsultantCommand:
             f"• Project: {recommendation.archon_project_plan.get('project_name', 'Strategic Initiative')}",
             f"• Phases: {len(recommendation.archon_project_plan.get('phases', []))}",
             f"• Tasks: {len(recommendation.archon_project_plan.get('tasks', []))}",
-            f"• Status: Ready for execution",
+            "• Status: Ready for execution",
             "",
             "**💡 Next Steps:**",
             "1. Review recommendation with stakeholders",
@@ -141,7 +139,7 @@ class ConsultantCommand:
 
         return "\n".join(response)
 
-    async def _show_project_status(self, args: List[str]) -> str:
+    async def _show_project_status(self, args: list[str]) -> str:
         """Show status of strategic projects"""
         if not args:
             # Show all active projects
@@ -172,7 +170,7 @@ class ConsultantCommand:
         else:
             return "❌ Archon integration not available for project status."
 
-    async def _monitor_projects(self, args: List[str]) -> str:
+    async def _monitor_projects(self, args: list[str]) -> str:
         """Monitor project execution and momentum"""
         if hasattr(self.strategic_consultant, 'archon_integration') and self.strategic_consultant.archon_integration:
             try:
@@ -298,13 +296,6 @@ class ConsultantCommand:
     def _validate_implementation_docs(self):
         """Validate that implementation matches documentation requirements"""
         # Check that all documented features are implemented
-        documented_features = [
-            "intake_questions",
-            "synthesis",
-            "scoring",
-            "planning",
-            "export_artifacts"
-        ]
 
         # Validate configuration has required sections
         required_config_sections = [
@@ -348,7 +339,7 @@ class ConsultantMCPTools:
     def __init__(self):
         self.consultant_command = ConsultantCommand()
 
-    async def oos_consultant_start(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def oos_consultant_start(self, params: dict[str, Any]) -> dict[str, Any]:
         """MCP tool to start consulting engagement"""
         project = params.get("project")
         domain = params.get("domain")
@@ -366,7 +357,7 @@ class ConsultantMCPTools:
         except Exception as e:
             return {"error": str(e)}
 
-    async def oos_consultant_answer(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def oos_consultant_answer(self, params: dict[str, Any]) -> dict[str, Any]:
         """MCP tool to submit answer"""
         question_id = params.get("question_id")
         text = params.get("text")
@@ -381,7 +372,7 @@ class ConsultantMCPTools:
         except Exception as e:
             return {"error": str(e)}
 
-    async def oos_consultant_export(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def oos_consultant_export(self, params: dict[str, Any]) -> dict[str, Any]:
         """MCP tool to export results"""
         format_type = params.get("format", "all")
 
@@ -395,7 +386,7 @@ class ConsultantMCPTools:
         except Exception as e:
             return {"error": str(e)}
 
-    async def oos_consultant_status(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def oos_consultant_status(self, params: dict[str, Any]) -> dict[str, Any]:
         """MCP tool to get status"""
         try:
             result = await self.consultant_command._show_status([])

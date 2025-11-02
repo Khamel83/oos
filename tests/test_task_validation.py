@@ -5,11 +5,14 @@ Comprehensive test suite for TaskValidator including field validation,
 business rules, and constraint checking.
 """
 
-import pytest
 from datetime import datetime, timedelta
 
-from src.oos_task_system.models import Task, TaskStatus, TaskPriority
-from src.oos_task_system.validation import TaskValidator, ValidationError, ValidationResult
+from src.oos_task_system.models import Task, TaskStatus
+from src.oos_task_system.validation import (
+    TaskValidator,
+    ValidationError,
+    ValidationResult,
+)
 
 
 class TestValidationResult:

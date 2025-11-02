@@ -5,13 +5,13 @@ Provides TaskDatabase class with CRUD operations, dependency tracking,
 and database schema management.
 """
 
-import sqlite3
 import json
-from pathlib import Path
-from typing import List, Optional, Dict, Any
+import sqlite3
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
-from .models import Task, TaskStatus, TaskPriority
+from .models import Task, TaskPriority, TaskStatus
 
 
 class TaskDatabase:
@@ -101,7 +101,7 @@ class TaskDatabase:
 
         return task
 
-    def get_task(self, task_id: str) -> Optional[Task]:
+    def get_task(self, task_id: str) -> Task | None:
         """Get a task by ID."""
         with self._get_connection() as conn:
             row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
@@ -157,9 +157,9 @@ class TaskDatabase:
             cursor = conn.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
             return cursor.rowcount > 0
 
-    def list_tasks(self, status: Optional[TaskStatus] = None,
-                   assignee: Optional[str] = None,
-                   tags: Optional[List[str]] = None) -> List[Task]:
+    def list_tasks(self, status: TaskStatus | None = None,
+                   assignee: str | None = None,
+                   tags: list[str] | None = None) -> list[Task]:
         """List tasks with optional filtering."""
         query = "SELECT * FROM tasks"
         params = []
@@ -207,7 +207,7 @@ class TaskDatabase:
 
         return tasks
 
-    def get_ready_tasks(self) -> List[Task]:
+    def get_ready_tasks(self) -> list[Task]:
         """Get tasks that are ready to work on (no pending dependencies)."""
         with self._get_connection() as conn:
             # Find TODO tasks that have no dependencies or all dependencies are complete
@@ -252,7 +252,7 @@ class TaskDatabase:
 
         return tasks
 
-    def get_blocked_tasks(self) -> List[Task]:
+    def get_blocked_tasks(self) -> list[Task]:
         """Get tasks that are blocked by pending dependencies."""
         with self._get_connection() as conn:
             query = """
@@ -309,7 +309,7 @@ class TaskDatabase:
         except sqlite3.IntegrityError:
             return False  # Dependency already exists
 
-    def _row_to_task(self, row: sqlite3.Row, depends_on: List[str], blocks: List[str]) -> Task:
+    def _row_to_task(self, row: sqlite3.Row, depends_on: list[str], blocks: list[str]) -> Task:
         """Convert database row to Task object."""
         return Task(
             id=row['id'],
@@ -330,7 +330,7 @@ class TaskDatabase:
             context=json.loads(row['context']) if row['context'] else {}
         )
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get database statistics."""
         with self._get_connection() as conn:
             total = conn.execute("SELECT COUNT(*) as count FROM tasks").fetchone()['count']
@@ -350,7 +350,7 @@ class TaskDatabase:
                 'db_size_bytes': self.db_path.stat().st_size if self.db_path.exists() else 0
             }
 
-    def export_tasks(self, output_path: str, **export_options) -> Dict[str, Any]:
+    def export_tasks(self, output_path: str, **export_options) -> dict[str, Any]:
         """
         Export tasks to JSONL file.
 
@@ -368,7 +368,7 @@ class TaskDatabase:
         exporter = TaskExporter(self)
         return exporter.export_all_tasks(output_path, **export_options)
 
-    def import_tasks(self, input_path: str, **import_options) -> Dict[str, Any]:
+    def import_tasks(self, input_path: str, **import_options) -> dict[str, Any]:
         """
         Import tasks from JSONL file.
 
@@ -387,7 +387,7 @@ class TaskDatabase:
         result = importer.import_tasks(input_path, **import_options)
         return result.__dict__
 
-    def sync_tasks(self, jsonl_path: str, conflict_resolution: str = "merge") -> Dict[str, Any]:
+    def sync_tasks(self, jsonl_path: str, conflict_resolution: str = "merge") -> dict[str, Any]:
         """
         Synchronize tasks with JSONL file (export then import with merge).
 

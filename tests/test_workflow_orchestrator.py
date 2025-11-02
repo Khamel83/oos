@@ -4,23 +4,26 @@ Test script for Workflow Orchestration Engine
 Validates workflow definition, execution, dependency management, and error handling
 """
 
-import json
 import asyncio
-import tempfile
+import json
 import os
 import sys
-from pathlib import Path
+import tempfile
 from datetime import datetime
-import unittest.mock as mock
+from pathlib import Path
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from src.orchestrator import (
-    WorkflowOrchestrator, WorkflowStep, WorkflowCondition,
-    ExecutionStatus, ExecutionResult, WorkflowContext,
-    create_default_workflows, COMMON_WORKFLOWS
+    ExecutionResult,
+    ExecutionStatus,
+    WorkflowCondition,
+    WorkflowContext,
+    WorkflowOrchestrator,
+    WorkflowStep,
+    create_default_workflows,
 )
 
 
@@ -219,14 +222,14 @@ class TestWorkflowOrchestrator:
         previous_results = {"prev_step": success_result}
 
         # Test success condition
-        assert self.orchestrator._should_execute_step(success_step, previous_results) == True
-        assert self.orchestrator._should_execute_step(failure_step, previous_results) == False
-        assert self.orchestrator._should_execute_step(always_step, previous_results) == True
+        assert self.orchestrator._should_execute_step(success_step, previous_results)
+        assert not self.orchestrator._should_execute_step(failure_step, previous_results)
+        assert self.orchestrator._should_execute_step(always_step, previous_results)
 
         # Test failure condition
         previous_results = {"prev_step": failure_result}
-        assert self.orchestrator._should_execute_step(success_step, previous_results) == False
-        assert self.orchestrator._should_execute_step(failure_step, previous_results) == True
+        assert not self.orchestrator._should_execute_step(success_step, previous_results)
+        assert self.orchestrator._should_execute_step(failure_step, previous_results)
 
     async def test_workflow_execution(self):
         """Test complete workflow execution"""

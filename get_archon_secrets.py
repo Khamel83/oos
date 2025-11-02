@@ -3,10 +3,10 @@
 Access Archon vault secrets using direct API calls
 """
 
-import requests
 import json
-from cryptography.fernet import Fernet
-import base64
+
+import requests
+
 
 def get_vault_secrets(password: str) -> dict:
     """Access Archon vault and retrieve secrets"""
@@ -36,7 +36,7 @@ def get_vault_secrets(password: str) -> dict:
                     secrets = secrets_response.json()
                     return {"status": "success", "secrets": secrets}
 
-    except Exception as e:
+    except Exception:
         pass
 
     # Fallback: try common API patterns
@@ -83,7 +83,7 @@ def main():
         with open('/home/ubuntu/dev/oos/archon_secrets.json', 'w') as f:
             json.dump(ai_keys, f, indent=2)
 
-        print(f"\n📁 Secrets saved to: archon_secrets.json")
+        print("\n📁 Secrets saved to: archon_secrets.json")
 
         return ai_keys
 

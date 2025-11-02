@@ -5,11 +5,11 @@ Execution Driver - Maintains momentum and drives strategic plan execution
 
 import asyncio
 import logging
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
 
-from src.archon_integration import ArchonIntegration, ArchonProject
+from src.archon_integration import ArchonIntegration
 
 logger = logging.getLogger(__name__)
 
@@ -19,9 +19,9 @@ class ExecutionStatus:
     momentum_score: float  # 0-100
     velocity_trend: str  # "increasing", "stable", "decreasing"
     risk_level: str  # "low", "medium", "high"
-    next_actions: List[str]
-    blockers: List[str]
-    recommendations: List[str]
+    next_actions: list[str]
+    blockers: list[str]
+    recommendations: list[str]
 
 class ExecutionDriver:
     """
@@ -33,7 +33,7 @@ class ExecutionDriver:
         self.monitoring_active = False
         self.config = self._load_config()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load execution driver configuration"""
         return {
             "monitoring": {
@@ -55,7 +55,7 @@ class ExecutionDriver:
             }
         }
 
-    async def start_monitoring(self, project_ids: List[str]) -> None:
+    async def start_monitoring(self, project_ids: list[str]) -> None:
         """Start continuous monitoring of strategic projects"""
         logger.info(f"Starting execution monitoring for {len(project_ids)} projects")
 
@@ -122,7 +122,7 @@ class ExecutionDriver:
 
         return execution_status
 
-    def _calculate_momentum_score(self, status_data: Dict[str, Any]) -> float:
+    def _calculate_momentum_score(self, status_data: dict[str, Any]) -> float:
         """Calculate momentum score (0-100)"""
         progress = status_data.get("progress", {})
 
@@ -157,7 +157,7 @@ class ExecutionDriver:
 
         return min(100, max(0, momentum))
 
-    def _analyze_velocity_trend(self, project_id: str, status_data: Dict[str, Any]) -> str:
+    def _analyze_velocity_trend(self, project_id: str, status_data: dict[str, Any]) -> str:
         """Analyze velocity trend over time"""
         # Simplified implementation - would track historical data in production
         progress = status_data.get("progress", {})
@@ -170,7 +170,7 @@ class ExecutionDriver:
         else:
             return "decreasing"
 
-    def _assess_risk_level(self, status_data: Dict[str, Any]) -> str:
+    def _assess_risk_level(self, status_data: dict[str, Any]) -> str:
         """Assess current risk level"""
         at_risk_tasks = len(status_data.get("at_risk_tasks", []))
         upcoming_milestones = status_data.get("next_milestones", [])
@@ -185,7 +185,7 @@ class ExecutionDriver:
         else:
             return "low"
 
-    def _identify_next_actions(self, status_data: Dict[str, Any]) -> List[str]:
+    def _identify_next_actions(self, status_data: dict[str, Any]) -> list[str]:
         """Identify immediate next actions needed"""
         actions = []
 
@@ -207,7 +207,7 @@ class ExecutionDriver:
 
         return actions
 
-    def _identify_blockers(self, status_data: Dict[str, Any]) -> List[str]:
+    def _identify_blockers(self, status_data: dict[str, Any]) -> list[str]:
         """Identify current blockers"""
         blockers = []
 
@@ -224,7 +224,7 @@ class ExecutionDriver:
         return blockers
 
     def _generate_execution_recommendations(self, momentum_score: float, velocity_trend: str,
-                                          risk_level: str, status_data: Dict[str, Any]) -> List[str]:
+                                          risk_level: str, status_data: dict[str, Any]) -> list[str]:
         """Generate execution recommendations"""
         recommendations = []
 
@@ -255,7 +255,7 @@ class ExecutionDriver:
         return recommendations
 
     async def _take_automated_actions(self, project_id: str, execution_status: ExecutionStatus,
-                                    status_data: Dict[str, Any]) -> None:
+                                    status_data: dict[str, Any]) -> None:
         """Take automated actions based on execution status"""
 
         # Send alerts for low momentum
@@ -291,7 +291,7 @@ class ExecutionDriver:
 
         logger.info(f"Momentum alert sent: {alert_message}")
 
-    async def _escalate_blocked_tasks(self, project_id: str, at_risk_tasks: List[Dict[str, Any]]) -> None:
+    async def _escalate_blocked_tasks(self, project_id: str, at_risk_tasks: list[dict[str, Any]]) -> None:
         """Escalate blocked tasks to appropriate stakeholders"""
         overdue_tasks = [t for t in at_risk_tasks if t.get("days_overdue", 0) > 0]
 
@@ -341,7 +341,7 @@ class ExecutionDriver:
                 f"**Project ID:** {project_id}",
                 f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
                 "",
-                f"📊 **Execution Metrics:**",
+                "📊 **Execution Metrics:**",
                 f"• Momentum Score: {execution_status.momentum_score:.1f}%",
                 f"• Velocity Trend: {execution_status.velocity_trend.title()}",
                 f"• Risk Level: {execution_status.risk_level.title()}",
@@ -380,7 +380,7 @@ class ExecutionDriver:
             logger.error(f"Failed to generate execution report: {e}")
             return f"❌ Error generating execution report: {str(e)}"
 
-    async def get_momentum_dashboard(self, project_ids: List[str]) -> Dict[str, Any]:
+    async def get_momentum_dashboard(self, project_ids: list[str]) -> dict[str, Any]:
         """Get momentum dashboard for multiple projects"""
         dashboard = {
             "overview": {

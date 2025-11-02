@@ -4,23 +4,21 @@ Resilient queue system with dead letter queue and retry logic
 """
 
 import json
-import time
 import logging
-import threading
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable
-from dataclasses import dataclass, asdict
-from enum import Enum
-import uuid
-import sqlite3
-from queue import Queue, Empty
 import os
 import sys
+import threading
+import uuid
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
 from pathlib import Path
+from typing import Any
 
 # Add helpers to path for database integration
 sys.path.insert(0, str(Path(__file__).parent))
 from database_config import DatabaseManager
+
 
 class TaskStatus(Enum):
     PENDING = "pending"
@@ -40,7 +38,7 @@ class QueueTask:
     """Container for queue tasks"""
     id: str
     task_type: str
-    task_data: Dict
+    task_data: dict
     status: TaskStatus = TaskStatus.PENDING
     attempt_count: int = 0
     max_attempts: int = 9
@@ -112,7 +110,7 @@ class CircuitBreaker:
                 if self.failure_count >= self.failure_threshold:
                     self.state = CircuitBreakerState.OPEN
 
-    def get_status(self) -> Dict:
+    def get_status(self) -> dict:
         """Get circuit breaker status"""
         with self.lock:
             return {
@@ -221,7 +219,7 @@ class ResilientQueue:
             self.logger.error(f"Failed to initialize schema: {e}")
             raise
 
-    def enqueue(self, task_type: str, task_data: Dict, max_attempts: int = 9) -> str:
+    def enqueue(self, task_type: str, task_data: dict, max_attempts: int = 9) -> str:
         """Add task to queue"""
         task_id = str(uuid.uuid4())
 
@@ -258,7 +256,7 @@ class ResilientQueue:
             self.logger.error(f"Failed to enqueue task: {e}")
             raise
 
-    def dequeue(self, worker_id: str, timeout: int = 30) -> Optional[QueueTask]:
+    def dequeue(self, worker_id: str, timeout: int = 30) -> QueueTask | None:
         """Get next available task for processing"""
         if not self.circuit_breaker.can_execute():
             self.logger.warning(f"Circuit breaker is open, worker {worker_id} cannot dequeue")
@@ -474,7 +472,7 @@ class ResilientQueue:
             self.logger.error(f"Failed to retry dead letter task {dlq_task_id}: {e}")
             return False
 
-    def get_queue_stats(self) -> Dict:
+    def get_queue_stats(self) -> dict:
         """Get queue statistics"""
         try:
             with self.db_manager.pool.get_connection() as conn:
@@ -675,7 +673,7 @@ def get_queue_manager(queue_name: str = "default") -> ResilientQueue:
             _queue_managers[queue_name] = ResilientQueue(queue_name)
         return _queue_managers[queue_name]
 
-def get_circuit_breaker_status(queue_name: str = "default") -> Dict:
+def get_circuit_breaker_status(queue_name: str = "default") -> dict:
     """Get circuit breaker status for queue"""
     queue_manager = get_queue_manager(queue_name)
     return queue_manager.circuit_breaker.get_status()

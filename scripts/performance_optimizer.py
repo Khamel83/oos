@@ -4,19 +4,20 @@ Performance optimization recommendations and analysis
 """
 
 import json
-import psutil
-import time
 import logging
 import os
 import sys
-from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+import time
 from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+
+import psutil
 
 # Add helpers to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from helpers.resource_manager import ResourceManager, ResourceMetrics
+from helpers.resource_manager import ResourceManager
+
 
 @dataclass
 class PerformanceIssue:
@@ -54,7 +55,7 @@ class PerformanceOptimizer:
 
         return logger
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """Load performance optimization configuration"""
         default_config = {
             "thresholds": {
@@ -97,7 +98,7 @@ class PerformanceOptimizer:
             self.logger.error(f"Error loading config: {e}")
             return default_config
 
-    def _save_config(self, config: Dict):
+    def _save_config(self, config: dict):
         """Save configuration to file"""
         try:
             os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
@@ -106,7 +107,7 @@ class PerformanceOptimizer:
         except Exception as e:
             self.logger.error(f"Error saving config: {e}")
 
-    def collect_performance_sample(self, duration: int = 60) -> Dict:
+    def collect_performance_sample(self, duration: int = 60) -> dict:
         """Collect detailed performance metrics over a period"""
         self.logger.info(f"Collecting performance sample for {duration} seconds...")
 
@@ -215,7 +216,7 @@ class PerformanceOptimizer:
             'analysis_timestamp': datetime.now().isoformat()
         }
 
-    def analyze_performance_trends(self, sample_data: Dict) -> Dict:
+    def analyze_performance_trends(self, sample_data: dict) -> dict:
         """Analyze performance trends from sample data"""
         if not sample_data.get('samples'):
             return {'error': 'No sample data available'}
@@ -230,7 +231,7 @@ class PerformanceOptimizer:
 
         return analysis
 
-    def _analyze_cpu_trends(self, samples: List[Dict]) -> Dict:
+    def _analyze_cpu_trends(self, samples: list[dict]) -> dict:
         """Analyze CPU performance trends"""
         cpu_data = [s['cpu'] for s in samples if 'cpu' in s]
         if not cpu_data:
@@ -275,7 +276,7 @@ class PerformanceOptimizer:
 
         return analysis
 
-    def _analyze_memory_trends(self, samples: List[Dict]) -> Dict:
+    def _analyze_memory_trends(self, samples: list[dict]) -> dict:
         """Analyze memory performance trends"""
         memory_data = [s['memory'] for s in samples if 'memory' in s]
         if not memory_data:
@@ -311,7 +312,7 @@ class PerformanceOptimizer:
 
         return analysis
 
-    def _analyze_disk_trends(self, samples: List[Dict]) -> Dict:
+    def _analyze_disk_trends(self, samples: list[dict]) -> dict:
         """Analyze disk performance trends"""
         disk_data = [s['disk'] for s in samples if 'disk' in s]
         if not disk_data:
@@ -357,7 +358,7 @@ class PerformanceOptimizer:
 
         return analysis
 
-    def _analyze_process_trends(self, samples: List[Dict]) -> Dict:
+    def _analyze_process_trends(self, samples: list[dict]) -> dict:
         """Analyze process-related trends"""
         process_data = [s.get('processes', {}) for s in samples]
         process_counts = [d.get('count', 0) for d in process_data if d.get('count')]
@@ -425,7 +426,7 @@ class PerformanceOptimizer:
 
         return analysis
 
-    def _calculate_variance(self, values: List[float]) -> float:
+    def _calculate_variance(self, values: list[float]) -> float:
         """Calculate variance of values"""
         if len(values) < 2:
             return 0
@@ -434,7 +435,7 @@ class PerformanceOptimizer:
         variance = sum((x - mean) ** 2 for x in values) / len(values)
         return variance
 
-    def _calculate_trend(self, values: List[float]) -> float:
+    def _calculate_trend(self, values: list[float]) -> float:
         """Calculate trend direction (-1 to 1, where 1 is increasing)"""
         if len(values) < 2:
             return 0
@@ -455,7 +456,7 @@ class PerformanceOptimizer:
 
         return max(-1, min(1, normalized_slope))
 
-    def generate_performance_issues(self, analysis: Dict) -> List[PerformanceIssue]:
+    def generate_performance_issues(self, analysis: dict) -> list[PerformanceIssue]:
         """Generate performance issues from analysis"""
         issues = []
 
@@ -574,7 +575,7 @@ class PerformanceOptimizer:
 
         return sorted(issues, key=lambda x: x.priority, reverse=True)
 
-    def generate_optimization_recommendations(self, issues: List[PerformanceIssue]) -> Dict:
+    def generate_optimization_recommendations(self, issues: list[PerformanceIssue]) -> dict:
         """Generate comprehensive optimization recommendations"""
         recommendations = {
             'immediate_actions': [],
@@ -641,7 +642,7 @@ class PerformanceOptimizer:
 
         return recommendations
 
-    def run_performance_analysis(self, duration: int = 60) -> Dict:
+    def run_performance_analysis(self, duration: int = 60) -> dict:
         """Run complete performance analysis"""
         start_time = datetime.now()
 
@@ -694,7 +695,7 @@ class PerformanceOptimizer:
 
         return report
 
-    def _save_performance_report(self, report: Dict):
+    def _save_performance_report(self, report: dict):
         """Save performance report to file"""
         try:
             reports_dir = "data/performance_reports"

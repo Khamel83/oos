@@ -4,10 +4,10 @@ Auto-configure RelayQ SSH settings from .env
 Makes SSH setup repeatable and automated
 """
 
-import os
 import json
 import subprocess
 from pathlib import Path
+
 
 def load_env():
     """Load environment variables from .env"""
@@ -143,46 +143,46 @@ def show_next_steps():
     if env.get("MACMINI_IP") and macmini_pub.exists():
         print(f"\n🖥️  MacMini Setup ({env['MACMINI_IP']}):")
         print(f"   User: {env.get('MACMINI_USER', 'ubuntu')}")
-        print(f"   Public key to copy:")
+        print("   Public key to copy:")
         print(f"   {macmini_pub.read_text().strip()}")
-        print(f"\n   On MacMini, run:")
-        print(f"   mkdir -p ~/.ssh")
+        print("\n   On MacMini, run:")
+        print("   mkdir -p ~/.ssh")
         print(f"   echo '{macmini_pub.read_text().strip()}' >> ~/.ssh/authorized_keys")
-        print(f"   chmod 600 ~/.ssh/authorized_keys")
-        print(f"   chmod 700 ~/.ssh")
+        print("   chmod 600 ~/.ssh/authorized_keys")
+        print("   chmod 700 ~/.ssh")
 
     if env.get("RPI4_IP") and rpi4_pub.exists():
         print(f"\n🍓 RPi4 Setup ({env['RPI4_IP']}):")
         print(f"   User: {env.get('RPI4_USER', 'pi')}")
-        print(f"   Public key to copy:")
+        print("   Public key to copy:")
         print(f"   {rpi4_pub.read_text().strip()}")
-        print(f"\n   On RPi4, run:")
-        print(f"   mkdir -p ~/.ssh")
+        print("\n   On RPi4, run:")
+        print("   mkdir -p ~/.ssh")
         print(f"   echo '{rpi4_pub.read_text().strip()}' >> ~/.ssh/authorized_keys")
-        print(f"   chmod 600 ~/.ssh/authorized_keys")
-        print(f"   chmod 700 ~/.ssh")
+        print("   chmod 600 ~/.ssh/authorized_keys")
+        print("   chmod 700 ~/.ssh")
 
-    print(f"\n🧪 Test Everything:")
-    print(f"   python3 src/ssh_manager.py")
-    print(f"   ./bin/oos-full-stack --test")
+    print("\n🧪 Test Everything:")
+    print("   python3 src/ssh_manager.py")
+    print("   ./bin/oos-full-stack --test")
 
-    print(f"\n💡 Pro Tip:")
-    print(f"   This configuration is now repeatable!")
-    print(f"   Just update .env and run: python3 configure_ssh.py")
+    print("\n💡 Pro Tip:")
+    print("   This configuration is now repeatable!")
+    print("   Just update .env and run: python3 configure_ssh.py")
 
 def update_env_template():
     """Add SSH configuration to .env if not present"""
     env_path = Path(__file__).parent / ".env"
 
     # Check if SSH config already exists
-    with open(env_path, 'r') as f:
+    with open(env_path) as f:
         env_content = f.read()
 
     ssh_vars = ["MACMINI_IP", "RPI4_IP", "MACMINI_USER", "RPI4_USER"]
     needs_update = any(var not in env_content for var in ssh_vars)
 
     if needs_update:
-        print(f"\n📝 Adding SSH configuration to .env...")
+        print("\n📝 Adding SSH configuration to .env...")
 
         with open(env_path, 'a') as f:
             f.write("\n# RelayQ SSH Configuration\n")
@@ -194,10 +194,10 @@ def update_env_template():
             f.write("# MACMINI_KEY_PATH=~/.ssh/macmini_key\n")
             f.write("# RPI4_KEY_PATH=~/.ssh/rpi4_key\n")
 
-        print(f"   ✅ Added SSH variables to .env")
-        print(f"   📝 Edit .env to add your actual IP addresses")
+        print("   ✅ Added SSH variables to .env")
+        print("   📝 Edit .env to add your actual IP addresses")
     else:
-        print(f"   ✅ SSH configuration already in .env")
+        print("   ✅ SSH configuration already in .env")
 
 if __name__ == "__main__":
     print("🔧 OOS RelayQ SSH Configuration")

@@ -6,9 +6,8 @@ Creates unified commands that replace multiple single-purpose commands.
 Designed for clear Archon MCP integration and reduced cognitive overhead.
 """
 
-import os
-import sys
 from pathlib import Path
+
 
 class CommandConsolidator:
     def __init__(self, commands_dir=".claude/commands"):

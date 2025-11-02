@@ -5,11 +5,12 @@ Tracks spending and enforces $1/day limit per project with Telegram notification
 
 import asyncio
 import json
-import aiohttp
-from pathlib import Path
-from typing import Dict, Any, Optional
-from datetime import datetime, date
 from dataclasses import dataclass
+from datetime import date, datetime
+from pathlib import Path
+from typing import Any
+
+import aiohttp
 
 from renderers import Colors
 
@@ -27,7 +28,7 @@ class CostTracker:
 class CostManager:
     """Manages OpenRouter costs and enforces daily limits"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.daily_limit = config.get('daily_cost_limit', 1.0)  # $1 default
         self.openrouter_api_key = config.get('openrouter_api_key')
@@ -38,13 +39,13 @@ class CostManager:
         self.cost_file = Path.home() / '.oos' / 'costs.json'
         self.cost_file.parent.mkdir(exist_ok=True)
 
-        self.daily_costs: Dict[str, CostTracker] = self._load_costs()
+        self.daily_costs: dict[str, CostTracker] = self._load_costs()
 
-    def _load_costs(self) -> Dict[str, CostTracker]:
+    def _load_costs(self) -> dict[str, CostTracker]:
         """Load cost tracking data"""
         if self.cost_file.exists():
             try:
-                with open(self.cost_file, 'r') as f:
+                with open(self.cost_file) as f:
                     data = json.load(f)
 
                 costs = {}
@@ -169,7 +170,7 @@ Reset tomorrow or increase limit in config."""
         except Exception as e:
             print(f"{Colors.RED}❌ Telegram notification error: {e}{Colors.END}")
 
-    def get_daily_summary(self, project_id: str = None) -> Dict[str, Any]:
+    def get_daily_summary(self, project_id: str = None) -> dict[str, Any]:
         """Get daily cost summary"""
         today = date.today().isoformat()
 
@@ -244,7 +245,7 @@ Reset tomorrow or increase limit in config."""
 _cost_manager = None
 
 
-def get_cost_manager(config: Dict[str, Any]) -> CostManager:
+def get_cost_manager(config: dict[str, Any]) -> CostManager:
     """Get or create cost manager instance"""
     global _cost_manager
     if _cost_manager is None:
@@ -252,13 +253,13 @@ def get_cost_manager(config: Dict[str, Any]) -> CostManager:
     return _cost_manager
 
 
-async def check_cost_limit(project_id: str, config: Dict[str, Any], estimated_cost: float = 0.01) -> bool:
+async def check_cost_limit(project_id: str, config: dict[str, Any], estimated_cost: float = 0.01) -> bool:
     """Convenience function to check cost limits"""
     cost_manager = get_cost_manager(config)
     return await cost_manager.check_can_proceed(project_id, estimated_cost)
 
 
-async def record_api_cost(project_id: str, config: Dict[str, Any], cost: float, tokens: int = 0):
+async def record_api_cost(project_id: str, config: dict[str, Any], cost: float, tokens: int = 0):
     """Convenience function to record API costs"""
     cost_manager = get_cost_manager(config)
     await cost_manager.record_api_call(project_id, cost, tokens)

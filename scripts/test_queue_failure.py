@@ -3,16 +3,17 @@
 Test script for queue failure scenarios and dead letter queue
 """
 
-import sys
-import time
 import json
-from pathlib import Path
-import threading
 import random
+import sys
+import threading
+import time
+from pathlib import Path
 
 # Add helpers to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from helpers.queue_manager import get_queue_manager, TaskStatus
+from helpers.queue_manager import TaskStatus, get_queue_manager
+
 
 class MockWorker:
     """Mock worker to simulate task processing"""
@@ -92,7 +93,7 @@ def test_basic_queue_operations():
     print(f"  Initial queue stats: {stats}")
 
     # Process one task successfully
-    worker = MockWorker("test_worker", "test_queue", failure_rate=0.0)  # No failures
+    MockWorker("test_worker", "test_queue", failure_rate=0.0)  # No failures
     task = queue_manager.dequeue("test_worker")
 
     if task:
@@ -117,7 +118,7 @@ def test_exponential_backoff():
     print(f"  Enqueued failing task: {task_id}")
 
     # Create worker that always fails
-    worker = MockWorker("failing_worker", "test_queue", failure_rate=1.0)
+    MockWorker("failing_worker", "test_queue", failure_rate=1.0)
 
     # Process the task multiple times to see retries
     for attempt in range(6):  # One more than max_attempts
@@ -143,7 +144,7 @@ def test_exponential_backoff():
                     if next_retry_at:
                         print(f"    Next retry at: {next_retry_at}")
                     if status == TaskStatus.DEAD_LETTER.value:
-                        print(f"    ⚰️ Task moved to dead letter queue")
+                        print("    ⚰️ Task moved to dead letter queue")
                         break
         else:
             print(f"  Attempt {attempt + 1}: No task available (waiting for retry time)")
@@ -176,7 +177,7 @@ def test_circuit_breaker():
         task_ids.append(task_id)
 
     # Create worker that always fails
-    worker = MockWorker("cb_worker", "test_queue", failure_rate=1.0)
+    MockWorker("cb_worker", "test_queue", failure_rate=1.0)
 
     # Process tasks until circuit breaker opens
     processed = 0
@@ -270,7 +271,7 @@ def test_dead_letter_queue_retry():
     print(f"  Enqueued task for DLQ: {task_id}")
 
     # Process it until it goes to DLQ
-    worker = MockWorker("dlq_worker", "test_queue", failure_rate=1.0)
+    MockWorker("dlq_worker", "test_queue", failure_rate=1.0)
 
     attempts = 0
     while attempts < 3:
@@ -330,7 +331,7 @@ def run_all_tests():
         # Final system stats
         queue_manager = get_queue_manager("test_queue")
         final_stats = queue_manager.get_queue_stats()
-        print(f"\nFinal system stats:")
+        print("\nFinal system stats:")
         print(json.dumps(final_stats, indent=2))
 
     except Exception as e:

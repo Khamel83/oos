@@ -12,9 +12,7 @@ Key fixes:
 4. Ensure consistent frontmatter structure
 """
 
-import os
 import re
-import sys
 from pathlib import Path
 from typing import List, Dict, Optional
 

@@ -4,14 +4,12 @@ SSH Manager for RelayQ Architecture
 Handles SSH connections, key management, and testing
 """
 
-import os
-import subprocess
 import asyncio
-import json
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
 import logging
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,8 +20,8 @@ class SSHConnection:
     host: str
     user: str
     port: int = 22
-    key_path: Optional[str] = None
-    password: Optional[str] = None
+    key_path: str | None = None
+    password: str | None = None
     timeout: int = 10
 
 
@@ -39,7 +37,7 @@ class SSHManager:
         """Ensure SSH directory exists with proper permissions"""
         self.ssh_dir.mkdir(exist_ok=True, mode=0o700)
 
-    async def test_connection(self, connection: SSHConnection) -> Dict[str, Any]:
+    async def test_connection(self, connection: SSHConnection) -> dict[str, Any]:
         """Test SSH connection and return detailed status"""
         try:
             cmd = self._build_ssh_command(connection, "echo 'SSH Connection Test Successful'")
@@ -62,7 +60,7 @@ class SSHManager:
                 "returncode": process.returncode
             }
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return {
                 "success": False,
                 "error": f"Connection timeout after {connection.timeout} seconds"
@@ -73,7 +71,7 @@ class SSHManager:
                 "error": str(e)
             }
 
-    def _build_ssh_command(self, connection: SSHConnection, command: str) -> List[str]:
+    def _build_ssh_command(self, connection: SSHConnection, command: str) -> list[str]:
         """Build SSH command with proper options"""
         ssh_cmd = ["ssh"]
 
@@ -102,7 +100,7 @@ class SSHManager:
 
         return ssh_cmd
 
-    async def execute_command(self, connection: SSHConnection, command: str, timeout: int = 30) -> Dict[str, Any]:
+    async def execute_command(self, connection: SSHConnection, command: str, timeout: int = 30) -> dict[str, Any]:
         """Execute command on remote host via SSH"""
         try:
             ssh_cmd = self._build_ssh_command(connection, command)
@@ -130,7 +128,7 @@ class SSHManager:
                 "host": connection.host
             }
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return {
                 "success": False,
                 "error": f"Command timeout after {timeout} seconds",
@@ -183,7 +181,7 @@ class SSHManager:
         else:
             raise FileNotFoundError(f"Public key not found: {pub_key_path}")
 
-    async def setup_ssh_key_copy(self, connection: SSHConnection, key_name: str) -> Dict[str, Any]:
+    async def setup_ssh_key_copy(self, connection: SSHConnection, key_name: str) -> dict[str, Any]:
         """Setup and copy SSH key to remote host"""
         try:
             # Generate key if doesn't exist
@@ -262,7 +260,7 @@ class SSHManager:
                 "error": str(e)
             }
 
-    async def discover_local_nodes(self) -> List[str]:
+    async def discover_local_nodes(self) -> list[str]:
         """Discover potential local network nodes"""
         potential_ips = []
 
@@ -305,7 +303,7 @@ def get_ssh_manager() -> SSHManager:
     return _ssh_manager
 
 
-async def test_relayq_ssh_connections() -> Dict[str, Any]:
+async def test_relayq_ssh_connections() -> dict[str, Any]:
     """Test SSH connections for all configured RelayQ nodes"""
     from relayq_architecture import get_relayq_manager
 

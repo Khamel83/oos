@@ -7,10 +7,9 @@ and data integrity constraints.
 
 import re
 from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional, Tuple, Union
-from dataclasses import fields
+from typing import Any
 
-from .models import Task, TaskStatus, TaskPriority
+from .models import Task, TaskPriority, TaskStatus
 
 
 class ValidationError(Exception):
@@ -28,8 +27,8 @@ class ValidationResult:
 
     def __init__(self):
         self.is_valid = True
-        self.errors: List[ValidationError] = []
-        self.warnings: List[str] = []
+        self.errors: list[ValidationError] = []
+        self.warnings: list[str] = []
 
     def add_error(self, field: str, message: str, value: Any = None):
         """Add validation error."""
@@ -41,7 +40,7 @@ class ValidationResult:
         """Add validation warning."""
         self.warnings.append(message)
 
-    def get_error_summary(self) -> Dict[str, List[str]]:
+    def get_error_summary(self) -> dict[str, list[str]]:
         """Get errors grouped by field."""
         summary = {}
         for error in self.errors:
@@ -156,7 +155,7 @@ class TaskValidator:
         if not isinstance(priority, TaskPriority):
             result.add_error('priority', f'Invalid priority type: {type(priority)}')
 
-    def _validate_tags(self, tags: List[str], result: ValidationResult, strict: bool):
+    def _validate_tags(self, tags: list[str], result: ValidationResult, strict: bool):
         """Validate task tags."""
         if not isinstance(tags, list):
             result.add_error('tags', 'Tags must be a list')
@@ -188,7 +187,7 @@ class TaskValidator:
                 result.add_warning(f'Duplicate tag: "{tag}"')
             seen_tags.add(tag_lower)
 
-    def _validate_dependencies(self, dependencies: List[str], result: ValidationResult, strict: bool):
+    def _validate_dependencies(self, dependencies: list[str], result: ValidationResult, strict: bool):
         """Validate task dependencies."""
         if not isinstance(dependencies, list):
             result.add_error('depends_on', 'Dependencies must be a list')
@@ -215,7 +214,7 @@ class TaskValidator:
                 result.add_warning(f'Duplicate dependency: "{dep_id}"')
             seen_deps.add(dep_id)
 
-    def _validate_assignee(self, assignee: Optional[str], result: ValidationResult, strict: bool):
+    def _validate_assignee(self, assignee: str | None, result: ValidationResult, strict: bool):
         """Validate task assignee."""
         if assignee is None:
             return
@@ -230,7 +229,7 @@ class TaskValidator:
         if strict and assignee and not self.ASSIGNEE_PATTERN.match(assignee):
             result.add_error('assignee', 'Assignee contains invalid characters')
 
-    def _validate_hours(self, estimated: Optional[float], actual: Optional[float], result: ValidationResult):
+    def _validate_hours(self, estimated: float | None, actual: float | None, result: ValidationResult):
         """Validate hour estimates."""
         if estimated is not None:
             if not isinstance(estimated, (int, float)):
@@ -253,7 +252,7 @@ class TaskValidator:
             result.add_warning('Actual hours significantly exceed estimated hours (>3x)')
 
     def _validate_dates(self, created: datetime, updated: datetime,
-                       completed: Optional[datetime], due: Optional[datetime], result: ValidationResult):
+                       completed: datetime | None, due: datetime | None, result: ValidationResult):
         """Validate date fields."""
         now = datetime.now()
 
@@ -287,7 +286,7 @@ class TaskValidator:
             elif due > now + timedelta(days=365 * self.MAX_FUTURE_DUE_DATE_YEARS):
                 result.add_warning(f'Due date is more than {self.MAX_FUTURE_DUE_DATE_YEARS} years in the future')
 
-    def _validate_context(self, context: Dict[str, Any], result: ValidationResult, strict: bool):
+    def _validate_context(self, context: dict[str, Any], result: ValidationResult, strict: bool):
         """Validate context field."""
         if not isinstance(context, dict):
             result.add_error('context', 'Context must be a dictionary')
@@ -380,7 +379,7 @@ class TaskValidator:
 
         return result
 
-    def get_field_constraints(self) -> Dict[str, Dict[str, Any]]:
+    def get_field_constraints(self) -> dict[str, dict[str, Any]]:
         """Get all field validation constraints for documentation."""
         return {
             'title': {

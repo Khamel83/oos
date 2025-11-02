@@ -4,21 +4,21 @@ OOS Full Stack Demonstration
 Shows AI SDK + OpenRouter, RelayQ Architecture, and Archon Sync working together
 """
 
-import asyncio
 import argparse
+import asyncio
 import json
 import sys
 import time
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, Optional
+from pathlib import Path
+from typing import Any
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
 from ai_provider import ask_ai, get_ai_manager
-from relayq_architecture import get_relayq_manager, DeploymentTask
 from archon_sync import get_sync_manager
+from relayq_architecture import DeploymentTask, get_relayq_manager
 
 
 class OOSFullStackDemo:
@@ -52,7 +52,7 @@ class OOSFullStackDemo:
         if self.ai_manager:
             await self.ai_manager.close_all()
 
-    async def demonstrate_ai_assistance(self, problem: str) -> Dict[str, Any]:
+    async def demonstrate_ai_assistance(self, problem: str) -> dict[str, Any]:
         """Demonstrate AI-powered problem solving"""
         print("🤖 AI-Powered Analysis")
         print("=" * 50)
@@ -100,7 +100,7 @@ Keep it concise and actionable.""",
                 "duration": time.time() - start_time
             }
 
-    async def demonstrate_distributed_execution(self, command: str, distributed: bool = False) -> Dict[str, Any]:
+    async def demonstrate_distributed_execution(self, command: str, distributed: bool = False) -> dict[str, Any]:
         """Demonstrate distributed task execution"""
         print("🏗️ Distributed Task Execution")
         print("=" * 50)
@@ -160,7 +160,7 @@ Keep it concise and actionable.""",
                 "duration": time.time() - start_time
             }
 
-    async def demonstrate_archon_sync(self, tasks: list, system_state: Dict[str, Any]) -> Dict[str, Any]:
+    async def demonstrate_archon_sync(self, tasks: list, system_state: dict[str, Any]) -> dict[str, Any]:
         """Demonstrate Archon synchronization"""
         print("🔄 Archon Synchronization")
         print("=" * 50)
@@ -295,7 +295,7 @@ Keep it concise and actionable.""",
 
         return results
 
-    def print_summary(self, results: Dict[str, Any]):
+    def print_summary(self, results: dict[str, Any]):
         """Print demonstration summary"""
         print("📊 Demonstration Summary")
         print("=" * 50)

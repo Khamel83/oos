@@ -4,14 +4,11 @@ OOS Smart Update System
 One command to update any project to the latest OOS with strategic intelligence
 """
 
-import os
-import sys
-import json
-import shutil
-import subprocess
-from pathlib import Path
-from typing import Dict, Any, List, Optional
 import hashlib
+import shutil
+import sys
+from pathlib import Path
+
 
 class OOSUpdater:
     """Smart OOS updater that only updates what's needed"""
@@ -160,7 +157,7 @@ class OOSUpdater:
 
         if dst_file.exists():
             # Check if it already has consultant integration
-            with open(dst_file, 'r') as f:
+            with open(dst_file) as f:
                 content = f.read()
 
             if "ConsultantCommand" in content and "register_consultant_command" in content:
@@ -224,7 +221,7 @@ class OOSUpdater:
 
         existing_deps = []
         if requirements_file.exists():
-            with open(requirements_file, 'r') as f:
+            with open(requirements_file) as f:
                 existing_deps = f.read().splitlines()
 
         # Check which dependencies are missing
@@ -254,17 +251,17 @@ class OOSUpdater:
             # Test import of strategic consultant
             sys.path.insert(0, str(self.project_path / "src"))
 
-            from strategic_consultant import StrategicConsultant
             from commands.consultant_command import ConsultantCommand
+            from strategic_consultant import StrategicConsultant
 
             print("  ✅ Strategic consultant imports successfully")
             print("  ✅ Consultant command imports successfully")
 
             # Test basic initialization
-            consultant = StrategicConsultant()
+            StrategicConsultant()
             print("  ✅ Strategic consultant initializes successfully")
 
-            cmd = ConsultantCommand()
+            ConsultantCommand()
             print("  ✅ Consultant command initializes successfully")
 
             print("  🎉 Installation test passed!")

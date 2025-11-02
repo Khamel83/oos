@@ -3,10 +3,6 @@
 Demo script showing the new OOS interface in action
 This simulates what users would see without requiring actual interaction
 """
-import os
-import subprocess
-import tempfile
-from pathlib import Path
 
 def demo_empty_directory():
     """Demo what happens in empty directory"""

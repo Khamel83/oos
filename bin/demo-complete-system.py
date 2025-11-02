@@ -7,18 +7,18 @@ safety guardrails, and visual feedback
 
 import asyncio
 import sys
-import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from oos_daemon import OOSDaemon, Idea
-from background_processor import BackgroundProcessor, Idea as BackgroundIdea
+from background_processor import BackgroundProcessor
+from background_processor import Idea as BackgroundIdea
+from oos_daemon import Idea, OOSDaemon
+from renderers import Colors
 from safety_guardrails import SafetyGuardrails
 from visual_feedback import LiveDashboard, NotificationManager
-from renderers import Colors
 
 
 async def demo_complete_system():
@@ -105,7 +105,7 @@ async def demo_complete_system():
         print(f"  Expected: {expected} | Actual: {result_color}{actual}{Colors.END}")
 
         if safety_check.recommendations:
-            print(f"  Recommendations:")
+            print("  Recommendations:")
             for rec in safety_check.recommendations[:2]:
                 print(f"    • {rec}")
 
@@ -125,7 +125,7 @@ async def demo_complete_system():
     print(f"\n{Colors.YELLOW}🌱 Testing Background Processing...{Colors.END}")
 
     # Start background processor
-    processor_task = asyncio.create_task(background_processor.start())
+    asyncio.create_task(background_processor.start())
 
     # Add safe ideas for processing
     safe_ideas = [idea for idea in test_ideas if idea['expected_safety'] == 'safe']
@@ -258,7 +258,7 @@ steal_data()
     print(f"  Safe: {danger_scan.is_safe} | Vulnerabilities: {len(danger_scan.vulnerabilities)}")
 
     if danger_scan.vulnerabilities:
-        print(f"  Issues found:")
+        print("  Issues found:")
         for vuln in danger_scan.vulnerabilities[:2]:
             print(f"    • Line {vuln['line']}: {vuln['type']} ({vuln['severity']})")
 
@@ -286,9 +286,9 @@ steal_data()
     print(f"\n{Colors.CYAN}📋 System Summary:{Colors.END}")
     print(f"  • Safety tests: {passed_count}/{total_count} passed")
     print(f"  • Ideas processed: {len(idea_ids)}")
-    print(f"  • Code scans: 2 completed")
-    print(f"  • Daemon integration: ✅ Working")
-    print(f"  • Visual feedback: ✅ Working")
+    print("  • Code scans: 2 completed")
+    print("  • Daemon integration: ✅ Working")
+    print("  • Visual feedback: ✅ Working")
 
     print(f"\n{Colors.WHITE}🚀 Ready for production use!{Colors.END}")
     print(f"   Run: {Colors.YELLOW}oos setup{Colors.END} to get started")

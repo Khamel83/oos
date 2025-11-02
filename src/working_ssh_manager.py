@@ -4,11 +4,10 @@ Working SSH Manager for RelayQ Architecture
 Uses the proven SSH connection setup
 """
 
-import os
-import subprocess
 import asyncio
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any
+
 
 def load_ssh_config():
     """Load SSH configuration from .ssh_config"""
@@ -25,7 +24,7 @@ def load_ssh_config():
 
     return config
 
-async def test_ssh_connection(host: str, user: str, key_path: str = None) -> Dict[str, Any]:
+async def test_ssh_connection(host: str, user: str, key_path: str = None) -> dict[str, Any]:
     """Test SSH connection with working parameters"""
     try:
         # Build SSH command with working options
@@ -59,7 +58,7 @@ async def test_ssh_connection(host: str, user: str, key_path: str = None) -> Dic
                 "stderr": stderr.decode().strip(),
                 "returncode": process.returncode
             }
-        except asyncio.TimeoutError:
+        except TimeoutError:
             # Kill the process if it times out
             process.kill()
             return {
@@ -115,11 +114,11 @@ async def test_relayq_nodes():
 
         results["rpi4"] = rpi4_result
     else:
-        print(f"\n2. RPi4: ⚠️  Not configured")
+        print("\n2. RPi4: ⚠️  Not configured")
 
     return results
 
-async def execute_on_node(host: str, user: str, command: str, key_path: str = None) -> Dict[str, Any]:
+async def execute_on_node(host: str, user: str, command: str, key_path: str = None) -> dict[str, Any]:
     """Execute command on remote node"""
     try:
         ssh_cmd = ["ssh"]
@@ -166,7 +165,7 @@ if __name__ == "__main__":
 
         # Load and show configuration
         config = load_ssh_config()
-        print(f"Configuration loaded from .ssh_config")
+        print("Configuration loaded from .ssh_config")
         print(f"MacMini: {config.get('MACMINI_IP', 'Not configured')}")
         print(f"RPi4: {config.get('RPI4_IP', 'Not configured')}")
 
@@ -174,16 +173,16 @@ if __name__ == "__main__":
         results = await test_relayq_nodes()
 
         # Summary
-        print(f"\n📊 Connection Summary:")
+        print("\n📊 Connection Summary:")
         working_nodes = sum(1 for r in results.values() if r.get("success"))
         total_nodes = len(results)
         print(f"   Working: {working_nodes}/{total_nodes} nodes")
 
         if working_nodes > 0:
-            print(f"\n✅ SSH setup working! Ready for distributed computing")
-            print(f"   Run full demo: ./bin/oos-full-stack --test")
+            print("\n✅ SSH setup working! Ready for distributed computing")
+            print("   Run full demo: ./bin/oos-full-stack --test")
         else:
-            print(f"\n⚠️  SSH needs configuration")
-            print(f"   Check .ssh_config and ensure keys are properly set up")
+            print("\n⚠️  SSH needs configuration")
+            print("   Check .ssh_config and ensure keys are properly set up")
 
     asyncio.run(main())

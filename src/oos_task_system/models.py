@@ -5,12 +5,12 @@ Provides the core Task dataclass with validation, status management,
 and dependency tracking capabilities.
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime
-from typing import List, Optional, Dict, Any
-from enum import Enum
 import json
 import uuid
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any
 
 
 class TaskStatus(Enum):
@@ -46,17 +46,17 @@ class Task:
     description: str = ""
     status: TaskStatus = TaskStatus.TODO
     priority: TaskPriority = TaskPriority.MEDIUM
-    tags: List[str] = field(default_factory=list)
-    depends_on: List[str] = field(default_factory=list)
-    blocks: List[str] = field(default_factory=list)
-    assignee: Optional[str] = None
+    tags: list[str] = field(default_factory=list)
+    depends_on: list[str] = field(default_factory=list)
+    blocks: list[str] = field(default_factory=list)
+    assignee: str | None = None
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
-    completed_at: Optional[datetime] = None
-    due_date: Optional[datetime] = None
-    estimated_hours: Optional[float] = None
-    actual_hours: Optional[float] = None
-    context: Dict[str, Any] = field(default_factory=dict)
+    completed_at: datetime | None = None
+    due_date: datetime | None = None
+    estimated_hours: float | None = None
+    actual_hours: float | None = None
+    context: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate and normalize task data after initialization."""
@@ -139,7 +139,7 @@ class Task:
             self.tags.remove(tag)
             self.updated_at = datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert task to dictionary for serialization."""
         return {
             'id': self.id,
@@ -161,7 +161,7 @@ class Task:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Task':
+    def from_dict(cls, data: dict[str, Any]) -> 'Task':
         """Create task from dictionary."""
         # Handle datetime fields
         for field_name in ['created_at', 'updated_at', 'completed_at', 'due_date']:

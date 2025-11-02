@@ -5,16 +5,16 @@ Provides robust task import with conflict resolution,
 validation, and incremental updates.
 """
 
-import json
 import gzip
-from pathlib import Path
-from datetime import datetime
-from typing import List, Dict, Any, Optional, Tuple, Set
+import json
 from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
-from .models import Task, TaskStatus, TaskPriority
 from .database import TaskDatabase
-from .validation import TaskValidator, ValidationResult
+from .models import Task, TaskPriority, TaskStatus
+from .validation import TaskValidator
 
 
 class ImportError(Exception):
@@ -39,10 +39,10 @@ class ImportResult:
     tasks_updated: int
     tasks_skipped: int
     tasks_failed: int
-    errors: List[str]
-    warnings: List[str]
+    errors: list[str]
+    warnings: list[str]
     processing_time: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class TaskImporter:
@@ -52,7 +52,7 @@ class TaskImporter:
     Supports conflict resolution, validation, and various import modes.
     """
 
-    def __init__(self, database: TaskDatabase, validator: Optional[TaskValidator] = None):
+    def __init__(self, database: TaskDatabase, validator: TaskValidator | None = None):
         """Initialize importer with database and optional validator."""
         self.database = database
         self.validator = validator or TaskValidator()
@@ -71,7 +71,7 @@ class TaskImporter:
                     dry_run: bool = False,
                     validate: bool = True,
                     strict_validation: bool = False,
-                    import_metadata: Optional[Dict[str, Any]] = None) -> ImportResult:
+                    import_metadata: dict[str, Any] | None = None) -> ImportResult:
         """
         Import tasks from JSONL file.
 
@@ -149,7 +149,7 @@ class TaskImporter:
                 metadata={'incremental_since': since.isoformat()}
             )
 
-    def import_from_multiple_files(self, input_paths: List[str],
+    def import_from_multiple_files(self, input_paths: list[str],
                                   conflict_resolution: str = ConflictResolution.SKIP,
                                   merge_strategy: str = 'first',
                                   **kwargs) -> ImportResult:
@@ -208,7 +208,7 @@ class TaskImporter:
                                   kwargs.get('strict_validation', False),
                                   kwargs.get('import_metadata'), start_time)
 
-    def _read_jsonl_file(self, input_path: str) -> List[Task]:
+    def _read_jsonl_file(self, input_path: str) -> list[Task]:
         """Read tasks from JSONL file."""
         tasks = []
         file_path = Path(input_path)
@@ -254,7 +254,7 @@ class TaskImporter:
 
         return tasks
 
-    def _parse_task_data(self, data: Dict[str, Any]) -> Task:
+    def _parse_task_data(self, data: dict[str, Any]) -> Task:
         """Parse task data from JSON."""
         try:
             # Handle datetime fields
@@ -265,12 +265,10 @@ class TaskImporter:
                         data[field] = datetime.fromisoformat(data[field].replace('Z', '+00:00'))
 
             # Handle enum fields
-            if 'status' in data:
-                if isinstance(data['status'], str):
-                    data['status'] = TaskStatus(data['status'])
-            if 'priority' in data:
-                if isinstance(data['priority'], str):
-                    data['priority'] = TaskPriority(data['priority'])
+            if 'status' in data and isinstance(data['status'], str):
+                data['status'] = TaskStatus(data['status'])
+            if 'priority' in data and isinstance(data['priority'], str):
+                data['priority'] = TaskPriority(data['priority'])
 
             # Handle list fields
             for field in ['tags', 'depends_on', 'blocks']:
@@ -286,9 +284,9 @@ class TaskImporter:
         except Exception as e:
             raise ImportError(f"Task data parsing failed: {str(e)}")
 
-    def _process_import(self, tasks: List[Task], conflict_resolution: str,
+    def _process_import(self, tasks: list[Task], conflict_resolution: str,
                        dry_run: bool, validate: bool, strict_validation: bool,
-                       import_metadata: Optional[Dict[str, Any]], start_time: datetime) -> ImportResult:
+                       import_metadata: dict[str, Any] | None, start_time: datetime) -> ImportResult:
         """Process task import with all options."""
         self.import_stats = {
             'processed': 0,
@@ -439,9 +437,7 @@ class TaskImporter:
 
         # Preserve some existing fields if they're not None in incoming
         for field in ['assignee', 'due_date', 'estimated_hours', 'actual_hours']:
-            if incoming_data[field] is not None:
-                merged_data[field] = incoming_data[field]
-            elif merged_data[field] is None:
+            if incoming_data[field] is not None or merged_data[field] is None:
                 merged_data[field] = incoming_data[field]
 
         # Merge context
@@ -455,7 +451,7 @@ class TaskImporter:
 
         return Task.from_dict(merged_data)
 
-    def validate_import_file(self, input_path: str) -> Tuple[bool, List[str]]:
+    def validate_import_file(self, input_path: str) -> tuple[bool, list[str]]:
         """
         Validate import file without importing.
 
@@ -478,7 +474,7 @@ class TaskImporter:
         except Exception as e:
             return False, [f"File validation failed: {str(e)}"]
 
-    def get_import_preview(self, input_path: str, max_tasks: int = 10) -> Dict[str, Any]:
+    def get_import_preview(self, input_path: str, max_tasks: int = 10) -> dict[str, Any]:
         """
         Get preview of import data.
 
@@ -518,7 +514,7 @@ class TaskImporter:
         except Exception as e:
             return {'error': str(e)}
 
-    def _get_status_distribution(self, tasks: List[Task]) -> Dict[str, int]:
+    def _get_status_distribution(self, tasks: list[Task]) -> dict[str, int]:
         """Get distribution of task statuses."""
         distribution = {}
         for task in tasks:
@@ -526,7 +522,7 @@ class TaskImporter:
             distribution[status] = distribution.get(status, 0) + 1
         return distribution
 
-    def _get_priority_distribution(self, tasks: List[Task]) -> Dict[str, int]:
+    def _get_priority_distribution(self, tasks: list[Task]) -> dict[str, int]:
         """Get distribution of task priorities."""
         distribution = {}
         for task in tasks:
@@ -534,7 +530,7 @@ class TaskImporter:
             distribution[priority] = distribution.get(priority, 0) + 1
         return distribution
 
-    def _get_assignee_distribution(self, tasks: List[Task]) -> Dict[str, int]:
+    def _get_assignee_distribution(self, tasks: list[Task]) -> dict[str, int]:
         """Get distribution of task assignees."""
         distribution = {}
         for task in tasks:

@@ -3,10 +3,11 @@
 Comprehensive OpenRouter model testing with fallback keys
 """
 
-import os
-import requests
 import json
-from typing import Dict, List, Tuple
+import os
+
+import requests
+
 
 # Load credentials
 def load_credentials():
@@ -18,7 +19,7 @@ def load_credentials():
     ]
     return [k for k in keys if k and k.strip()]
 
-def test_api_key(api_key: str) -> Tuple[bool, str]:
+def test_api_key(api_key: str) -> tuple[bool, str]:
     """Test if an API key works"""
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -67,7 +68,7 @@ def get_working_api_key() -> str:
 
     return None
 
-def test_model_access(api_key: str, model_id: str, model_name: str) -> Dict:
+def test_model_access(api_key: str, model_id: str, model_name: str) -> dict:
     """Test access to a specific model"""
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -199,12 +200,12 @@ def main():
         working_models = [model_id for model_id, result in results.items() if result["status"] == "SUCCESS"]
 
         if working_models:
-            print(f"\n🎯 RECOMMENDED MODEL STRATEGY:")
+            print("\n🎯 RECOMMENDED MODEL STRATEGY:")
             print(f"• DEFAULT: {working_models[0]} (first working model)")
             print(f"• ALTERNATIVES: {len(working_models)-1} other working models")
-            print(f"• COST ESTIMATE: ~$0.02-$0.40 per 1M tokens depending on selection")
+            print("• COST ESTIMATE: ~$0.02-$0.40 per 1M tokens depending on selection")
         else:
-            print(f"\n❌ No working models found. Check API key or model availability.")
+            print("\n❌ No working models found. Check API key or model availability.")
 
 if __name__ == "__main__":
     main()

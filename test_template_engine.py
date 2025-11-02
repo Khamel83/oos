@@ -22,8 +22,8 @@ class Colors:
     BOLD = '\033[1m'
     END = '\033[0m'
 
-from template_engine import get_template_engine, TemplateEngine, GoalAnalyzer
 from google_sheets_integration import get_sheets_integration
+from template_engine import get_template_engine
 
 
 async def test_template_engine():
@@ -57,7 +57,7 @@ async def test_template_engine():
         try:
             # Analyze goal
             goal_analysis = await template_engine.goal_analyzer.analyze_goal(description)
-            print(f"✅ Goal Analysis:")
+            print("✅ Goal Analysis:")
             print(f"   Type: {goal_analysis.goal_type}")
             print(f"   Confidence: {goal_analysis.confidence:.0%}")
             print(f"   Features: {', '.join(goal_analysis.features)}")
@@ -66,7 +66,7 @@ async def test_template_engine():
             # Get template
             template = template_engine.templates.get(goal_analysis.goal_type)
             if template:
-                print(f"✅ Template Found:")
+                print("✅ Template Found:")
                 print(f"   Name: {template.name}")
                 print(f"   Steps: {len(template.steps)}")
                 print(f"   Time: {template.estimated_time}")

@@ -5,7 +5,6 @@ Provides DependencyGraph class for analyzing task relationships,
 detecting cycles, and computing work order.
 """
 
-from typing import List, Dict, Set, Optional, Tuple
 from collections import defaultdict, deque
 
 from .models import Task, TaskStatus
@@ -14,7 +13,7 @@ from .models import Task, TaskStatus
 class CyclicDependencyError(Exception):
     """Raised when a circular dependency is detected."""
 
-    def __init__(self, cycle: List[str]):
+    def __init__(self, cycle: list[str]):
         self.cycle = cycle
         super().__init__(f"Circular dependency detected: {' -> '.join(cycle + [cycle[0]])}")
 
@@ -27,20 +26,20 @@ class DependencyGraph:
     impact analysis for task management.
     """
 
-    def __init__(self, tasks: List[Task]):
+    def __init__(self, tasks: list[Task]):
         """Initialize dependency graph from list of tasks."""
         self.tasks = {task.id: task for task in tasks}
         self.dependencies = self._build_dependency_map()
         self.reverse_dependencies = self._build_reverse_dependency_map()
 
-    def _build_dependency_map(self) -> Dict[str, Set[str]]:
+    def _build_dependency_map(self) -> dict[str, set[str]]:
         """Build mapping of task_id -> set of dependencies."""
         deps = defaultdict(set)
         for task in self.tasks.values():
             deps[task.id] = set(task.depends_on)
         return dict(deps)
 
-    def _build_reverse_dependency_map(self) -> Dict[str, Set[str]]:
+    def _build_reverse_dependency_map(self) -> dict[str, set[str]]:
         """Build mapping of task_id -> set of tasks that depend on it."""
         reverse_deps = defaultdict(set)
         for task_id, deps in self.dependencies.items():
@@ -48,7 +47,7 @@ class DependencyGraph:
                 reverse_deps[dep_id].add(task_id)
         return dict(reverse_deps)
 
-    def detect_cycles(self) -> List[List[str]]:
+    def detect_cycles(self) -> list[list[str]]:
         """
         Detect all circular dependencies in the graph.
 
@@ -59,7 +58,7 @@ class DependencyGraph:
         visited = set()
         rec_stack = set()
 
-        def dfs(task_id: str, path: List[str]) -> None:
+        def dfs(task_id: str, path: list[str]) -> None:
             if task_id in rec_stack:
                 # Found a cycle
                 cycle_start = path.index(task_id)
@@ -87,7 +86,7 @@ class DependencyGraph:
 
         return cycles
 
-    def topological_sort(self) -> List[str]:
+    def topological_sort(self) -> list[str]:
         """
         Return tasks in topological order (dependencies first).
 
@@ -121,7 +120,7 @@ class DependencyGraph:
 
         return result
 
-    def get_ready_tasks(self) -> List[str]:
+    def get_ready_tasks(self) -> list[str]:
         """
         Get tasks that are ready to work on (no pending dependencies).
 
@@ -154,7 +153,7 @@ class DependencyGraph:
 
         return ready_tasks
 
-    def get_blocked_tasks(self) -> List[str]:
+    def get_blocked_tasks(self) -> list[str]:
         """
         Get tasks that are blocked by pending dependencies.
 
@@ -181,7 +180,7 @@ class DependencyGraph:
 
         return blocked_tasks
 
-    def get_blocking_tasks(self, task_id: str) -> List[str]:
+    def get_blocking_tasks(self, task_id: str) -> list[str]:
         """
         Get tasks that are blocking the specified task.
 
@@ -201,7 +200,7 @@ class DependencyGraph:
 
         return blocking
 
-    def get_impact_analysis(self, task_id: str) -> Dict[str, List[str]]:
+    def get_impact_analysis(self, task_id: str) -> dict[str, list[str]]:
         """
         Analyze the impact of changing a task's status.
 
@@ -234,7 +233,7 @@ class DependencyGraph:
             'transitively_affected': transitively_affected
         }
 
-    def get_critical_path(self) -> List[str]:
+    def get_critical_path(self) -> list[str]:
         """
         Find the critical path (longest chain of dependencies).
 
@@ -247,7 +246,7 @@ class DependencyGraph:
             return []
 
         # Calculate longest path to each task
-        distances = {task_id: 0 for task_id in self.tasks}
+        distances = dict.fromkeys(self.tasks, 0)
         predecessors = {}
 
         for task_id in sorted_tasks:
@@ -272,7 +271,7 @@ class DependencyGraph:
         path.reverse()
         return path
 
-    def validate_dependency(self, task_id: str, dependency_id: str) -> Tuple[bool, str]:
+    def validate_dependency(self, task_id: str, dependency_id: str) -> tuple[bool, str]:
         """
         Validate if adding a dependency would create issues.
 
@@ -315,7 +314,7 @@ class DependencyGraph:
 
         return True, ""
 
-    def get_dependency_chains(self, task_id: str, max_depth: int = 10) -> List[List[str]]:
+    def get_dependency_chains(self, task_id: str, max_depth: int = 10) -> list[list[str]]:
         """
         Get all dependency chains for a task.
 
@@ -331,7 +330,7 @@ class DependencyGraph:
 
         chains = []
 
-        def dfs(current_id: str, chain: List[str], depth: int) -> None:
+        def dfs(current_id: str, chain: list[str], depth: int) -> None:
             if depth > max_depth:
                 return
 
@@ -360,7 +359,7 @@ class DependencyGraph:
             return priority_values.get(priority.value, 2)
         return priority_values.get(priority, 2)
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         """Get dependency graph statistics."""
         ready_count = len(self.get_ready_tasks())
         blocked_count = len(self.get_blocked_tasks())

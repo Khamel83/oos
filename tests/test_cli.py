@@ -5,17 +5,18 @@ Comprehensive test suite for all CLI commands including
 task CRUD operations, dependency management, and export/import.
 """
 
-import pytest
 import json
-import tempfile
 import shutil
+import tempfile
+from datetime import datetime
 from pathlib import Path
+
+import pytest
 from click.testing import CliRunner
-from datetime import datetime, timedelta
 
 from src.oos_task_system.cli import cli
-from src.oos_task_system.models import Task, TaskStatus, TaskPriority
 from src.oos_task_system.database import TaskDatabase
+from src.oos_task_system.models import Task, TaskPriority, TaskStatus
 
 
 class TestTaskCLI:
@@ -304,7 +305,7 @@ class TestTaskCLI:
         task1 = Task(title="Task 1")
         task2 = Task(title="Task 2", depends_on=[task1.id])
         created_task1 = db.create_task(task1)
-        created_task2 = db.create_task(task2)
+        db.create_task(task2)
 
         # Try to delete task1
         result = runner.invoke(cli, [

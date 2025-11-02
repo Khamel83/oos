@@ -3,18 +3,18 @@ Goal-Oriented Project Template Engine
 Guide users from idea to working AI project through natural language
 """
 
-import json
 import asyncio
-import aiohttp
-from pathlib import Path
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
-from datetime import datetime
+import json
 import re
-import os
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
-from renderers import Colors
+import aiohttp
+
 from cost_manager import get_cost_manager
+from renderers import Colors
 
 
 @dataclass
@@ -22,13 +22,13 @@ class GoalAnalysis:
     """Analysis of user's goal description"""
     goal_type: str
     confidence: float
-    features: List[str]
-    target_users: List[str]
+    features: list[str]
+    target_users: list[str]
     complexity: str  # simple, medium, complex
     estimated_time: str
-    user_needs: List[str]
-    data_sources: List[str] = None
-    integrations: List[str] = None
+    user_needs: list[str]
+    data_sources: list[str] = None
+    integrations: list[str] = None
 
 
 @dataclass
@@ -37,9 +37,9 @@ class ProjectStep:
     name: str
     description: str
     order: int
-    actions: List[str]
+    actions: list[str]
     status: str = "pending"
-    user_inputs: Dict[str, Any] = None
+    user_inputs: dict[str, Any] = None
 
 
 @dataclass
@@ -48,10 +48,10 @@ class ProjectTemplate:
     name: str
     goal_type: str
     description: str
-    variations: List[str]
-    steps: List[ProjectStep]
-    components: List[str]
-    dependencies: List[str]
+    variations: list[str]
+    steps: list[ProjectStep]
+    components: list[str]
+    dependencies: list[str]
     estimated_time: str
     difficulty: str
 
@@ -165,7 +165,7 @@ Return ONLY the JSON, no other text."""
                                 data_sources=analysis_data.get("data_sources", []),
                                 integrations=analysis_data.get("integrations", [])
                             )
-                        except json.JSONDecodeError as e:
+                        except json.JSONDecodeError:
                             print(f"{Colors.YELLOW}⚠️  AI response parsing failed, using fallback{Colors.END}")
                             return self._extract_patterns(description)
                     else:
@@ -233,7 +233,7 @@ Return ONLY the JSON, no other text."""
             integrations=self._extract_integrations(desc_lower)
         )
 
-    def _extract_features_for_goal(self, goal_type: str, description: str) -> List[str]:
+    def _extract_features_for_goal(self, goal_type: str, description: str) -> list[str]:
         """Extract features specific to goal type"""
         features = []
 
@@ -263,7 +263,7 @@ Return ONLY the JSON, no other text."""
 
         return features
 
-    def _extract_target_users(self, description: str) -> List[str]:
+    def _extract_target_users(self, description: str) -> list[str]:
         """Extract target users from description"""
         users = []
         if any(word in description for word in ['customer', 'client', 'user']):
@@ -274,7 +274,7 @@ Return ONLY the JSON, no other text."""
             users.append('team')
         return users or ['general']
 
-    def _extract_user_needs(self, description: str) -> List[str]:
+    def _extract_user_needs(self, description: str) -> list[str]:
         """Extract user needs from description"""
         needs = []
         if 'help' in description:
@@ -287,7 +287,7 @@ Return ONLY the JSON, no other text."""
             needs.append('organization')
         return needs or ['general_assistance']
 
-    def _extract_data_sources(self, description: str) -> List[str]:
+    def _extract_data_sources(self, description: str) -> list[str]:
         """Extract data sources from description"""
         sources = []
         if any(word in description for word in ['website', 'web', 'url']):
@@ -298,7 +298,7 @@ Return ONLY the JSON, no other text."""
             sources.append('apis')
         return sources
 
-    def _extract_integrations(self, description: str) -> List[str]:
+    def _extract_integrations(self, description: str) -> list[str]:
         """Extract required integrations from description"""
         integrations = []
         if 'email' in description:
@@ -319,7 +319,7 @@ class TemplateEngine:
         self.goal_analyzer = GoalAnalyzer(config)
         self.templates = self._load_templates()
 
-    def _load_templates(self) -> Dict[str, ProjectTemplate]:
+    def _load_templates(self) -> dict[str, ProjectTemplate]:
         """Load all available project templates"""
         return {
             'chatbot': self._create_chatbot_template(),
@@ -729,7 +729,7 @@ class TemplateEngine:
             difficulty="advanced"
         )
 
-    async def create_project_from_description(self, description: str, context: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
+    async def create_project_from_description(self, description: str, context: dict[str, Any] | None = None) -> dict[str, Any] | None:
         """Create a project from natural language description"""
         print(f"{Colors.CYAN}🚀 Creating project from: {description[:50]}...{Colors.END}")
 
@@ -742,7 +742,7 @@ class TemplateEngine:
         else:
             return await self._fallback_generate_project(description, goal_analysis, context)
 
-    async def _ai_generate_project(self, description: str, goal_analysis: GoalAnalysis, context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _ai_generate_project(self, description: str, goal_analysis: GoalAnalysis, context: dict[str, Any] | None) -> dict[str, Any]:
         """Use real AI to generate working project code"""
         print(f"{Colors.BLUE}🤖 Generating real code with AI...{Colors.END}")
 
@@ -848,7 +848,7 @@ Make sure ALL code is complete and functional. No placeholders or TODOs."""
             print(f"{Colors.YELLOW}⚠️  AI generation failed: {str(e)}{Colors.END}")
             return await self._fallback_generate_project(description, goal_analysis, context)
 
-    async def _create_project_files(self, project_data: Dict[str, Any]) -> Path:
+    async def _create_project_files(self, project_data: dict[str, Any]) -> Path:
         """Create actual project files on disk"""
         project_name = project_data.get('project_name', 'generated-project')
         project_name = re.sub(r'[^a-zA-Z0-9-_]', '-', project_name.lower())
@@ -869,7 +869,7 @@ Make sure ALL code is complete and functional. No placeholders or TODOs."""
         print(f"{Colors.GREEN}📁 Created project in: {project_dir}{Colors.END}")
         return project_dir
 
-    async def _fallback_generate_project(self, description: str, goal_analysis: GoalAnalysis, context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _fallback_generate_project(self, description: str, goal_analysis: GoalAnalysis, context: dict[str, Any] | None) -> dict[str, Any]:
         """Fallback project generation when AI is not available"""
         print(f"{Colors.YELLOW}🔧 Using template-based generation{Colors.END}")
 
@@ -900,7 +900,7 @@ Make sure ALL code is complete and functional. No placeholders or TODOs."""
             'goal_analysis': asdict(goal_analysis)
         }
 
-    def _generate_basic_files(self, goal_analysis: GoalAnalysis, description: str) -> Dict[str, str]:
+    def _generate_basic_files(self, goal_analysis: GoalAnalysis, description: str) -> dict[str, str]:
         """Generate basic project files for fallback"""
         files = {}
 
@@ -1022,7 +1022,7 @@ Generated by OOS (Open Operating System)
 
         return files
 
-    async def _guide_project_creation(self, template: ProjectTemplate, goal_analysis: GoalAnalysis) -> Dict[str, Any]:
+    async def _guide_project_creation(self, template: ProjectTemplate, goal_analysis: GoalAnalysis) -> dict[str, Any]:
         """Guide user through step-by-step project creation"""
         project_data = {
             'template': template.name,
@@ -1049,7 +1049,7 @@ Generated by OOS (Open Operating System)
 
             # Simulate step execution
             print(f"{Colors.YELLOW}🔧 {step.name}...{Colors.END}")
-            for i, action in enumerate(step.actions, 1):
+            for _i, action in enumerate(step.actions, 1):
                 await asyncio.sleep(0.5)  # Simulate work
                 print(f"{Colors.GREEN}  ✓ {action}{Colors.END}")
 
@@ -1074,7 +1074,7 @@ Generated by OOS (Open Operating System)
             'next_steps': self._get_next_steps(template)
         }
 
-    async def _get_step_input(self, step: ProjectStep, goal_analysis: GoalAnalysis) -> Dict[str, Any]:
+    async def _get_step_input(self, step: ProjectStep, goal_analysis: GoalAnalysis) -> dict[str, Any]:
         """Get user input for a specific step"""
         inputs = {}
 
@@ -1105,7 +1105,7 @@ Generated by OOS (Open Operating System)
 
         return inputs
 
-    async def _create_project_files(self, template: ProjectTemplate, goal_analysis: GoalAnalysis, project_data: Dict[str, Any]) -> Path:
+    async def _create_project_files(self, template: ProjectTemplate, goal_analysis: GoalAnalysis, project_data: dict[str, Any]) -> Path:
         """Create project files and directory"""
         # Create project directory
         project_name = f"{template.goal_type}_{hash(str(goal_analysis.features)) % 10000}"
@@ -1135,7 +1135,7 @@ Generated by OOS (Open Operating System)
 
         return project_dir
 
-    def _generate_main_code(self, template: ProjectTemplate, goal_analysis: GoalAnalysis, project_data: Dict[str, Any]) -> str:
+    def _generate_main_code(self, template: ProjectTemplate, goal_analysis: GoalAnalysis, project_data: dict[str, Any]) -> str:
         """Generate main project code based on template"""
         if goal_analysis.goal_type == 'chatbot':
             return self._generate_chatbot_code(goal_analysis, project_data)
@@ -1148,7 +1148,7 @@ Generated by OOS (Open Operating System)
         else:
             return self._generate_generic_code(template, goal_analysis)
 
-    def _generate_chatbot_code(self, goal_analysis: GoalAnalysis, project_data: Dict[str, Any]) -> str:
+    def _generate_chatbot_code(self, goal_analysis: GoalAnalysis, project_data: dict[str, Any]) -> str:
         """Generate chatbot code"""
         user_inputs = project_data['user_inputs']
         purpose = user_inputs.get('Discover Your Chatbot', {}).get('purpose', 'help users')
@@ -1206,7 +1206,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 '''
 
-    def _generate_automation_code(self, goal_analysis: GoalAnalysis, project_data: Dict[str, Any]) -> str:
+    def _generate_automation_code(self, goal_analysis: GoalAnalysis, project_data: dict[str, Any]) -> str:
         """Generate automation code"""
         user_inputs = project_data['user_inputs']
         task = user_inputs.get('Define Automation', {}).get('task', 'automate tasks')
@@ -1265,7 +1265,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 '''
 
-    def _generate_data_analysis_code(self, goal_analysis: GoalAnalysis, project_data: Dict[str, Any]) -> str:
+    def _generate_data_analysis_code(self, goal_analysis: GoalAnalysis, project_data: dict[str, Any]) -> str:
         """Generate data analysis code"""
         return f'''# Data Analysis - Created with OOS
 # Features: {', '.join(goal_analysis.features)}
@@ -1355,7 +1355,7 @@ if __name__ == "__main__":
     main()
 '''
 
-    def _generate_personal_assistant_code(self, goal_analysis: GoalAnalysis, project_data: Dict[str, Any]) -> str:
+    def _generate_personal_assistant_code(self, goal_analysis: GoalAnalysis, project_data: dict[str, Any]) -> str:
         """Generate personal assistant code"""
         return f'''# Personal Assistant - Created with OOS
 # Features: {', '.join(goal_analysis.features)}
@@ -1501,10 +1501,10 @@ if __name__ == "__main__":
     main()
 '''
 
-    def _get_next_steps(self, template: ProjectTemplate) -> List[str]:
+    def _get_next_steps(self, template: ProjectTemplate) -> list[str]:
         """Get next steps for the user"""
         steps = [
-            f"cd into your project directory",
+            "cd into your project directory",
             "Review the generated code",
             "Customize it for your specific needs",
             "Run: python main.py to test",
@@ -1526,7 +1526,7 @@ if __name__ == "__main__":
 
         return steps
 
-    async def _sync_step_progress(self, step_name: str, project_data: Dict[str, Any]):
+    async def _sync_step_progress(self, step_name: str, project_data: dict[str, Any]):
         """Sync progress to Google Sheets (placeholder)"""
         # In production, this would update the Google Sheet with progress
         pass

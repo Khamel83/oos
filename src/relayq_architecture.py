@@ -4,16 +4,15 @@ OOS RelayQ Architecture Integration
 Distributed computing architecture with MacMini, RPi4, and ocivm nodes
 """
 
-import os
-import json
 import asyncio
-import subprocess
+import json
+import logging
+import os
 import socket
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-import logging
+from typing import Any
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,22 +37,22 @@ class Node:
     node_type: NodeType
     host: str
     port: int
-    capabilities: List[str]
+    capabilities: list[str]
     status: NodeStatus = NodeStatus.OFFLINE
     load: float = 0.0
     last_ping: float = 0.0
-    ssh_config: Optional[Dict[str, Any]] = None
+    ssh_config: dict[str, Any] | None = None
 
 
 @dataclass
 class DeploymentTask:
     task_id: str
     command: str
-    target_nodes: List[str]
+    target_nodes: list[str]
     priority: int = 1
     timeout: int = 300
     distributed: bool = False
-    requirements: Optional[List[str]] = None
+    requirements: list[str] | None = None
 
 
 class RelayQManager:
@@ -61,7 +60,7 @@ class RelayQManager:
 
     def __init__(self, config_file: str = ".relayq_config.json"):
         self.config_file = Path(config_file)
-        self.nodes: Dict[str, Node] = {}
+        self.nodes: dict[str, Node] = {}
         self.current_node = None
         self.load_config()
 
@@ -159,22 +158,22 @@ class RelayQManager:
             node.status = NodeStatus.ERROR
             return False
 
-    async def health_check_all(self) -> Dict[str, bool]:
+    async def health_check_all(self) -> dict[str, bool]:
         """Check health of all nodes"""
         results = {}
         for node_name in self.nodes:
             results[node_name] = await self.ping_node(node_name)
         return results
 
-    def get_nodes_by_type(self, node_type: NodeType) -> List[Node]:
+    def get_nodes_by_type(self, node_type: NodeType) -> list[Node]:
         """Get all nodes of a specific type"""
         return [node for node in self.nodes.values() if node.node_type == node_type]
 
-    def get_available_nodes(self) -> List[Node]:
+    def get_available_nodes(self) -> list[Node]:
         """Get all online and available nodes"""
         return [node for node in self.nodes.values() if node.status == NodeStatus.ONLINE]
 
-    def select_best_node(self, task_requirements: List[str]) -> Optional[Node]:
+    def select_best_node(self, task_requirements: list[str]) -> Node | None:
         """Select the best node for a task based on requirements"""
         available_nodes = self.get_available_nodes()
 
@@ -194,11 +193,7 @@ class RelayQManager:
             score += (1.0 - node.load) * 5
 
             # Prefer certain node types for specific tasks
-            if "ai-training" in task_requirements and node.node_type == NodeType.MAC_MINI:
-                score += 20
-            elif "edge-processing" in task_requirements and node.node_type == NodeType.RPI4:
-                score += 20
-            elif "development" in task_requirements and node.node_type == NodeType.OCIVM:
+            if "ai-training" in task_requirements and node.node_type == NodeType.MAC_MINI or "edge-processing" in task_requirements and node.node_type == NodeType.RPI4 or "development" in task_requirements and node.node_type == NodeType.OCIVM:
                 score += 20
 
             if score > best_score:
@@ -207,7 +202,7 @@ class RelayQManager:
 
         return best_node
 
-    async def execute_on_node(self, node_name: str, command: str, timeout: int = 300) -> Dict[str, Any]:
+    async def execute_on_node(self, node_name: str, command: str, timeout: int = 300) -> dict[str, Any]:
         """Execute a command on a remote node via SSH"""
         node = self.nodes.get(node_name)
         if not node:
@@ -247,12 +242,12 @@ class RelayQManager:
                 "returncode": process.returncode
             }
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return {"success": False, "error": f"Command timed out after {timeout} seconds"}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def deploy_task(self, task: DeploymentTask) -> Dict[str, Any]:
+    async def deploy_task(self, task: DeploymentTask) -> dict[str, Any]:
         """Deploy a task to the best available node(s)"""
         results = {}
 
@@ -297,7 +292,7 @@ class RelayQManager:
             "task_id": task.task_id
         }
 
-    def get_topology_summary(self) -> Dict[str, Any]:
+    def get_topology_summary(self) -> dict[str, Any]:
         """Get a summary of the RelayQ topology"""
         summary = {
             "total_nodes": len(self.nodes),
