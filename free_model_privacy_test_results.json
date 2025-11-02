@@ -1,0 +1,72 @@
+{
+  "deepseek/deepseek-r1:free": {
+    "model_id": "deepseek/deepseek-r1:free",
+    "model_name": "DeepSeek R1 Free",
+    "tests": {
+      "access": {
+        "status": "FAILED",
+        "error": "HTTP 401: {\"error\":{\"message\":\"User not found.\",\"code\":401}}"
+      }
+    }
+  },
+  "deepseek/deepseek-r1-0528:free": {
+    "model_id": "deepseek/deepseek-r1-0528:free",
+    "model_name": "DeepSeek R1 0528 Free",
+    "tests": {
+      "access": {
+        "status": "FAILED",
+        "error": "HTTP 401: {\"error\":{\"message\":\"User not found.\",\"code\":401}}"
+      }
+    }
+  },
+  "tngtech/deepseek-r1t-chimera:free": {
+    "model_id": "tngtech/deepseek-r1t-chimera:free",
+    "model_name": "DeepSeek R1T Chimera Free",
+    "tests": {
+      "access": {
+        "status": "FAILED",
+        "error": "HTTP 401: {\"error\":{\"message\":\"User not found.\",\"code\":401}}"
+      }
+    }
+  },
+  "minimax/minimax-m2:free": {
+    "model_id": "minimax/minimax-m2:free",
+    "model_name": "MiniMax M2 Free",
+    "tests": {
+      "access": {
+        "status": "FAILED",
+        "error": "HTTP 401: {\"error\":{\"message\":\"User not found.\",\"code\":401}}"
+      }
+    }
+  },
+  "z-ai/glm-4.5-air:free": {
+    "model_id": "z-ai/glm-4.5-air:free",
+    "model_name": "GLM 4.5 Air Free",
+    "tests": {
+      "access": {
+        "status": "FAILED",
+        "error": "HTTP 401: {\"error\":{\"message\":\"User not found.\",\"code\":401}}"
+      }
+    }
+  },
+  "agentica-org/deepcoder-14b-preview:free": {
+    "model_id": "agentica-org/deepcoder-14b-preview:free",
+    "model_name": "Deepcoder 14B Free",
+    "tests": {
+      "access": {
+        "status": "FAILED",
+        "error": "HTTP 401: {\"error\":{\"message\":\"User not found.\",\"code\":401}}"
+      }
+    }
+  },
+  "openrouter/andromeda-alpha": {
+    "model_id": "openrouter/andromeda-alpha",
+    "model_name": "Andromeda Alpha (Free)",
+    "tests": {
+      "access": {
+        "status": "FAILED",
+        "error": "HTTP 401: {\"error\":{\"message\":\"User not found.\",\"code\":401}}"
+      }
+    }
+  }
+}

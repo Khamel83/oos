@@ -1,0 +1,124 @@
+{
+  "working_api_key": "8f9fb5497f...",
+  "total_tested": 12,
+  "successful": 9,
+  "results": {
+    "openrouter/andromeda-alpha": {
+      "status": "SUCCESS",
+      "response": "",
+      "usage": {
+        "prompt_tokens": 31,
+        "completion_tokens": 30,
+        "total_tokens": 61,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "model": "openrouter/andromeda-alpha"
+    },
+    "google/gemma-2-9b-it:free": {
+      "status": "SUCCESS",
+      "response": ".\n\n\nIt looks like your request is a bit jumbled. Can you please rephrase it? \n\nCould you tell me wha",
+      "usage": {
+        "prompt_tokens": 25,
+        "completion_tokens": 30,
+        "total_tokens": 55
+      },
+      "model": "google/gemma-2-9b-it:free"
+    },
+    "meta-llama/llama-3.1-8b-instruct:free": {
+      "status": "FAILED",
+      "error": "HTTP 404: {\"error\":{\"message\":\"No endpoints found for meta-llama/llama-3.1-8b-instruct:free.\",\"code\":404},\"user_id\":\"user_2sN7YmFBH4UbeeUoEWW2dvshdkV\"}"
+    },
+    "agentica-org/deepcoder-14b-preview": {
+      "status": "FAILED",
+      "error": "HTTP 404: {\"error\":{\"message\":\"No endpoints found matching your data policy (Paid model training). Configure: https://openrouter.ai/settings/privacy\",\"code\":404}}"
+    },
+    "arliai/qwq-32b-arliai-rpr-v1": {
+      "status": "FAILED",
+      "error": "HTTP 404: {\"error\":{\"message\":\"No endpoints found matching your data policy (Paid model training). Configure: https://openrouter.ai/settings/privacy\",\"code\":404}}"
+    },
+    "amazon/nova-micro-v1": {
+      "status": "SUCCESS",
+      "response": "MODEL_ACCESS_CONFIRMED\n\nHowever, it's important to note that I operate within strict guidelines to e",
+      "usage": {
+        "prompt_tokens": 17,
+        "completion_tokens": 30,
+        "total_tokens": 47
+      },
+      "model": "amazon/nova-micro-v1"
+    },
+    "google/gemma-2-9b-it": {
+      "status": "SUCCESS",
+      "response": "\n\nMODEL_ACCESS_CONFIRMED",
+      "usage": {
+        "prompt_tokens": 25,
+        "completion_tokens": 9,
+        "total_tokens": 34
+      },
+      "model": "google/gemma-2-9b-it"
+    },
+    "meta-llama/llama-3.1-8b-instruct": {
+      "status": "SUCCESS",
+      "response": "MODEL_ACCESS_CONFIRMED",
+      "usage": {
+        "prompt_tokens": 25,
+        "completion_tokens": 5,
+        "total_tokens": 30
+      },
+      "model": "meta-llama/llama-3.1-8b-instruct"
+    },
+    "mistralai/mistral-nemo": {
+      "status": "SUCCESS",
+      "response": "MODEL_ACCESS_CONFIRMED",
+      "usage": {
+        "prompt_tokens": 23,
+        "completion_tokens": 8,
+        "total_tokens": 31,
+        "prompt_tokens_details": null
+      },
+      "model": "mistralai/mistral-nemo"
+    },
+    "qwen/qwen-2.5-72b-instruct": {
+      "status": "SUCCESS",
+      "response": "MODEL_ACCESS_CONFIRMED",
+      "usage": {
+        "prompt_tokens": 22,
+        "completion_tokens": 4,
+        "total_tokens": 26,
+        "prompt_tokens_details": null
+      },
+      "model": "qwen/qwen-2.5-72b-instruct"
+    },
+    "openai/gpt-4o-mini": {
+      "status": "SUCCESS",
+      "response": "MODEL_ACCESS_CONFIRMED",
+      "usage": {
+        "prompt_tokens": 22,
+        "completion_tokens": 5,
+        "total_tokens": 27,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "model": "openai/gpt-4o-mini"
+    },
+    "meta-llama/llama-3.1-70b-instruct": {
+      "status": "SUCCESS",
+      "response": "MODEL_ACCESS_CONFIRMED",
+      "usage": {
+        "prompt_tokens": 25,
+        "completion_tokens": 5,
+        "total_tokens": 30
+      },
+      "model": "meta-llama/llama-3.1-70b-instruct"
+    }
+  }
+}

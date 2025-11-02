@@ -1,0 +1,174 @@
+{
+  "analysis": {
+    "google/gemma-2-9b-it": {
+      "cost_per_m": 0.02,
+      "coding_test": "\u2705 Working Python code (321 tokens)",
+      "business_test": "\u2705 Strategic 3-step plan (433 tokens)",
+      "quality_score": 8.5,
+      "notes": "Consistent performer, good value",
+      "value_score": 283.33333333333337
+    },
+    "qwen/qwen-2.5-72b-instruct": {
+      "cost_per_m": 0.165,
+      "coding_test": "Not tested with coding",
+      "business_test": "\u2705 Detailed business planning (433 tokens)",
+      "quality_score": 9.0,
+      "notes": "Best for complex business tasks",
+      "value_score": 51.42857142857142
+    },
+    "meta-llama/llama-3.1-70b-instruct": {
+      "cost_per_m": 0.4,
+      "coding_test": "\u2705 Working Python code (548 tokens)",
+      "business_test": "\u2705 Problem solving analysis (548 tokens)",
+      "quality_score": 9.2,
+      "notes": "Highest quality, large context (131K)",
+      "value_score": 22.439024390243897
+    },
+    "openrouter/andromeda-alpha": {
+      "cost_per_m": 0.0,
+      "coding_test": "\u274c Empty response (327 tokens)",
+      "business_test": "\u274c Empty response",
+      "quality_score": 1.0,
+      "notes": "Useless for real work",
+      "value_score": 100.0
+    },
+    "google/gemma-2-9b-it:free": {
+      "cost_per_m": 0.0,
+      "coding_test": "\u274c Generic response (56 tokens)",
+      "business_test": "Not tested - failed on coding",
+      "quality_score": 2.0,
+      "notes": "Free version has restrictions",
+      "value_score": 200.0
+    },
+    "amazon/nova-micro-v1": {
+      "cost_per_m": 0.09,
+      "coding_test": "\u2705 Working Python code (444 tokens)",
+      "business_test": "\u2705 Detailed 6-month plan (456 tokens)",
+      "quality_score": 8.0,
+      "notes": "Consistent, Amazon reliability",
+      "value_score": 80.0
+    },
+    "meta-llama/llama-3.1-8b-instruct": {
+      "cost_per_m": 0.025,
+      "coding_test": "\u2705 Working Python code (453 tokens)",
+      "business_test": "\u2705 Structured 6-month plan (465 tokens)",
+      "quality_score": 8.2,
+      "notes": "Great value for the price",
+      "value_score": 234.28571428571425
+    },
+    "mistralai/mistral-nemo": {
+      "cost_per_m": 0.03,
+      "coding_test": "\u2705 Working Python code (451 tokens)",
+      "business_test": "\u2705 Comprehensive 6-month plan (464 tokens)",
+      "quality_score": 8.3,
+      "notes": "Strong multilingual capabilities",
+      "value_score": 207.5
+    },
+    "openai/gpt-4o-mini": {
+      "cost_per_m": 0.375,
+      "coding_test": "\u2705 Working Python code (451 tokens)",
+      "business_test": "\u2705 Comprehensive 6-month plan (462 tokens)",
+      "quality_score": 8.8,
+      "notes": "Industry standard, reliable",
+      "value_score": 22.857142857142858
+    }
+  },
+  "rankings": {
+    "by_value": [
+      [
+        "google/gemma-2-9b-it",
+        283.33333333333337
+      ],
+      [
+        "meta-llama/llama-3.1-8b-instruct",
+        234.28571428571425
+      ],
+      [
+        "mistralai/mistral-nemo",
+        207.5
+      ],
+      [
+        "amazon/nova-micro-v1",
+        80.0
+      ],
+      [
+        "qwen/qwen-2.5-72b-instruct",
+        51.42857142857142
+      ],
+      [
+        "openai/gpt-4o-mini",
+        22.857142857142858
+      ],
+      [
+        "meta-llama/llama-3.1-70b-instruct",
+        22.439024390243897
+      ]
+    ],
+    "by_quality": [
+      [
+        "meta-llama/llama-3.1-70b-instruct",
+        9.2
+      ],
+      [
+        "qwen/qwen-2.5-72b-instruct",
+        9.0
+      ],
+      [
+        "openai/gpt-4o-mini",
+        8.8
+      ],
+      [
+        "google/gemma-2-9b-it",
+        8.5
+      ],
+      [
+        "mistralai/mistral-nemo",
+        8.3
+      ],
+      [
+        "meta-llama/llama-3.1-8b-instruct",
+        8.2
+      ],
+      [
+        "amazon/nova-micro-v1",
+        8.0
+      ]
+    ],
+    "by_cost": [
+      [
+        "google/gemma-2-9b-it",
+        0.02
+      ],
+      [
+        "meta-llama/llama-3.1-8b-instruct",
+        0.025
+      ],
+      [
+        "mistralai/mistral-nemo",
+        0.03
+      ],
+      [
+        "amazon/nova-micro-v1",
+        0.09
+      ],
+      [
+        "qwen/qwen-2.5-72b-instruct",
+        0.165
+      ],
+      [
+        "openai/gpt-4o-mini",
+        0.375
+      ],
+      [
+        "meta-llama/llama-3.1-70b-instruct",
+        0.4
+      ]
+    ]
+  },
+  "optimal_selection": {
+    "DEFAULT": "google/gemma-2-9b-it",
+    "MAXIMUM": "meta-llama/llama-3.1-70b-instruct",
+    "BUDGET": "google/gemma-2-9b-it",
+    "CODING": "meta-llama/llama-3.1-70b-instruct"
+  }
+}

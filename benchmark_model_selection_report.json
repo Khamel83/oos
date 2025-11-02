@@ -1,0 +1,174 @@
+{
+  "metadata": {
+    "total_models_analyzed": 11,
+    "benchmark_sources": [
+      "HuggingFace",
+      "LMSYS",
+      "Company Research"
+    ],
+    "cost_ceiling": 1.0,
+    "selection_criteria": {
+      "value_weight": 0.4,
+      "performance_weight": 0.3,
+      "cost_weight": 0.3
+    }
+  },
+  "optimal_selections": {
+    "DEFAULT": {
+      "openrouter_id": "google/gemma-2-9b-it",
+      "benchmark_name": "Gemma-2-9B",
+      "cost_per_m_tokens": 0.02,
+      "overall_benchmark_score": 56.88999999999999,
+      "value_score": 1896.3333333333333,
+      "strengths": [
+        "Exceptional value for money"
+      ],
+      "best_for": "Daily tasks, general assistance, routine work"
+    },
+    "CODING_SPECIALIST": {
+      "openrouter_id": "qwen/qwen-2.5-coder-32b-instruct",
+      "benchmark_name": "Qwen2.5-Coder-32B-Instruct",
+      "cost_per_m_tokens": 0.1,
+      "overall_benchmark_score": 63.519999999999996,
+      "value_score": 577.4545454545454,
+      "strengths": [
+        "Strong coding ability",
+        "Exceptional value for money"
+      ],
+      "best_for": "Programming tasks, code review, debugging"
+    }
+  },
+  "all_ranked_models": [
+    {
+      "rank": 1,
+      "openrouter_id": "google/gemma-2-9b-it",
+      "category": "DEFAULT",
+      "cost_per_m": 0.02,
+      "overall_score": 56.88999999999999,
+      "value_score": 1896.3333333333333,
+      "mmlu": 71.3,
+      "humaneval": 64.8,
+      "gsm8k": 72.9
+    },
+    {
+      "rank": 2,
+      "openrouter_id": "meta-llama/llama-3.1-8b-instruct",
+      "category": "DEFAULT",
+      "cost_per_m": 0.025,
+      "overall_score": 54.53,
+      "value_score": 1557.9999999999998,
+      "mmlu": 68.9,
+      "humaneval": 61.2,
+      "gsm8k": 70.4
+    },
+    {
+      "rank": 3,
+      "openrouter_id": "mistralai/mistral-nemo",
+      "category": "DEFAULT",
+      "cost_per_m": 0.03,
+      "overall_score": 54.66,
+      "value_score": 1366.4999999999998,
+      "mmlu": 68.1,
+      "humaneval": 62.7,
+      "gsm8k": 69.8
+    },
+    {
+      "rank": 4,
+      "openrouter_id": "qwen/qwen-2.5-coder-32b-instruct",
+      "category": "DEFAULT",
+      "cost_per_m": 0.1,
+      "overall_score": 63.519999999999996,
+      "value_score": 577.4545454545454,
+      "mmlu": 75.8,
+      "humaneval": 81.2,
+      "gsm8k": 74.1
+    },
+    {
+      "rank": 5,
+      "openrouter_id": "microsoft/phi-3.5-mini-128k-instruct",
+      "category": "DEFAULT",
+      "cost_per_m": 0.1,
+      "overall_score": 52.02,
+      "value_score": 472.90909090909093,
+      "mmlu": 65.7,
+      "humaneval": 58.3,
+      "gsm8k": 67.2
+    },
+    {
+      "rank": 6,
+      "openrouter_id": "qwen/qwen-2.5-72b-instruct",
+      "category": "DEFAULT",
+      "cost_per_m": 0.165,
+      "overall_score": 66.69,
+      "value_score": 381.08571428571423,
+      "mmlu": 82.3,
+      "humaneval": 77.6,
+      "gsm8k": 84.9
+    },
+    {
+      "rank": 7,
+      "openrouter_id": "openai/gpt-4o-mini",
+      "category": "DEFAULT",
+      "cost_per_m": 0.375,
+      "overall_score": 61.379999999999995,
+      "value_score": 159.42857142857142,
+      "mmlu": 76.8,
+      "humaneval": 70.4,
+      "gsm8k": 78.1
+    },
+    {
+      "rank": 8,
+      "openrouter_id": "meta-llama/llama-3.1-70b-instruct",
+      "category": "DEFAULT",
+      "cost_per_m": 0.4,
+      "overall_score": 65.28,
+      "value_score": 159.21951219512195,
+      "mmlu": 80.5,
+      "humaneval": 76.3,
+      "gsm8k": 82.7
+    },
+    {
+      "rank": 9,
+      "openrouter_id": "deepseek/deepseek-chat",
+      "category": "ALTERNATIVE",
+      "cost_per_m": 0.575,
+      "overall_score": 60.5,
+      "value_score": 103.41880341880342,
+      "mmlu": 73.2,
+      "humaneval": 74.8,
+      "gsm8k": 72.6
+    },
+    {
+      "rank": 10,
+      "openrouter_id": "anthropic/claude-3-haiku",
+      "category": "ALTERNATIVE",
+      "cost_per_m": 0.75,
+      "overall_score": 60.17000000000001,
+      "value_score": 79.17105263157896,
+      "mmlu": 75.4,
+      "humaneval": 68.7,
+      "gsm8k": 76.9
+    },
+    {
+      "rank": 11,
+      "openrouter_id": "anthropic/claude-3.5-haiku-20241022",
+      "category": "ALTERNATIVE",
+      "cost_per_m": 2.4,
+      "overall_score": 68.85,
+      "value_score": 28.568464730290458,
+      "mmlu": 85.2,
+      "humaneval": 79.1,
+      "gsm8k": 88.7
+    }
+  ],
+  "category_breakdown": {
+    "DEFAULT": 8,
+    "ALTERNATIVE": 3
+  },
+  "usage_recommendations": {
+    "minimum_usage_percentage": 15,
+    "default_usage_percentage": 70,
+    "maximum_usage_percentage": 10,
+    "specialized_usage_percentage": 5
+  }
+}

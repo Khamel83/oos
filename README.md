@@ -15,9 +15,14 @@ OOS transforms how you approach any coding work, project, or idea by providing a
 
 **Quick links for forgetful humans:**
 - **[What Even Is OOS?](GUIDES/WHAT_IS_OOS.md)** - The simple explanation
-- **[5-Minute Quick Start](GUIDES/QUICK_START.md)** - Copy-paste setup
+- **[5-Minute Quick Start](QUICK_SETUP_GUIDE.md)** - Copy-paste setup
 - **[Emergency Refresher](GUIDES/EMERGENCY_REFRESHER.md)** - "I haven't used this in weeks"
 - **[Quick Reference](QUICK_REFERENCE.md)** - One-page cheat sheet
+
+**🚀 NEW: Full Stack AI Integration:**
+- **[Current Status](CURRENT_STATUS.md)** - What's working now
+- **[Next Steps](NEXT_STEPS.md)** - Future development roadmap
+- **[Full Stack Guide](docs/FULL_STACK_INTEGRATION.md)** - AI + RelayQ + Archon integration
 
 **Quick links for AI Claude:**
 - **[AI Reference](AI_REFERENCE.md)** - Technical implementation details

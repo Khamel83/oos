@@ -32,7 +32,7 @@ from auto_documentation import get_auto_documentation_system
 from capability_router import route_request
 from knowledge_resolver import resolve_knowledge, result_to_dict
 from actions_gateway import list_available_tools, execute_action, tool_info_to_dict, action_result_to_dict
-from renderers import render_knowledge, render_tools, render_action_result
+from renderers import render_knowledge, render_tools, CapabilityRenderer
 
 
 class OOSContextEngineeringServer:
@@ -45,6 +45,7 @@ class OOSContextEngineeringServer:
         # Initialize systems
         self.clarification_workflow = get_clarification_workflow()
         self.auto_doc_system = get_auto_documentation_system()
+        self.renderer = CapabilityRenderer()
 
         # Auto-optimization settings
         self.auto_optimize = True
@@ -722,7 +723,7 @@ Copy this entire prompt to ChatGPT, Claude, or any other AI to get structured he
             result = await execute_action(tool_id, params)
 
             # Render the result
-            output = render_action_result(result, show_json=show_json)
+            output = self.renderer.render_action_result(result, show_json=show_json)
 
             return CallToolResult(
                 content=[TextContent(type="text", text=output)]

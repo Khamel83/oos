@@ -2,6 +2,9 @@
 .env
 .env.*
 !.env.template
+.ssh_config
+.ssh/
+demo_results_*.json
 
 # local
 .env.export

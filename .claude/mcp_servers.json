@@ -1,10 +1,11 @@
 {
   "oos": {
-    "command": "python3",
-    "args": ["mcp_server.py"],
+    "command": "/home/ubuntu/dev/oos/bin/oos-mcp-server.sh",
+    "args": [],
     "cwd": "/home/ubuntu/dev/oos",
     "env": {
-      "PYTHONPATH": "/home/ubuntu/dev/oos/src:/home/ubuntu/dev/oos/venv/lib/python3.12/site-packages"
+      "PYTHONPATH": "/home/ubuntu/dev/oos/src",
+      "SCRIPT_DIR": "/home/ubuntu/dev/oos"
     }
   }
 }

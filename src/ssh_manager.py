@@ -83,7 +83,9 @@ class SSHManager:
             "-o", "StrictHostKeyChecking=no",
             "-o", "UserKnownHostsFile=/dev/null",
             "-o", "ConnectTimeout=" + str(connection.timeout),
-            "-o", "BatchMode=yes"  # Never ask for passwords
+            "-o", "BatchMode=yes",  # Never ask for passwords
+            "-o", "PasswordAuthentication=no",  # Disable password auth
+            "-o", "PreferredAuthentications=publickey"  # Only use key auth
         ])
 
         # Key-based authentication

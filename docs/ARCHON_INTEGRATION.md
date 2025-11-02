@@ -1,940 +1,330 @@
-# Archon Integration for OOS
-
-## CRITICAL: Mandatory Archon Usage
-
-OOS requires explicit use of Archon tools for all knowledge queries and task management. This document defines how Claude Code must interact with Archon when working in an OOS environment.
-
-## The Problem OOS Solves
-
-Without explicit instructions, Claude Code won't automatically use Archon tools. This integration ensures systematic use of your brain extension's knowledge base and task tracking.
-
-## Archon Tools Available
-
-When connected to Archon (archon.khamel.com), you have these tools:
-
-### Knowledge Base Tools
-- `archon_query_knowledge` - Search uploaded docs, crawled websites
-- `archon_list_sources` - See available data sources for filtering
-
-### Task Management Tools
-- `archon_create_task` - Add new tasks
-- `archon_read_task` - Get task details
-- `archon_update_task` - Update task status/details
-- `archon_delete_task` - Remove tasks
-- `archon_list_tasks` - See all project tasks
-
-### Project Tools
-- `archon_create_project` - Initialize project structure
-- `archon_read_project` - Get project metadata
-- `archon_update_project` - Modify project settings
-
-## Mandatory Usage Rules
-
-### Rule 1: Search Archon Before Answering
-
-**BEFORE answering ANY question about:**
-- OOS documentation → `archon_query_knowledge("OOS [topic]")`
-- USC policies/procedures → `archon_query_knowledge("USC [topic]")`
-- Project-specific patterns → `archon_query_knowledge("[project] patterns")`
-- Python best practices for THIS project → Search Archon first
-
-**Never answer from general knowledge if project-specific info exists in Archon.**
-
-### Rule 2: Check Tasks Before Suggesting Work
-
-**BEFORE suggesting what to work on:**
-```
-archon_list_tasks(project_id="[current-project]")
-```
-
-**BEFORE starting coding session:**
-```
-archon_list_tasks(status="in_progress")
-```
-
-### Rule 3: Update Tasks During Work
-
-**AFTER completing work:**
-```
-archon_update_task(task_id="...", status="completed")
-```
-
-**WHEN starting new work:**
-```
-archon_update_task(task_id="...", status="in_progress")
-```
-
-## Integration with OOS Commands
-
-### /start-coding Integration
-
-When user runs `/start-coding`, automatically:
-1. Check Archon connection status
-2. List current project tasks
-3. Query Archon for project context
-4. Show what's in progress
-
-### /help-me Integration
-
-When user runs `/help-me`:
-1. Search Archon knowledge base for relevant docs
-2. Check if there are related tasks
-3. Use Archon context to provide specific help
-
-### /archon-* Commands
-
-These commands are explicitly about Archon:
-- `/archon-status` → Call `archon_read_project` and `archon_list_tasks`
-- `/archon-task-start` → Call `archon_update_task` with status="in_progress"
-- `/archon-complete` → Call `archon_update_task` with status="completed"
-- `/archon-research` → Call `archon_query_knowledge`
-
-## Response Patterns
-
-### Pattern 1: Documentation Questions
-
-User: "How do I handle database connections in OOS?"
-
-CORRECT:
-```
-Let me search your OOS documentation in Archon.
-[calls archon_query_knowledge("OOS database connection patterns")]
-Based on your project docs: [answer from Archon results]
-```
-
-INCORRECT:
-```
-❌ "Typically in Python you'd use SQLAlchemy..."
-```
-
-### Pattern 2: Task Planning
-
-User: "What should I work on next?"
-
-CORRECT:
-```
-[calls archon_list_tasks(project_id="oos", status="todo")]
-Based on your Archon task list: [list top priorities]
-```
-
-INCORRECT:
-```
-❌ "You could work on improving error handling..."
-```
-
-### Pattern 3: USC-Specific Questions
-
-User: "What's the vacation policy?"
-
-CORRECT:
-```
-[calls archon_query_knowledge("USC vacation policy HR")]
-According to your uploaded USC HR docs: [answer]
-```
-
-INCORRECT:
-```
-❌ "I don't have access to USC-specific policies..."
-```
-
-## Default Behavior
-
-### Always Assume Archon is Available
-
-Never say:
-- ❌ "I don't have access to your docs"
-- ❌ "I can't see your task list"
-- ❌ "Let me check if Archon is connected"
-
-Instead:
-- ✅ Use Archon tools immediately
-- ✅ If tool fails, THEN explain the connection issue
-
-### Always Be Specific
-
-Don't say:
-- ❌ "Check your task manager"
-- ❌ "Look at your documentation"
-
-Instead:
-- ✅ "I checked your Archon task list and found..."
-- ✅ "According to your Archon knowledge base..."
-
-## What's in Archon for OOS
-
-### Expected Knowledge Base Content
-
-- OOS documentation (README, guides, system vision)
-- USC HR policies and procedures
-- Python patterns and best practices for this workflow
-- Project-specific conventions and standards
-- 1Password integration docs
-- Archon integration docs (this file)
-
-### Expected Project Structure
-
-- Project Name: `oos`
-- Features organized by component (core, integrations, commands)
-- Tasks tracking development work
-- Status tracking (todo, in_progress, done, blocked)
-
-## Testing Integration
-
-### Verify Archon Connection
-
-In Claude Code:
-```
-Search my Archon docs for OOS start-coding command
-```
-
-Should return documentation about `/start-coding`.
-
-### Verify Task Management
-
-In Claude Code:
-```
-What's on my Archon task list for OOS?
-```
-
-Should list actual tasks from Archon.
-
-## Troubleshooting
-
-### "Archon tools not working"
-
-1. Check MCP connection: `claude mcp list`
-2. Should show: `archon: http://100.103.45.61:8051/mcp (HTTP) - ✓ Connected`
-3. If missing, reconnect: `claude mcp add --transport http archon http://100.103.45.61:8051/mcp`
-
-**Note**: Use direct IP address `100.103.45.61:8051` until OCI firewall is configured for domain access. See `docs/ARCHON_OCI_FIREWALL_FIX.md` for details.
-
-### "Can't find docs in Archon"
-
-1. Verify docs are uploaded at archon.khamel.com:3737
-2. Check Knowledge Base tab
-3. Upload missing documentation
-4. Retry query after upload
-
-### "Tasks not showing"
-
-1. Verify project exists in Archon
-2. Check project name matches (case-sensitive)
-3. Ensure tasks are created in correct project
-
-## Future Enhancements
-
-- Automatic Archon query injection in all OOS commands
-- Smart context loading from Archon on `/start-coding`
-- Automatic task creation from commit messages
-- Integration with `/brain-dump` for task extraction
-
-## 🏗️ Project Architecture
-
-### Project Isolation Model
-
-```
-Archon Server
-├── Project Alpha (ID: 550e8400-...)
-│   ├── Tasks (filtered by project_id)
-│   ├── Documents (scoped to project)
-│   ├── Features (project-specific)
-│   └── Versions (project history)
-├── Project Beta (ID: 7a8b9c0d-...)
-│   ├── Tasks (completely separate)
-│   ├── Documents (independent)
-│   ├── Features (isolated)
-│   └── Versions (separate history)
-└── Project Gamma (ID: 2f3e4d5c-...)
-    └── (fully isolated scope)
-```
-
-### Environment Configuration
-
-Each project maintains its own `.env` file with unique identifiers:
-
+# Archon Integration - The OOS-Archon Symbiotic Brain
+
+## 🧠 **CORE PHILOSOPHY: AI BRAIN EXTENSION**
+
+**OOS and Archon form a complete AI operational brain:**
+- **OOS** = Body/Operations (executes, automates, manages workflows)
+- **Archon** = Brain/Memory (knowledge, context, project intelligence, secrets)
+
+**MANDATORY:** OOS requires Archon connection for full AI capabilities. Without Archon, OOS operates at 30% capacity.
+
+**Single AI Instruction:**
+"Connect to Archon at https://archon.khamel.com with vault password 'YOUR_PASSWORD' to access complete operational brain - knowledge base, project management, secret vault, and AI context."
+
+**Complete development context:** https://raw.githubusercontent.com/Khamel83/archon/main/DEVELOPER_REFERENCE.md
+
+## 🔐 **SECRET MANAGEMENT (Secure Vault)**
+
+**NEW: Replaces 1Password with Archon Vault:**
+- **Single Password:** Only `ARCHON_VAULT_PASSWORD` in `.env`
+- **Pull-Use-Discard:** Secrets pulled individually, used immediately, cleared from memory
+- **Central Rotation:** Change vault password = invalidate all access instantly
+- **Never Stored:** Secrets never written to disk, always accessed via API
+
+**OOS gets from vault:** Database credentials, API keys, service configurations
+
+## 🚀 **COMPLETE ARCHON ECOSYSTEM**
+
+### **🧠 Knowledge & Intelligence (AI Brain)**
+- **RAG Search:** `GET /api/knowledge/search` - Search uploaded docs, crawled websites
+- **Knowledge Base:** `POST /api/knowledge/upload` - Add documents to AI memory
+- **Web Crawling:** `POST /api/knowledge/crawl` - Learn from external sources
+- **Code Examples:** Search patterns, implementations, best practices
+- **Contextual Memory:** Persistent AI learning across sessions
+
+### **📊 Project Management (Strategic Intelligence)**
+- **Projects:** `GET/POST /api/projects` - Organize work into intelligent projects
+- **Tasks:** `GET/POST /api/tasks` - AI-assisted task creation and tracking
+- **Milestones:** Strategic goal tracking and progress measurement
+- **Dependencies:** Intelligent task relationship management
+- **Status Tracking:** Real-time project health and progress
+
+### **📋 Document Management (Organizational Memory)**
+- **Documents:** `GET/POST /api/documents` - Persistent project documentation
+- **Specifications:** API specs, architecture docs, requirements
+- **Meeting Notes:** Automated capture and organization
+- **Code Documentation:** Integrated with development workflows
+
+### **🔧 MCP Integration (AI Tools)**
+- **Server:** `http://localhost:8051` or `https://archon.khamel.com:8051`
+- **AI Assistant Tools:** Direct Claude Code integration
+- **Command Tools:** `/archon`, `/archon-research`, `/archon-status`
+- **Strategic Consultant:** Complex project planning and execution
+
+### **🔒 Secret Vault (Secure Operations)**
+- **Vault Access:** `https://archon.khamel.com/vault`
+- **Secret Management:** Database credentials, API keys, service config
+- **Session-Based:** Temporary access with automatic cleanup
+- **Audit Trail:** All secret access logged and tracked
+
+## 🤖 **SYMBIOTIC OPERATIONAL PATTERNS**
+
+### **📚 AI-Assisted Development Workflow:**
+1. **Context Gathering:** AI searches Archon knowledge base for relevant docs, patterns, and previous work
+2. **Secret Access:** Pull only required secrets from vault for current operation
+3. **Task Intelligence:** Create tasks with Archon context, dependencies, and project alignment
+4. **Knowledge Capture:** Upload new learnings, code patterns, and decisions back to Archon
+5. **Progress Sync:** Update project status, milestones, and documentation in real-time
+
+### **🧠 Strategic Intelligence Flow:**
+1. **Research Phase:** Query Archon knowledge base for domain expertise and best practices
+2. **Planning Phase:** Create strategic projects with intelligent task breakdown and milestones
+3. **Execution Phase:** OOS executes while Archon provides context and decision support
+4. **Learning Phase:** Capture outcomes, lessons learned, and improved patterns back to Archon
+
+### **🔄 Continuous Learning Loop:**
+1. **OOS executes operations** → Generates real-world experience
+2. **Archon captures learning** → Updates knowledge base and patterns
+3. **AI uses enhanced context** → Makes better decisions next time
+4. **Cycle repeats** → Continuously improving operational intelligence
+
+### **🎯 Command Integration Patterns:**
+- **`/archon research <query>`** → Search knowledge base before answering
+- **`/archon status`** → Check project tasks and current priorities
+- **`/archon search <query>`** → Find relevant projects and documentation
+- **Strategic Consultant** → Creates complex projects with phases and milestones
+- **Task System** → Local SQLite with Archon project synchronization
+
+## 🔄 **INTEGRATION HEALTH & DISCOVERY**
+
+### **Comprehensive Health Check:**
 ```bash
-# Each project's .env contains:
-ARCHON_PROJECT_ID=<unique-project-id-from-archon>
-ARCHON_URL=<your-archon-server-url>
-PROJECT_NAME=<project-name>
-PROJECT_TYPE=<project-type>
+# 1. Check Archon server availability
+curl -I https://archon.khamel.com/api/health
+
+# 2. Verify MCP server connection
+claude mcp list | grep archon
+
+# 3. Test vault access
+curl -I https://archon.khamel.com/vault
+
+# 4. Validate knowledge base
+curl -X GET https://archon.khamel.com/api/knowledge/search?q=test
+
+# 5. Check project management
+curl -X GET https://archon.khamel.com/api/projects
 ```
 
-## ✅ Current Implementation Status
+### **Required Services Status:**
+- ✅ **Archon Web Interface:** https://archon.khamel.com:3737
+- ✅ **Vault Service:** https://archon.khamel.com/vault
+- ✅ **API Gateway:** https://archon.khamel.com/api
+- ✅ **MCP Server:** http://localhost:8051 or https://archon.khamel.com:8051
+- ✅ **Knowledge Base:** Search and upload capabilities
+- ✅ **Project Management:** Task and milestone tracking
 
-**OOS v1.0+ includes full Archon integration:**
-- ✅ Automatic MCP server registration
-- ✅ Project creation helpers
-- ✅ Task management via Claude Code MCP tools
-- ✅ Environment configuration
-- 🟡 CLI task management (in development)
-- 🟡 Archon-aware slash commands (in development)
+### **Graceful Degradation Strategy:**
+When Archon services are unavailable:
+1. **Local Task System:** Continue with SQLite-based task management
+2. **Cached Knowledge:** Use previously downloaded documentation
+3. **Secret Fallback:** Alert user to check Archon connection
+4. **Queue Operations:** Store updates for later synchronization
 
-## 🚀 Automatic Integration (Default)
+## 📋 **COMPLETE OOS CONFIGURATION**
 
-### 1. Archon Integration is Now Automatic
-
-**As of OOS v1.0+, Archon integration happens automatically during bootstrap.**
-
-#### Quick Setup for New Projects
+### **Environment Variables (.env):**
 ```bash
-# Navigate to your project directory
-cd /home/ubuntu/dev/my-project
+# Archon Connection
+ARCHON_URL=https://archon.khamel.com
+ARCHON_VAULT_URL=https://archon.khamel.com/vault
+ARCHON_API_URL=https://archon.khamel.com/api
+ARCHON_MCP_URL=http://localhost:8051
+ARCHON_WEB_URL=https://archon.khamel.com:3737
 
-# Initialize OOS (Archon integration happens automatically)
-eval "$(op signin)"
-/path/to/oos/scripts/bootstrap_enhanced.sh
+# Secure Vault Access
+ARCHON_VAULT_PASSWORD="your_vault_password_here"
 
-# The bootstrap script automatically:
-# - Adds ARCHON_PROJECT_ID= to .env
-# - Adds ARCHON_URL=http://your-archon-server:8051/mcp to .env
-# - Creates bin/create_archon_project.sh helper script
-# - Registers Archon MCP server with Claude Code
+# Project Integration
+ARCHON_PROJECT_ID="your-project-uuid-here"
+PROJECT_NAME="your-project-name"
+PROJECT_TYPE="cli-tool|api-service|web-app|documentation"
+
+# MCP Configuration
+ENABLE_ARCHON_MCP=true
+MCP_TIMEOUT=30
+MCP_RETRY_COUNT=3
+
+# Sync Settings
+SYNC_WITH_ARCHON=true
+AUTO_SYNC_INTERVAL=300  # 5 minutes
+CACHE_KNOWLEDGE_LOCALLY=true
 ```
 
-#### Complete Archon Project Creation
-```bash
-# Use the generated helper script (auto-detects GitHub repo)
-./bin/create_archon_project.sh "My Project Title" "Project description"
+### **Bootstrap Integration:**
+The OOS bootstrap automatically:
+- Detects and registers Archon MCP server
+- Creates project in Archon with proper metadata
+- Sets up bidirectional sync between local tasks and Archon
+- Configures secure vault access patterns
+- Enables AI knowledge base integration
 
-# Follow the instructions to create the project in Claude Code:
-# mcp__archon__create_project({
-#     title: "My Project Title",
-#     description: "Project description",
-#     github_repo: "https://github.com/username/my-project" // auto-detected
-# })
+## 🛠️ **AI TOOLS & COMMANDS INTEGRATION**
 
-# Update .env with the returned project_id
-echo "ARCHON_PROJECT_ID=<returned-project-id>" >> .env
-```
-
-### 2. Manual Integration (For Existing Projects)
-
-If you have an existing project that needs Archon integration:
-
-```bash
-# Re-run bootstrap to add Archon integration
-/path/to/oos/scripts/bootstrap_enhanced.sh --force
-
-# Or manually add to existing .env:
-echo "
-# Archon MCP Integration
-ARCHON_PROJECT_ID=
-ARCHON_URL=http://your-archon-server:8051/mcp" >> .env
-```
-
-### 2. Task Management Integration
-
-#### Create Project Tasks with Proper Scoping
-
+### **Available MCP Tools:**
 ```javascript
-// Authentication Feature Tasks
-mcp__archon__create_task({
-    project_id: "$ARCHON_PROJECT_ID",
-    title: "Design JWT token architecture",
-    description: `Design JWT token structure with:
-- Access token (15 min expiry)
-- Refresh token (30 day expiry)
-- Token rotation strategy
-- Secure token storage patterns`,
-    assignee: "AI IDE Agent",
-    feature: "authentication",
-    task_order: 5,
-    sources: [
-        {
-            url: "https://tools.ietf.org/rfc/rfc7519.txt",
-            type: "specification",
-            relevance: "JWT standard specification"
-        }
-    ]
-})
-
-mcp__archon__create_task({
-    project_id: "$ARCHON_PROJECT_ID",
-    title: "Implement user login endpoint",
-    description: `Create POST /auth/login endpoint:
-- Email/password validation
-- Rate limiting (5 attempts per minute)
-- JWT generation on success
-- Secure password hashing verification`,
-    assignee: "AI IDE Agent",
-    feature: "authentication",
-    task_order: 10,
-    code_examples: [
-        {
-            file: "examples/auth/login.py",
-            function: "login_handler",
-            purpose: "Reference implementation pattern"
-        }
-    ]
-})
-
-// Database Feature Tasks
-mcp__archon__create_task({
-    project_id: "$ARCHON_PROJECT_ID",
-    title: "Create user database schema",
-    description: `PostgreSQL schema design:
-- users table (id, email, password_hash, created_at, updated_at)
-- user_sessions table (token_id, user_id, expires_at, created_at)
-- oauth_tokens table (provider, provider_id, user_id, tokens)
-- Proper indexes and constraints`,
-    assignee: "AI IDE Agent",
-    feature: "database",
-    task_order: 3
-})
-
-// OAuth Integration Tasks
-mcp__archon__create_task({
-    project_id: "$ARCHON_PROJECT_ID",
-    title: "Implement Google OAuth2 provider",
-    description: `OAuth2 integration with PKCE:
-- Authorization URL generation
-- Code exchange implementation
-- User info retrieval and mapping
-- Account linking logic`,
-    assignee: "AI IDE Agent",
-    feature: "oauth",
-    task_order: 20
-})
-```
-
-#### Task Workflow Management
-
-```javascript
-// Get project-specific tasks
-mcp__archon__list_tasks({
-    project_id: "$ARCHON_PROJECT_ID",
-    filter_by: "status",
-    filter_value: "todo"
-})
-
-// Start working on a task
-mcp__archon__update_task({
-    task_id: "task-uuid-from-above",
-    status: "doing"
-})
-
-// Complete a task
-mcp__archon__update_task({
-    task_id: "task-uuid",
-    status: "done"
-})
-
-// Move task to review
-mcp__archon__update_task({
-    task_id: "task-uuid",
-    status: "review"
-})
-```
-
-### 3. Documentation Management
-
-#### Create Project Documentation
-
-```javascript
-// Technical Specification
-mcp__archon__create_document({
-    project_id: "$ARCHON_PROJECT_ID",
-    title: "Authentication API Specification v1.0",
-    document_type: "spec",
-    content: {
-        version: "1.0.0",
-        base_url: "https://api.example.com/auth",
-        authentication: "Bearer JWT tokens",
-        endpoints: [
-            {
-                path: "/login",
-                method: "POST",
-                description: "User authentication",
-                request: {
-                    email: "string (required)",
-                    password: "string (required)"
-                },
-                responses: {
-                    200: "Login successful with tokens",
-                    401: "Invalid credentials",
-                    429: "Rate limit exceeded"
-                }
-            },
-            {
-                path: "/refresh",
-                method: "POST",
-                description: "Token refresh",
-                headers: {
-                    "Authorization": "Bearer <refresh_token>"
-                },
-                responses: {
-                    200: "New access token provided",
-                    401: "Invalid refresh token"
-                }
-            },
-            {
-                path: "/logout",
-                method: "POST",
-                description: "User logout",
-                headers: {
-                    "Authorization": "Bearer <access_token>"
-                },
-                responses: {
-                    200: "Logout successful",
-                    401: "Invalid token"
-                }
-            }
-        ],
-        security: {
-            rate_limiting: "5 requests per minute per IP",
-            cors: "Enabled for allowed origins",
-            csrf: "Required for state-changing operations"
-        }
-    },
-    tags: ["api", "authentication", "specification"],
-    author: "Development Team"
-})
-
-// Architecture Design Document
-mcp__archon__create_document({
-    project_id: "$ARCHON_PROJECT_ID",
-    title: "Authentication System Architecture",
-    document_type: "design",
-    content: {
-        overview: "JWT-based authentication system with OAuth2 integration",
-        components: [
-            {
-                name: "AuthController",
-                responsibility: "Handle authentication endpoints",
-                dependencies: ["UserService", "TokenService", "RateLimiter"]
-            },
-            {
-                name: "TokenService",
-                responsibility: "JWT generation and validation",
-                dependencies: ["SecretManager", "DatabaseService"]
-            },
-            {
-                name: "OAuth2Service",
-                responsibility: "OAuth provider integration",
-                dependencies: ["HttpClient", "UserService"]
-            }
-        ],
-        data_flow: [
-            "User submits credentials",
-            "AuthController validates input",
-            "UserService verifies credentials",
-            "TokenService generates JWT tokens",
-            "Response sent with tokens"
-        ],
-        security_considerations: [
-            "Password hashing with bcrypt",
-            "JWT tokens signed with RS256",
-            "Refresh token rotation",
-            "Rate limiting on auth endpoints",
-            "CORS configuration",
-            "Input validation and sanitization"
-        ]
-    },
-    tags: ["architecture", "design", "authentication"]
-})
-
-// Implementation Guide
-mcp__archon__create_document({
-    project_id: "$ARCHON_PROJECT_ID",
-    title: "Development Setup Guide",
-    document_type: "guide",
-    content: {
-        prerequisites: [
-            "Python 3.9+",
-            "PostgreSQL 13+",
-            "Redis 6+",
-            "1Password CLI access"
-        ],
-        setup_steps: [
-            "Clone repository",
-            "Run OOS bootstrap: ./scripts/scripts/bootstrap_enhanced.sh",
-            "Install dependencies: pip install -r requirements.txt",
-            "Setup database: ./bin/setup_db.sh",
-            "Run tests: ./bin/run_tests.sh all",
-            "Start development server: ./bin/dev_server.sh"
-        ],
-        environment_variables: {
-            "DATABASE_URL": "PostgreSQL connection string",
-            "REDIS_URL": "Redis connection string",
-            "JWT_SECRET": "JWT signing secret",
-            "OAUTH_GOOGLE_CLIENT_ID": "Google OAuth client ID",
-            "OAUTH_GOOGLE_CLIENT_SECRET": "Google OAuth client secret"
-        },
-        testing: {
-            unit_tests: "./bin/run_tests.sh unit",
-            integration_tests: "./bin/run_tests.sh integration",
-            security_tests: "./bin/run_tests.sh security"
-        }
-    },
-    tags: ["guide", "setup", "development"]
-})
-```
-
-### 4. Version Control Integration
-
-#### Document Versioning
-```javascript
-// Create version snapshots for important milestones
-mcp__archon__create_version({
-    project_id: "$ARCHON_PROJECT_ID",
-    field_name: "docs",
-    content: [
-        // Current state of all documents
-    ],
-    change_summary: "Initial API specification and architecture design",
-    created_by: "Development Team"
-})
-
-// Version project features
-mcp__archon__create_version({
-    project_id: "$ARCHON_PROJECT_ID",
-    field_name: "features",
-    content: {
-        authentication: {
-            status: "in_progress",
-            completion: 60,
-            components: ["login", "logout", "token_refresh"],
-            tests_passing: true
-        },
-        oauth: {
-            status: "planned",
-            providers: ["google", "github"],
-            completion: 0
-        },
-        database: {
-            status: "completed",
-            schema_version: "1.0",
-            migrations_applied: 5
-        }
-    },
-    change_summary: "Authentication 60% complete, database schema finalized"
-})
-```
-
-## 🔒 Security & Isolation Best Practices
-
-### Environment Isolation
-```bash
-# Each project has isolated environment
-# Project Alpha
-cat /home/ubuntu/dev/auth-service/.env
-ARCHON_PROJECT_ID=$ARCHON_PROJECT_ID
-PROJECT_SECRETS_PREFIX=AUTH_SERVICE_
-
-# Project Beta
-cat /home/ubuntu/dev/ecommerce-web/.env
-ARCHON_PROJECT_ID=$ARCHON_PROJECT_ID_B
-PROJECT_SECRETS_PREFIX=ECOMMERCE_WEB_
-
-# No cross-project access possible
-```
-
-### Access Control Validation
-```bash
-# Verify project isolation in each project directory
-
-# Project Alpha - should only see its own data
-cd /home/ubuntu/dev/auth-service
-# In Claude Code:
-# mcp__archon__list_tasks(project_id="$ARCHON_PROJECT_ID")
-# Result: Only auth-service tasks
-
-# Project Beta - completely isolated
-cd /home/ubuntu/dev/ecommerce-web
-# In Claude Code:
-# mcp__archon__list_tasks(project_id="$ARCHON_PROJECT_ID_B")
-# Result: Only ecommerce-web tasks
-```
-
-### Security Monitoring Per Project
-```bash
-# Each project maintains separate security audit trails
-./bin/security_audit.sh scan --report auth-service-security.json
-./bin/security_audit.sh compliance --report auth-service-compliance.json
-
-# Separate monitoring logs
-tail -f security_audit.log | grep "PROJECT_ID=550e8400"
-```
-
-## 🖥️ OOS CLI Integration (v1.1+)
-
-### Task Management Commands
-
-```bash
-# List project tasks
-./oos task list
-./oos task list --status todo
-./oos task list --feature authentication
-
-# Start working on a task
-./oos task start <task-id>
-
-# Complete a task
-./oos task complete <task-id>
-
-# Create new task
-./oos task create "Implement OAuth" "Add Google OAuth2 integration"
-
-# Project status
-./oos project status
-```
-
-### Capability Layer Integration
-
-```bash
-# Search capabilities
-./oos capabilities
-./oos capabilities "api documentation"
-
-# Execute actions
-./oos act "search for JWT best practices"
-./oos act "list available API endpoints"
-```
-
-## 🤖 Claude Code Integration
-
-### Current MCP Tools Available
-
-```javascript
-// Project Management
-mcp__archon__create_project({title, description, github_repo})
-mcp__archon__list_projects()
-mcp__archon__get_project(project_id)
-mcp__archon__update_project(project_id, {...updates})
-
-// Task Management
-mcp__archon__create_task({project_id, title, description, ...})
-mcp__archon__list_tasks({project_id, filter_by, filter_value})
-mcp__archon__get_task(task_id)
-mcp__archon__update_task(task_id, {status, ...})
-
 // Knowledge & Research
-mcp__archon__perform_rag_query({query, source_domain, match_count})
+mcp__archon__rag_search_knowledge_base({query, match_count})
 mcp__archon__search_code_examples({query, match_count})
 
-// Documentation
+// Project Management
+mcp__archon__create_project({title, description, github_repo})
+mcp__archon__find_projects({filter_by, filter_value})
+mcp__archon__get_project(project_id)
+
+// Task & Document Management
+mcp__archon__create_task({project_id, title, description, ...})
+mcp__archon__find_tasks({project_id, filter_by, filter_value})
 mcp__archon__create_document({project_id, title, document_type, content})
-mcp__archon__list_documents(project_id)
-mcp__archon__get_document(project_id, doc_id)
 ```
 
-### Planned Slash Commands (v1.1)
-
+### **Consolidated Command Interface:**
 ```bash
-/archon-status        # Show current project and tasks
-/archon-task-start    # Create and start new task
-/archon-research      # Search Archon knowledge base
-/archon-complete      # Mark current work complete
+# Primary Archon command (consolidates multiple old commands)
+/archon research "database connection patterns"    # Search knowledge base
+/archon status                                    # Show projects and tasks
+/archon search "authentication"                   # Find projects and docs
+
+# Task Management Integration
+/task list                                         # Local tasks with Archon sync
+/task create "New Feature" "Description"          # Creates both locally and in Archon
+/task start <task-id>                             # Syncs status to Archon
+
+# Strategic Consultant Integration
+/think solve "Scale our architecture"             # Uses Archon knowledge for strategy
+/think clarify "Requirements for auth system"      # Research via Archon knowledge base
 ```
 
-## 🔄 Workflow Integration
+### **AI Assistant Integration Patterns:**
+- **Context First:** AI always searches Archon knowledge base before answering
+- **Project Awareness:** AI checks Archon tasks before suggesting work
+- **Continuous Learning:** AI captures new insights back to Archon knowledge base
+- **Secret Intelligence:** AI uses vault secrets securely via pull-use-discard pattern
 
-### Development Workflow with Archon
+### **Strategic Consultant Integration:**
+The Strategic Consultant (`src/strategic_consultant.py`) uses Archon for:
+- **Complex Project Creation:** Multi-phase projects with milestones and dependencies
+- **Intelligence Gathering:** Research across knowledge base for strategic recommendations
+- **Progress Tracking:** Real-time project health monitoring and risk assessment
+- **Organizational Learning:** Capture strategic insights and patterns for future use
 
-#### 1. Daily Standup Workflow
+## 🔒 **MINIMAL SECRET EXPOSURE WORKFLOW**
+
+**Core Principle:** Only pull secrets when needed, use immediately, then discard
+
+### **Secure Pull-Use-Discard Pattern:**
 ```bash
-# Morning routine - check project status
-./bin/health_monitor.sh check
+# 1. Pull specific secret(s) needed for current operation
+GET /vault/secrets/{secret_key}
 
-# In Claude Code - review project tasks:
-# mcp__archon__list_tasks(
-#     project_id="$ARCHON_PROJECT_ID",
-#     filter_by="status",
-#     filter_value="doing"
-# )
+# 2. Use immediately in memory (never write to disk)
+export DATABASE_URL="pulled_secret_value"
 
-# Start work on priority task
-# mcp__archon__update_task(task_id="uuid", status="doing")
+# 3. Perform operation requiring secret
+./bin/some-operation-with-secret
+
+# 4. Clear from environment
+unset DATABASE_URL
+
+# 5. Repeat for next secret needed
 ```
 
-#### 2. Feature Development Workflow
-```bash
-# 1. Get task details
-# mcp__archon__get_task(task_id="uuid")
+### **Targeted Secret Access:**
+- **Never:** Pull all secrets at once
+- **Always:** Request specific secret by key
+- **Minimal:** Only pull 1-2 secrets per operation
+- **Ephemeral:** Clear from memory after use
 
-# 2. Research phase - query knowledge base
-# mcp__archon__perform_rag_query(
-#     query="JWT authentication best practices",
-#     match_count=5
-# )
+### **Implementation Strategy:**
+```python
+# Example secure secret handling
+def get_and_use_secret(secret_key, operation_func):
+    # 1. Pull specific secret
+    secret = vault.get_secret(secret_key)
 
-# 3. Code implementation
-# Use task description and research findings
+    # 2. Use immediately
+    result = operation_func(secret)
 
-# 4. Testing and validation
-./bin/run_tests.sh unit
-./bin/security_audit.sh scan
+    # 3. Clear secret from memory
+    del secret
 
-# 5. Task completion
-# mcp__archon__update_task(task_id="uuid", status="review")
+    return result
 ```
 
-#### 3. Code Review Workflow
-```bash
-# 1. Move task to review
-# mcp__archon__update_task(task_id="uuid", status="review")
+### **Local Environment Strategy:**
+- **Only store:** `ARCHON_VAULT_PASSWORD` in `.env`
+- **Never store:** Actual secret values
+- **Rotate password:** Change vault password to invalidate all access
+- **Session-based:** Secrets expire after session
 
-# 2. Create review documentation
-# mcp__archon__create_document(
-#     project_id="$ARCHON_PROJECT_ID",
-#     title="JWT Implementation Review",
-#     document_type="note",
-#     content={
-#         "implementation_summary": "...",
-#         "security_review": "...",
-#         "test_coverage": "...",
-#         "performance_analysis": "..."
-#     }
-# )
+## ⚠️ **FALLBACK & RESILIENCE STRATEGY**
 
-# 3. Mark as completed after review
-# mcp__archon__update_task(task_id="uuid", status="done")
-```
+### **When Archon Services Are Partially Available:**
+1. **Knowledge Base Offline:** Use locally cached documentation and patterns
+2. **Project Management Offline:** Continue with local SQLite task system
+3. **Vault Offline:** Alert user, queue operations requiring secrets
+4. **MCP Server Offline:** Use direct API calls where possible
 
-### Multi-Project Coordination
+### **Complete Archon Unavailability:**
+1. **Local Mode:** OOS continues with local task management and documentation
+2. **Queue Operations:** Store updates for Archon synchronization when available
+3. **User Notification:** Clear messaging about reduced capabilities
+4. **Retry Logic:** Automatic connection attempts with exponential backoff
 
-#### Project Dependencies
-```javascript
-// Project Alpha (auth-service) creates shared authentication
-// Project Beta (ecommerce-web) depends on Project Alpha
+### **What Always Works (Local-First):**
+- ✅ Task management (SQLite database)
+- ✅ Documentation system (local files)
+- ✅ Command execution (all 10 consolidated commands)
+- ✅ Project scripts and automation
+- ✅ Health monitoring and diagnostics
 
-// In Project Beta - reference auth service
-mcp__archon__create_task({
-    project_id: "$ARCHON_PROJECT_ID_B",
-    title: "Integrate with authentication service",
-    description: "Connect frontend to auth-service API endpoints",
-    sources: [
-        {
-            url: "http://localhost:3001/auth-service/docs",
-            type: "api_documentation",
-            relevance: "Authentication API endpoints from Project Alpha"
-        }
-    ],
-    assignee: "AI IDE Agent",
-    feature: "authentication_integration"
-})
-```
-
-#### Cross-Project Communication
-```bash
-# Projects remain isolated but can reference each other's public interfaces
-# Document inter-project dependencies
-
-# Project Alpha exposes API documentation
-mcp__archon__create_document({
-    project_id: "$ARCHON_PROJECT_ID",
-    title: "Public API Documentation",
-    document_type: "api",
-    content: {
-        public_endpoints: [...],
-        authentication_flow: [...],
-        integration_guide: [...]
-    },
-    tags: ["public", "api", "integration"]
-})
-```
-
-## 📊 Monitoring & Analytics
-
-### Project-Specific Monitoring
-```bash
-# Each project maintains independent monitoring
-cd /home/ubuntu/dev/auth-service
-./bin/health_monitor.sh daemon --profile auth-service
-
-cd /home/ubuntu/dev/ecommerce-web
-./bin/health_monitor.sh daemon --profile ecommerce-web
-
-# Separate log files and monitoring data
-tail -f health_monitor.log | grep "PROJECT=auth-service"
-tail -f health_monitor.log | grep "PROJECT=ecommerce-web"
-```
-
-### Performance Tracking
-```javascript
-// Track project-specific performance metrics
-mcp__archon__update_project({
-    project_id: "$ARCHON_PROJECT_ID",
-    data: {
-        performance_metrics: {
-            api_response_time: "120ms avg",
-            database_query_time: "45ms avg",
-            memory_usage: "256MB",
-            cpu_utilization: "15%"
-        },
-        last_updated: new Date().toISOString()
-    }
-})
-```
-
-### Analytics and Reporting
-```bash
-# Generate project-specific reports
-./bin/performance_monitor.sh report --project auth-service
-./bin/security_audit.sh compliance --project auth-service --report compliance.json
-./bin/run_tests.sh report --project auth-service --format json > test-results.json
-```
-
-## 🚀 Advanced Integration Patterns
-
-### Template Integration with Archon
-```bash
-# Create Archon-aware templates
-./bin/template_manager.sh create archon-api-service my-service \
-  --archon-integration \
-  --auto-create-project \
-  --project-title "My Service API" \
-  --project-description "RESTful API service with authentication"
-
-# Template automatically:
-# 1. Creates Archon project
-# 2. Sets ARCHON_PROJECT_ID in .env
-# 3. Creates initial task structure
-# 4. Sets up project documentation
-```
-
-### Automated Task Creation
-```bash
-# Hook into OOS bootstrap to create standard tasks
-# In scripts/bootstrap_enhanced.sh integration:
-
-create_standard_archon_tasks() {
-    local project_id="$1"
-    local project_type="$2"
-
-    case "$project_type" in
-        "api-service")
-            # Create API-specific tasks
-            ;;
-        "web-app")
-            # Create web app tasks
-            ;;
-        "cli-tool")
-            # Create CLI tool tasks
-            ;;
-    esac
-}
-```
-
-### CI/CD Integration
-```yaml
-# .github/workflows/archon-integration.yml
-name: Archon Integration
-on: [push, pull_request]
-
-jobs:
-  update-archon:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Update Archon Project
-        run: |
-          # Update project status in Archon
-          # Mark relevant tasks as completed
-          # Update project metrics
-```
+### **What Requires Archon (Enhanced Mode):**
+- 🧠 Knowledge base search and AI context
+- 📊 Cross-project intelligence and pattern recognition
+- 🔒 Secure secret vault access
+- 🔄 Bidirectional synchronization
+- 🎯 Strategic consultant capabilities
 
 ---
 
-This integration guide ensures that OOS and Archon work together seamlessly while maintaining complete project isolation and providing clear operational procedures for multi-project development environments.
+## 🎯 **COMPLETE INTEGRATION BENEFITS**
+
+### **Security Advantages (vs 1Password):**
+1. **Single Password Management:** Only `ARCHON_VAULT_PASSWORD` in `.env`
+2. **Minimal Exposure:** Secrets pulled individually, used immediately
+3. **Central Rotation:** Change vault password = invalidate all access
+4. **No Local Storage:** Secrets never written to disk
+5. **API-Controlled:** All access through audited API endpoints
+6. **Session-Based:** Temporary access, automatic expiration
+
+### **Intelligence Advantages (vs Standalone OOS):**
+1. **Persistent Memory:** AI learns and remembers across sessions
+2. **Cross-Project Context:** Patterns and knowledge transfer between projects
+3. **Strategic Intelligence:** Complex project planning and execution
+4. **Continuous Learning:** Every operation improves future AI performance
+5. **Organizational Brain:** Shared knowledge across entire development ecosystem
+
+### **Operational Advantages:**
+1. **Unified Interface:** Single source of truth for projects, tasks, and knowledge
+2. **AI-Augmented Workflows:** Every operation benefits from Archon intelligence
+3. **Real-Time Sync:** Local execution with cloud persistence
+4. **Scalable Intelligence:** Knowledge grows with every project and interaction
+
+---
+
+## 🧠 **THE AI BRAIN EXTENSION VISION**
+
+**OOS + Archon = Complete AI Operational Brain:**
+
+- **Body (OOS):** Executes commands, manages files, runs operations, interfaces with systems
+- **Brain (Archon):** Remembers everything, learns patterns, provides context, makes intelligent decisions
+- **Nervous System (MCP):** Real-time communication between body and brain
+- **Memory (Knowledge Base):** Persistent learning and pattern recognition
+- **Consciousness (AI Assistant):** Uses body and brain to achieve user goals
+
+**Result:** An AI system that gets smarter and more capable with every interaction, while maintaining security, reliability, and operational excellence.
+
+---
+
+**MANDATORY:** Full Archon integration required for complete AI capabilities. Local mode available for basic operations.
+
+**Integration Model:** Local-first execution + Cloud intelligence + Continuous learning = AI operational brain.
