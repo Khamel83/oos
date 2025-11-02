@@ -1,0 +1,60 @@
+{
+  "nodes": [
+    {
+      "name": "macmini-server",
+      "node_type": "macmini",
+      "host": "192.168.1.100",
+      "port": 22,
+      "capabilities": [
+        "compute",
+        "storage",
+        "database",
+        "ai-training"
+      ],
+      "status": "offline",
+      "load": 0.0,
+      "last_ping": 0.0,
+      "ssh_config": {
+        "user": "ubuntu",
+        "key_path": "~/.ssh/macmini_key"
+      }
+    },
+    {
+      "name": "rpi4-edge-1",
+      "node_type": "rpi4",
+      "host": "192.168.1.101",
+      "port": 22,
+      "capabilities": [
+        "edge-processing",
+        "iot",
+        "sensor-data",
+        "light-compute"
+      ],
+      "status": "offline",
+      "load": 0.0,
+      "last_ping": 0.0,
+      "ssh_config": {
+        "user": "pi",
+        "key_path": "~/.ssh/rpi4_key"
+      }
+    },
+    {
+      "name": "ocivm-dev",
+      "node_type": "ocivm",
+      "host": "localhost",
+      "port": 22,
+      "capabilities": [
+        "development",
+        "testing",
+        "api",
+        "orchestration"
+      ],
+      "status": "online",
+      "load": 0.0,
+      "last_ping": 0.0,
+      "ssh_config": null
+    }
+  ],
+  "current_node": null,
+  "version": "1.0"
+}

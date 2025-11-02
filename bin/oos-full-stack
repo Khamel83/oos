@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""
+OOS Full Stack Command
+Integrates AI + RelayQ + Archon for comprehensive distributed AI assistance
+"""
+
+import sys
+import os
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from oos_full_stack import OOSFullStackDemo, main as demo_main
+import asyncio
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        print("🎯 OOS Full Stack - AI + RelayQ + Archon Integration")
+        print()
+        print("Usage:")
+        print("  oos-full-stack \"your problem or question\"")
+        print("  oos-full-stack \"problem\" --command \"command to execute\"")
+        print("  oos-full-stack --test                    # Run demo scenario")
+        print()
+        print("Examples:")
+        print("  oos-full-stack \"How do I optimize database queries?\"")
+        print("  oos-full-stack \"Deploy this service\" --command \"docker-compose up -d\"")
+        print("  oos-full-stack --test")
+        print()
+        print("Features:")
+        print("  🤖 AI-powered analysis using OpenRouter")
+        print("  🏗️ Distributed execution via RelayQ")
+        print("  🔄 Synchronization to Archon knowledge base")
+        print()
+        sys.exit(0)
+
+    # Run the demo
+    asyncio.run(demo_main())
