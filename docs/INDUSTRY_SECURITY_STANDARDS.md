@@ -210,7 +210,7 @@ echo "📊 Security report generated: security-report.json"
 ### Industry-Standard Testing
 ```bash
 # 1. Test with known secrets (should be blocked)
-echo 'sk-or-v1-1234567890abcdef1234567890abcdef1234567890abcdef1234567890' > test-secret.txt
+echo 'sk-or-v1-FAKE0000000000000000000000000000000000000000000000000000' > test-secret.txt
 git add test-secret.txt
 # Expected: BLOCKED
 

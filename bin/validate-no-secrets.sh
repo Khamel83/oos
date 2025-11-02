@@ -44,6 +44,7 @@ ALLOWED_PATTERNS=(
     "your_.*_key_here"
     "example_.*_key"
     "1234567890"  # Current placeholder
+    "sk-or-v1-[real_key_here]"  # Documentation placeholder
 )
 
 validate_no_secrets() {

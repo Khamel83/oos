@@ -42,7 +42,7 @@ git commit -m "test: security verification" --dry-run
 # Expected: Commit allowed (fake key pattern)
 
 # Test pre-commit hook with real-looking key
-echo 'OPENROUTER_API_KEY="sk-or-v1-1234567890abcdef1234567890abcdef1234567890abcdef1234567890"' > test_key.txt
+echo 'OPENROUTER_API_KEY="sk-or-v1-FAKE0000000000000000000000000000000000000000000000000000"' > test_key.txt
 git add test_key.txt
 git commit -m "test: security verification" --dry-run
 # Expected: Commit BLOCKED

@@ -167,7 +167,7 @@ git commit -m "test: security validation"
 # ✅ Should pass with fake key
 
 # Test with real-looking key
-echo "OPENROUTER_API_KEY=\"sk-or-v1-1234567890abcdef1234567890abcdef1234567890abcdef1234567890\"" > test.txt
+echo "OPENROUTER_API_KEY=\"sk-or-v1-FAKE0000000000000000000000000000000000000000000000000000\"" > test.txt
 git add test.txt
 git commit -m "test: security validation"
 # ❌ Should be blocked
