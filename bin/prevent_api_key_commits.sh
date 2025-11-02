@@ -51,6 +51,9 @@ SAFE_KEYS=(
     "mcp__archon__rag_sea"
     "clarification_confid"
     "free_model_compatibi"
+    # Documentation example patterns (safe)
+    "sk-proj-abc123def456"
+    "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"
     # File path patterns (safe)
     "AI%20Specifications-Com"
     "BENCHMARK_DRIVEN_MOD"
