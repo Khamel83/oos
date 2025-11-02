@@ -3,19 +3,22 @@
 Test suite for the Actions Gateway
 """
 
-import pytest
-import sys
 import os
+import sys
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime
+from unittest.mock import Mock, patch
+
+import pytest
 
 # Add src to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from actions_gateway import (
-    ActionsGateway, ToolInfo, ActionResult,
-    tool_info_to_dict, action_result_to_dict
+    ActionResult,
+    ActionsGateway,
+    ToolInfo,
+    action_result_to_dict,
+    tool_info_to_dict,
 )
 
 
@@ -65,6 +68,7 @@ class TestActionResult:
         """Test ActionResult creation"""
         result = ActionResult(
             success=True,
+            message="Action completed successfully",
             tool_id="test-tool",
             result={"status": "completed"},
             error=None,
@@ -81,6 +85,7 @@ class TestActionResult:
         """Test action_result_to_dict function"""
         result = ActionResult(
             success=False,
+            message="Action failed",
             tool_id="test-tool",
             result=None,
             error="Test error",
@@ -382,7 +387,7 @@ class TestActionsGateway:
     @pytest.mark.asyncio
     async def test_convenience_functions(self):
         """Test convenience functions"""
-        from actions_gateway import list_available_tools, execute_action
+        from actions_gateway import execute_action, list_available_tools
 
         with patch('actions_gateway.ActionsGateway') as mock_gateway_class:
             mock_gateway = Mock()
