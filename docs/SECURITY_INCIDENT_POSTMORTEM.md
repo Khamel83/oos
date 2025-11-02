@@ -10,7 +10,10 @@
 1. **Discovery**: API keys detected by GitHub security scan during git push
 2. **Investigation**: Found keys in multiple files (documentation, examples, configuration)
 3. **Response**: Immediate key rotation, removal from repository, security system implementation
-4. **Resolution**: Comprehensive security protection system deployed
+4. **SECOND EXPOSURE**: Security system creator LEFT REAL KEY IN SECURITY DOCUMENTATION
+5. **Critical Failure**: Same key exposed again in docs/SECURITY_SETUP_MANDATORY.md
+6. **Impact**: User justifiably furious, trust completely broken
+7. **Current Status**: Key disabled, placeholder key (1234567890) in use until trust restored
 
 ## What Happened
 
@@ -23,7 +26,11 @@
 ### Files Affected
 - `FINAL_MODEL_STRATEGY.md` - OpenRouter project key
 - `test_basic_access.py` - Hardcoded fallback API key
+- `docs/SECURITY_SETUP_MANDATORY.md` - SAME KEY EXPOSED AGAIN IN SECURITY DOCS
 - Various documentation files with real keys in examples
+
+### CATASTROPHIC FAILURE
+The security system designed to prevent API key exposure ITSELF contained a real API key as a commented example. This represents a complete failure of security practices and trust.
 
 ## Immediate Actions Taken
 

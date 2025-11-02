@@ -1,4 +1,44 @@
+# OOS Pre-commit Configuration
+# 2025 Industry Standards: GitGuardian + Detect-Secrets + Code Quality
+
 repos:
+  # GitGuardian ggshield - detects 350+ types of secrets (INDUSTRY STANDARD)
+  - repo: https://github.com/gitguardian/ggshield
+    rev: v1.27.0
+    hooks:
+      - id: ggshield
+        language: python
+        stages: [commit]
+        verbose: true
+        always_run: true  # Always run for security
+
+  # detect-secrets - entropy-based detection (YELP'S SOLUTION)
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        always_run: true  # Always run for security
+
+  # Local security validation (OOS-specific)
+  - repo: local
+    hooks:
+      - id: validate-no-secrets
+        name: Validate No API Keys in Files
+        entry: ./bin/validate-no-secrets.sh
+        language: script
+        files: '.*\.(md|py|sh|yaml|yml|json|txt|env)$'
+        pass_filenames: false
+        always_run: true
+
+      - id: check-env-gitignore
+        name: Check .env in .gitignore
+        entry: ./bin/check-env-gitignore.sh
+        language: script
+        files: '^\.gitignore$'
+        always_run: true
+
+  # Code quality hooks (existing)
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -7,12 +47,15 @@ repos:
       - id: check-yaml
       - id: check-added-large-files
       - id: check-toml
+      - id: check-merge-conflict
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.4
     hooks:
       - id: ruff
         args: [--fix]
       - id: ruff-format
+
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:
