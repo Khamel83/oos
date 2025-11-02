@@ -1,5 +1,40 @@
 # OOS Changelog
 
+## [1.1.0] - 2024-11-02
+
+### 🔐 Simple Secrets Management System
+**When 1Password fails - this actually works**
+
+#### ✨ Features
+- **Simple .env-based Security**: Text-file secrets management that works reliably
+- **AI Agent Integration**: Non-interactive secret access for AI agents
+- **GitHub Project Template**: Complete template for future secure projects
+- **Automated Security**: Pre-commit hooks and git protection against API key exposure
+- **Project Copy System**: Easy secrets sharing between projects
+
+#### 🔧 Tools Added
+- `bin/setup-simple-security.sh` - Install the simple security system
+- `bin/get-secrets.py` - AI agent secrets client
+- `bin/setup-new-project.sh` - Copy secrets to new projects
+- `GITHUB_PROJECT_TEMPLATE.md` - Complete GitHub repository template
+- `README_TEMPLATE.md` - Clean README template for new projects
+
+#### 🛡️ Security Benefits
+- **No more API key commits** - .env files are automatically protected
+- **AI agent ready** - Simple Python interface for non-interactive access
+- **Zero complexity** - Just edit text files, no complex interfaces
+- **Industry standard** - Uses GitGuardian and detect-secrets best practices
+
+#### 📚 Documentation
+- `docs/FINAL_SIMPLE_SOLUTION.md` - Complete solution guide
+- Updated README.md with simple secrets management section
+- GitHub project template for easy future project setup
+
+### 🔧 Bug Fixes
+- **Fixed deprecation warnings** - Removed deprecated model references from slash commands
+- **Clean command execution** - All `/fix` commands now work without warnings
+- **Improved ZAI integration** - Proper GLM model configuration
+
 ## [1.0.0] - 2024-09-27
 
 ### 🎉 Initial Production Release

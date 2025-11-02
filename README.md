@@ -24,6 +24,10 @@ OOS transforms how you approach any coding work, project, or idea by providing a
 - **[Next Steps](NEXT_STEPS.md)** - Future development roadmap
 - **[Full Stack Guide](docs/FULL_STACK_INTEGRATION.md)** - AI + RelayQ + Archon integration
 
+**🔐 NEW: Simple Secrets Management:**
+- **[Final Simple Solution](docs/FINAL_SIMPLE_SOLUTION.md)** - Complete guide to the working security system
+- **[GitHub Project Template](GITHUB_PROJECT_TEMPLATE.md)** - Template for future secure projects
+
 **Quick links for AI Claude:**
 - **[AI Reference](AI_REFERENCE.md)** - Technical implementation details
 
@@ -198,6 +202,45 @@ uv run ruff format .      # Format code
 uv run mypy src/          # Type check
 uv run pre-commit run --all-files  # Run all quality checks
 ```
+
+### 🔐 Simple Secrets Management (NEW!)
+**When 1Password fails - use this simple system that actually works:**
+
+```bash
+./bin/setup-simple-security.sh
+```
+
+**Perfect for:**
+- ✅ **AI agents** - Non-interactive secret access
+- ✅ **Simple projects** - No complex interfaces
+- ✅ **Reliable setup** - Works when 1Password doesn't
+
+**Quick Start:**
+```bash
+# 1. Install the simple security system
+./bin/setup-simple-security.sh
+
+# 2. Add your API keys to .env file
+nano .env
+# Add your actual API keys here
+
+# 3. Test it works
+python3 bin/get-secrets.py list
+
+# 4. Use in any new project
+./bin/setup-new-project.sh ~/my-new-project
+```
+
+**AI Agent Integration:**
+```python
+from get_secrets import SimpleSecrets
+secrets = SimpleSecrets()
+api_key = secrets.get('OPENROUTER_API_KEY')
+```
+
+**GitHub Template Ready:**
+- [**GITHUB_PROJECT_TEMPLATE.md**](GITHUB_PROJECT_TEMPLATE.md) - Complete template for future projects
+- [**README_TEMPLATE.md**](README_TEMPLATE.md) - Clean README for new projects
 
 ### 1Password Integration
 Long-term authentication without repeated signins:

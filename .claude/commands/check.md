@@ -2,7 +2,6 @@
 description: "🔍 Comprehensive validation and security"
 argument-hint: [security | context | all] [additional-args]
 allowed-tools: Bash
-model: claude-3-5-sonnet-20241022
 ---
 
 

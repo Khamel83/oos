@@ -2,7 +2,6 @@
 description: "🔐 1Password operations and authentication"
 argument-hint: [signin | status | setup | get | secret | session] [additional-args]
 allowed-tools: Bash
-model: claude-3-5-sonnet-20241022
 ---
 
 

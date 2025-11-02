@@ -19,7 +19,9 @@ classifiers = [
 ]
 
 # Core OOS functionality uses only Python standard library
-dependencies = []
+dependencies = [
+    "python-dotenv>=1.1.1",
+]
 
 [project.optional-dependencies]
 # MCP Server Dependencies

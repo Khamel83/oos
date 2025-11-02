@@ -2,7 +2,6 @@
 description: "📚 Complete help and command discovery system"
 argument-hint: [command-name | topic | "all"]
 allowed-tools: Bash, Read
-model: claude-3-5-sonnet-20241022
 ---
 
 # 📚 OOS Help System

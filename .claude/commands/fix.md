@@ -2,7 +2,6 @@
 description: "🔧 Code fixes and optimization"
 argument-hint: [auto | optimize | docs] [additional-args]
 allowed-tools: Bash
-model: claude-3-5-sonnet-20241022
 ---
 
 

@@ -961,6 +961,9 @@ wheels = [
 name = "oos"
 version = "1.2.0"
 source = { editable = "." }
+dependencies = [
+    { name = "python-dotenv" },
+]
 
 [package.optional-dependencies]
 all = [
@@ -1022,6 +1025,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.21.0" },
     { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=4.0.0" },
+    { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "pyyaml", marker = "extra == 'test'", specifier = ">=6.0" },
     { name = "requests", marker = "extra == 'dashboard'", specifier = ">=2.25.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
