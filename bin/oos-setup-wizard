@@ -1,0 +1,191 @@
+#!/usr/bin/env bash
+# OOS Smart Setup Wizard
+# Migrates existing config, only prompts for missing items
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OOS_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+source "$OOS_ROOT/lib/oos-common.sh" 2>/dev/null || true
+
+# Config location
+OOS_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/oos"
+OOS_CREDENTIALS="$OOS_CONFIG_DIR/credentials"
+
+mkdir -p "$OOS_CONFIG_DIR"
+chmod 700 "$OOS_CONFIG_DIR"
+
+oos_log_header "OOS Smart Setup"
+echo "Checking for existing configuration..."
+echo ""
+
+# Check for existing credentials
+has_existing=false
+if [[ -f "$OOS_CREDENTIALS" ]]; then
+    has_existing=true
+    source "$OOS_CREDENTIALS"
+fi
+
+# Check for .env in OOS repo
+if [[ -f "$OOS_ROOT/.env" ]]; then
+    oos_log_info "Found .env file - migrating credentials..."
+
+    # Migrate from .env to global config
+    while IFS='=' read -r key value; do
+        # Skip comments and empty lines
+        [[ "$key" =~ ^#.*$ ]] && continue
+        [[ -z "$key" ]] && continue
+
+        # Remove quotes from value
+        value=$(echo "$value" | tr -d '"' | tr -d "'")
+
+        # Check if key is a credential we care about
+        case "$key" in
+            OPENROUTER_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY|ARCHON_URL|ARCHON_API_KEY)
+                if [[ -n "$value" ]] && [[ ! "$value" =~ your-key|example ]]; then
+                    echo "$key=$value" >> "$OOS_CREDENTIALS.tmp"
+                    oos_log_success "Migrated: $key"
+                    has_existing=true
+                fi
+                ;;
+        esac
+    done < "$OOS_ROOT/.env"
+
+    # Replace old config with migrated one
+    if [[ -f "$OOS_CREDENTIALS.tmp" ]]; then
+        mv "$OOS_CREDENTIALS.tmp" "$OOS_CREDENTIALS"
+        chmod 600 "$OOS_CREDENTIALS"
+        source "$OOS_CREDENTIALS"
+    fi
+
+    echo ""
+fi
+
+# Now check what's missing and only prompt for those
+oos_log_header "Configuration Status"
+
+# AI Provider
+if [[ -n "${OPENROUTER_API_KEY:-}" ]] || \
+   [[ -n "${OPENAI_API_KEY:-}" ]] || \
+   [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+    oos_log_success "AI: Already configured"
+else
+    oos_log_info "AI: Not configured"
+    echo ""
+    echo "Configure AI provider now?"
+    echo "  1) OpenRouter (recommended)"
+    echo "  2) OpenAI"
+    echo "  3) Anthropic"
+    echo "  4) Skip"
+    read -p "Choice (1-4): " ai_choice
+
+    case "$ai_choice" in
+        1)
+            echo "Get key from: https://openrouter.ai/keys"
+            read -p "OpenRouter API Key: " -s key
+            echo ""
+            echo "OPENROUTER_API_KEY=$key" >> "$OOS_CREDENTIALS"
+            oos_log_success "OpenRouter configured"
+            ;;
+        2)
+            read -p "OpenAI API Key: " -s key
+            echo ""
+            echo "OPENAI_API_KEY=$key" >> "$OOS_CREDENTIALS"
+            ;;
+        3)
+            read -p "Anthropic API Key: " -s key
+            echo ""
+            echo "ANTHROPIC_API_KEY=$key" >> "$OOS_CREDENTIALS"
+            ;;
+        4)
+            oos_log_info "Skipping AI configuration"
+            ;;
+    esac
+fi
+
+# Archon
+echo ""
+if [[ -n "${ARCHON_URL:-}" ]]; then
+    oos_log_success "Archon: Already configured ($ARCHON_URL)"
+
+    # Test if reachable
+    if curl -sf -m 2 "${ARCHON_URL}/api/health" &>/dev/null; then
+        oos_log_success "Archon: Online and responding"
+    else
+        oos_log_warning "Archon: Configured but offline"
+    fi
+else
+    oos_log_info "Archon: Not configured"
+    read -p "Configure Archon now? (Y/n) " -n 1 -r
+    echo
+
+    if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
+        read -p "Archon URL [https://archon.khamel.com]: " url
+        url="${url:-https://archon.khamel.com}"
+
+        read -p "Archon API Key (optional): " key
+
+        echo "ARCHON_URL=$url" >> "$OOS_CREDENTIALS"
+        [[ -n "$key" ]] && echo "ARCHON_API_KEY=$key" >> "$OOS_CREDENTIALS"
+
+        if curl -sf -m 2 "${url}/api/health" &>/dev/null; then
+            oos_log_success "Archon configured and online"
+        else
+            oos_log_warning "Archon configured but not reachable"
+        fi
+    fi
+fi
+
+# Deployment
+echo ""
+if [[ -n "${VERCEL_CONFIGURED:-}" ]]; then
+    oos_log_success "Vercel: Already configured"
+else
+    read -p "Setup Vercel deployment? (Y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
+        if ! command -v vercel &>/dev/null; then
+            npm install -g vercel
+        fi
+        vercel login
+        echo "VERCEL_CONFIGURED=true" >> "$OOS_CREDENTIALS"
+        oos_log_success "Vercel configured"
+    fi
+fi
+
+echo ""
+if [[ -n "${OCI_VM_IP:-}" ]]; then
+    oos_log_success "OCI VM: Already configured ($OCI_VM_IP)"
+else
+    read -p "Setup OCI VM deployment? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        read -p "VM IP: " ip
+        read -p "SSH User: " user
+        read -p "SSH Key Path [~/.ssh/oci_key]: " key
+        key="${key:-$HOME/.ssh/oci_key}"
+
+        if ssh -o ConnectTimeout=5 -i "$key" "$user@$ip" "echo 'OK'" &>/dev/null; then
+            echo "OCI_VM_IP=$ip" >> "$OOS_CREDENTIALS"
+            echo "OCI_SSH_USER=$user" >> "$OOS_CREDENTIALS"
+            echo "OCI_SSH_KEY=$key" >> "$OOS_CREDENTIALS"
+            oos_log_success "OCI VM configured and tested"
+        else
+            oos_log_warning "OCI connection failed"
+        fi
+    fi
+fi
+
+# Final permissions
+chmod 600 "$OOS_CREDENTIALS"
+
+oos_log_header "Setup Complete!"
+echo ""
+echo "Configuration saved to: $OOS_CREDENTIALS"
+echo "These settings work in ALL projects."
+echo ""
+echo "Test your setup:"
+echo "  oos status"
+echo ""
+echo "You can reconfigure anytime with: oos setup"
