@@ -115,6 +115,22 @@ bin/dev-gate.sh
 bin/claude-*.sh
 EOF
 
+# If this IS the OOS repo (has pyproject.toml), install Python dependencies
+if [[ -f "pyproject.toml" ]] && grep -q "name = \"oos\"" pyproject.toml 2>/dev/null; then
+    echo ""
+    echo "📦 Installing Python dependencies..."
+    if command -v uv &> /dev/null; then
+        if uv sync; then
+            echo "✅ Python dependencies installed"
+        else
+            echo "⚠️  Failed to install Python dependencies - run: uv sync"
+        fi
+    else
+        echo "⚠️  uv not found - install from: https://github.com/astral-sh/uv"
+        echo "   Or run: curl -LsSf https://astral.sh/uv/install.sh | sh"
+    fi
+fi
+
 echo -e "\033[1;32m✅ OOS Installation Complete!\033[0m"
 echo ""
 echo "🚀 Your 11 perfect commands are ready:"
