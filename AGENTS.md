@@ -1,45 +1,136 @@
-# Project Overview
-This is a Python project using modern tooling for consistency and reproducibility.
+<!-- FOR CLAUDE - NOT FOR HUMANS -->
 
-# Setup and Build
-- Python version: 3.12+ (managed by uv)
-- Package manager: uv (unified Python package manager)
-- Run `uv sync` to install dependencies
-- Run `uv run pytest` to execute tests
+# ONE_SHOT v13 — Operator Framework
 
-# Development Environment
-- Use VS Code Dev Container for consistent environment (.devcontainer/)
-- Docker required for containerized development
-- All dependencies locked in uv.lock for reproducibility
+> **Context is the scarce resource.** Three operators, seven utilities. Discover skills on demand.
 
-# Code Style and Formatting
-- Use ruff for linting and formatting (replaces Black, isort, Flake8)
-- Run `uv run ruff check .` for linting
-- Run `uv run ruff format .` for formatting
-- Type checking with mypy: `uv run mypy src/`
-- Line length: 88 characters (Black-compatible)
+---
 
-# Testing
-- Framework: pytest with coverage reporting
-- Run tests: `uv run pytest`
-- Run with coverage: `uv run pytest --cov=src`
-- All tests in tests/ directory
-- Target: 80%+ code coverage
+## OPERATORS
 
-# Commit and PR Guidelines
-- Pre-commit hooks enforce code quality (run automatically)
-- Manual run: `uv run pre-commit run --all-files`
-- All PRs require passing CI checks (GitHub Actions)
-- Write clear commit messages describing changes
+### `/short` — Quick Iteration
 
-# CI/CD
-- GitHub Actions runs on all pushes and PRs
-- Tests run on Python 3.10, 3.11, and 3.12
-- Checks: ruff linting, mypy type checking, pytest with coverage
-- Badge status visible in README
+```
+/short [scope]
+```
 
-# Architecture
-- Source code: src/ directory
-- Tests: tests/ directory
-- Configuration: pyproject.toml (unified config)
-- Dependencies: managed by uv, locked in uv.lock
+**Behavior:**
+1. Load context: git log -5, TaskList, DECISIONS.md, BLOCKERS.md
+2. Ask: "What are you working on?"
+3. Discover skills on demand (~/.claude/skills/ index)
+4. Execute in burn-down mode
+5. Show delegation summary on completion
+
+**Decision defaults:** Simplest implementation, match existing patterns, skip refactors unless blocking.
+
+### `/full` — Structured Work
+
+```
+/full [project-description]
+```
+
+**Behavior:**
+1. Create/load IMPLEMENTATION_CONTEXT.md
+2. Structured intake: goals, scope, architecture, constraints
+3. Phase-based planning with milestones
+4. Skill discovery via ~/.claude/skills/ index
+5. Execute with context checkpoints (50% → suggest handoff, 70% → auto-handoff)
+6. Verify and show completion summary
+
+**For:** New projects, refactors, complex features.
+
+### `/conduct` — Multi-Model PMO Orchestrator
+
+```
+/conduct [idea or goal]
+```
+
+**Behavior:**
+1. Detect available providers (codex, gemini)
+2. Ask clarifying questions — BLOCKING, nothing runs until answered
+3. Create structured plan with task breakdown
+4. Route work across Claude + Codex + Gemini based on task type
+5. Loop until goal is fully met (not just started)
+
+**For:** Non-trivial tasks where you want autonomous execution across models until done.
+
+---
+
+## UTILITY COMMANDS
+
+| Command | Purpose |
+|---------|---------|
+| `/handoff` | Save context before /clear |
+| `/restore` | Resume from handoff |
+| `/research` | Background research |
+| `/freesearch` | Zero-token web search (Exa) |
+| `/doc` | Cache external docs |
+| `/vision` | Image/website analysis |
+| `/secrets` | SOPS/Age secrets |
+
+---
+
+## DECISION DEFAULTS
+
+When ambiguous, apply without asking:
+
+| Ambiguity | Default |
+|-----------|---------|
+| Multiple implementations | **Simplest** |
+| Naming | Follow existing pattern |
+| Refactor opportunity | **Skip** unless blocking |
+| Stack | Follow CLAUDE.md |
+| Error handling | Match surrounding code |
+| Test framework | Use existing tests |
+
+**Key rule:** When truly ambiguous, pick option A, note in DECISIONS.md.
+
+---
+
+## AUTO-APPROVED ACTIONS
+
+- Reading any file
+- Writing to scope-matched files
+- Running tests and linters
+- Creating DECISIONS.md, BLOCKERS.md, CHANGES.md
+- Git commit (not push)
+- Creating native tasks
+
+## REQUIRES CONFIRMATION
+
+- Destructive operations (rm -rf, DROP TABLE)
+- Git push to shared branches
+- External API calls that cost money
+- Deploying to production
+
+---
+
+## DELEGATION
+
+Before delegating: assess (complexity, criticality, uncertainty)
+After delegating: verify the result
+On failure: escalate (original → inline → human)
+
+**Delegation summary on completion:**
+```
+📊 Delegation Summary
+├─ N delegations, avg reward: X.XX
+├─ Best: [agent] (reward) - [description]
+└─ Tip: [optimization]
+```
+
+---
+
+## PHILOSOPHY
+
+> "It's harder to read code than to write it." — Joel Spolsky
+
+**NEVER rewrite from scratch.** Extend, refactor, use existing solutions.
+
+**USER TIME IS PRECIOUS.** Agents should make reasonable decisions autonomously.
+
+---
+
+## VERSION
+
+v13 | 10 skills | Operators discover skills on demand
