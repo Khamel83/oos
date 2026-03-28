@@ -1,0 +1,227 @@
+#!/usr/bin/env bash
+# OOS - Organized Operational Setup
+# Single entry point for all OOS functionality
+# Version: 2.0.0
+
+set -euo pipefail
+
+# Find OOS root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export OOS_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+export OOS_BIN="$OOS_ROOT/bin"
+export OOS_LIB="$OOS_ROOT/lib"
+
+# Load common functions
+if [[ -f "$OOS_LIB/oos-common.sh" ]]; then
+    source "$OOS_LIB/oos-common.sh"
+fi
+
+if [[ -f "$OOS_LIB/oos-tier-detection.sh" ]]; then
+    source "$OOS_LIB/oos-tier-detection.sh"
+fi
+
+# Show help
+oos_help() {
+    local topic="${1:-}"
+
+    if [[ -z "$topic" ]]; then
+        cat << 'EOF'
+OOS - Organized Operational Setup
+==================================
+
+USAGE:
+    oos <command> [subcommand] [arguments]
+
+CORE COMMANDS (Always Available):
+    task        Task management (create, list, start, done)
+    dev         Development environment (setup, check)
+    project     Project management (create, update)
+    deploy      One-click deployment (vercel, oci)
+    test        Testing utilities (run, debug, scenarios)
+    fix         Code fixes (auto, optimize)
+    check       Validation (security, all)
+
+ENHANCED COMMANDS (Requires API Keys):
+    ai          AI-powered features (analyze, suggest)
+
+ADVANCED COMMANDS (Requires Archon):
+    archon      Knowledge base (research, search)
+
+OTHER COMMANDS:
+    status      Show available features
+    help        Show this help or help for a command
+    version     Show version information
+
+EXAMPLES:
+    oos task create "Build authentication"
+    oos dev check
+    oos test run
+    oos status
+
+Get help for a command:
+    oos help <command>
+    oos help setup      # Guide to enable optional features
+
+EOF
+        return 0
+    fi
+
+    # Show help for specific command
+    case "$topic" in
+        task)
+            cat << 'EOF'
+TASK - Task Management
+
+USAGE:
+    oos task <subcommand> [arguments]
+
+SUBCOMMANDS:
+    list                List all tasks
+    create <title>      Create new task
+    start <id>          Start working on task
+    done <id>           Mark task complete
+    show <id>           Show task details
+    update <id>         Update task
+
+EXAMPLES:
+    oos task create "Build user authentication"
+    oos task list
+    oos task start abc123
+    oos task done abc123
+
+TIER: Core (always available)
+EOF
+            ;;
+        dev)
+            cat << 'EOF'
+DEV - Development Environment
+
+USAGE:
+    oos dev <subcommand> [arguments]
+
+SUBCOMMANDS:
+    setup               Complete development setup
+    check               Validate environment
+    modules [name]      Run development modules
+
+EXAMPLES:
+    oos dev setup
+    oos dev check
+    oos dev modules security
+
+TIER: Core (always available)
+EOF
+            ;;
+        setup)
+            cat << 'EOF'
+SETUP - Enable Optional Features
+
+You have CORE features (task tracking, project management, dev tools).
+To enable more:
+
+ENHANCED TIER (AI Features):
+    1. Get API key from: https://openrouter.ai
+    2. Add to .env file:
+       OPENROUTER_API_KEY=sk-your-key-here
+    3. Test: oos ai test
+
+ADVANCED TIER (Archon Integration):
+    1. Install Archon server (see: oos help archon)
+    2. Add to .env file:
+       ARCHON_URL=https://your-archon-server
+    3. Test: oos archon status
+
+Check what you have:
+    oos status
+EOF
+            ;;
+        archon)
+            cat << 'EOF'
+ARCHON - Knowledge Base Integration
+
+Archon provides persistent knowledge base and project management.
+
+SETUP:
+    1. Clone Archon: git clone https://github.com/Khamel83/archon
+    2. Follow Archon setup instructions
+    3. Add to OOS .env:
+       ARCHON_URL=https://your-archon-server
+       ARCHON_API_KEY=your-api-key
+
+USAGE:
+    oos archon research <query>    # Search knowledge base
+    oos archon status               # Show connection status
+
+TIER: Advanced (requires external service)
+EOF
+            ;;
+        *)
+            echo "No help available for: $topic"
+            echo "Run 'oos help' for list of all commands"
+            return 1
+            ;;
+    esac
+}
+
+# Route to appropriate command
+main() {
+    local command="${1:-help}"
+    shift || true
+
+    case "$command" in
+        # Core commands
+        task)
+            exec "$OOS_BIN/oos-core/task.sh" "$@"
+            ;;
+        dev)
+            exec "$OOS_BIN/oos-core/dev.sh" "$@"
+            ;;
+        project)
+            exec "$OOS_BIN/oos-core/project.sh" "$@"
+            ;;
+        deploy)
+            exec "$OOS_BIN/oos-core/deploy.sh" "$@"
+            ;;
+        test)
+            exec "$OOS_BIN/oos-core/test.sh" "$@"
+            ;;
+        fix)
+            exec "$OOS_BIN/oos-core/fix.sh" "$@"
+            ;;
+        check)
+            exec "$OOS_BIN/oos-core/check.sh" "$@"
+            ;;
+
+        # Enhanced commands
+        ai)
+            oos_require_tier enhanced "AI features" || exit 1
+            exec "$OOS_BIN/oos-enhanced/ai.sh" "$@"
+            ;;
+
+        # Advanced commands
+        archon)
+            oos_require_tier advanced "Archon integration" || exit 1
+            exec "$OOS_BIN/oos-advanced/archon.sh" "$@"
+            ;;
+
+        # Meta commands
+        status)
+            oos_show_status
+            ;;
+        help|--help|-h)
+            oos_help "$@"
+            ;;
+        version|--version|-v)
+            echo "OOS version 2.0.0"
+            echo "Simplified, unified interface"
+            ;;
+
+        *)
+            echo "Unknown command: $command"
+            echo "Run 'oos help' for usage"
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

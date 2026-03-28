@@ -1,14 +1,10 @@
 ---
-description: "🔧 Code fixes and optimization"
-argument-hint: [auto | optimize | docs] [additional-args]
+description: ""
 allowed-tools: Bash
 ---
 
 
-🔧 Code fixes and optimization
-
-Consolidates: /auto-fix, /optimize, /doc-check
 
 ```bash
-./bin/claude-fix.sh "$ARGUMENTS"
+oos fix $ARGUMENTS
 ```
