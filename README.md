@@ -9,11 +9,22 @@ OOS transforms how you approach any coding work, project, or idea by providing a
 
 ---
 
+## ⚠️ Current Status: Active Development
+
+**What works:** Task management system, Python CLI, basic structure
+**What's WIP:** Most slash commands, integrations, "production ready" features
+**Start here:** [Quick Start That Actually Works](QUICK_START_THAT_ACTUALLY_WORKS.md) ← Honest guide
+
+**Troubleshooting:** [Why OOS Doesn't Work (And How We're Fixing It)](docs/WHY_OOS_DOESNT_WORK.md)
+
+---
+
 ## 🆘 New to OOS or Forgot How It Works?
 
 **[📖 Start Here → Documentation Hub](DOCUMENTATION_HUB.md)**
 
 **Quick links for forgetful humans:**
+- **[Quick Start (Actually Works)](QUICK_START_THAT_ACTUALLY_WORKS.md)** - Honest, tested guide
 - **[What Even Is OOS?](GUIDES/WHAT_IS_OOS.md)** - The simple explanation
 - **[5-Minute Quick Start](QUICK_SETUP_GUIDE.md)** - Copy-paste setup
 - **[Emergency Refresher](GUIDES/EMERGENCY_REFRESHER.md)** - "I haven't used this in weeks"
