@@ -1,3 +1,3 @@
 <!-- janitor:begin:todo -->
-- Track follow-up tasks and architectural milestones based on recent commits.
+No TODO items are currently listed in the repository's documentation.
 <!-- janitor:end:todo -->
