@@ -1,10 +1,17 @@
 <!-- janitor:begin:recent -->
-- chore: add Homelab project contract (`c462eae`)
-- chore: bootstrap LLM-OVERVIEW files 2026-05-10 (`00c3bb2`)
-- chore: sync oneshot framework (skills, agents, AGENTS.md) (`fd57254`)
-- fix: replace humanizer gitlink with actual skill files, sync framework (`22b05b7`)
-- chore: update AGENTS.md to ONE_SHOT v13 (`3ffdc84`)
-- docs: comprehensive AI SDK and RelayQ integration documentation (`f0884e6`)
-- feat: add simple secrets management system and fix deprecation warnings (`4388a08`)
-- fix: add documentation placeholders to security allowlist (`6023092`)
+- chore: add Homelab project contract
+- chore: bootstrap LLM-OVERVIEW files 2026-05-10
+- chore: sync oneshot framework (skills, agents, AGENTS.md) (multiple commits)
+- fix: replace humanizer gitlink with actual skill files, sync framework
+- chore: update AGENTS.md to ONE_SHOT v13
+- docs: comprehensive AI SDK and RelayQ integration documentation
+- feat: add simple secrets management system and fix deprecation warnings
+- fix: add documentation placeholders to security allowlist
+- fix: update documentation examples to use standardized fake API keys
+- feat: implement industry-standard security with universal secret access
+- CRITICAL: Remove second API key exposure
+- fix: update ActionResult tests to match API changes
+- fix: remove problematic API key example from security documentation
+- fix: update security patterns to handle fake API keys in documentation
+- SECURITY: Implement comprehensive API key protection system
 <!-- janitor:end:recent -->
